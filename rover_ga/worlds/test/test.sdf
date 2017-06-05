@@ -2068,7 +2068,7 @@
 	    <type>occupied</type>
 	    <region>bowl_room</region>
 	    <topic>~/region</topic>
-	    <msg_data>rover_in_bowl_room</msg_data>
+	    <msg_data>bowl_room</msg_data>
 	  </event>
 	
 	
@@ -2086,10 +2086,8 @@
 	    <type>occupied</type>
 	    <region>coke_room</region>
 	    <topic>~/region</topic>
-	    <msg_data>rover_in_coke_room</msg_data>
+	    <msg_data>coke_room</msg_data>
 	  </event>
-	
-	
 	
 	<region>
 	    <name>beer_room__</name>
@@ -2104,8 +2102,26 @@
 	    <type>occupied</type>
 	    <region>beer_room</region>
 	    <topic>~/region</topic>
-	    <msg_data>rover_in_beer_room</msg_data>
+	    <msg_data>beer_room</msg_data>
 	  </event>
+	
+	<region>
+	    <name>maze_exit</name>
+	    <volume>
+	      <min>2.5 -8.86 -1</min>
+	      <max>3.5 -7.38 1</max>
+	    </volume>
+	 </region>
+	 
+	 <event>
+	    <name>maze_exit_event</name>
+	    <type>occupied</type>
+	    <region>maze_exit</region>
+	    <topic>~/region</topic>
+	    <msg_data>exited_the_maze</msg_data>
+	  </event>
+	  
+	  
 	</plugin>
 	
 	
