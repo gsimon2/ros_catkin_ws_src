@@ -17,7 +17,7 @@ import std_msgs.msg
 pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
 
 
-max_sim_time = 30
+max_sim_time = 150
 start_sim = False
 end_sim = False
 sim_timeout = False
@@ -29,21 +29,28 @@ sim_end_time = [0,0]
 max_turn_strength = 200
 
 #how much the yaw can change for each callback
-max_difference = 10
+max_yaw_change_per_cb = 10
 
 #distance at which a rover will try to stop or reverse instead of going
 #	around an object
-min_detection_distance = 0.55
+min_detection_distance = 0.45
 
 #Number of how many partitions there will be of the lidar sweep
 #	this must be an odd number
 num_vision_cones = 7
 
+#Modifies the weighting of objects as they appear further to the side 
+#	of the rover
+sweep_weight_factor = 1
+
+#Modifies the weighting of the objects as they come closer to the rover
+distance_weight_factor = 1
+
 #The last known region that the rover was in
 last_known_region = 'start'
 
 #Region that rover must find to end the simulation
-ending_region = 'coke_room'
+ending_region = 'exited_the_maze'
 
 last_nav_cmd = {'throttle':1900,'yaw':1500}
 
@@ -51,18 +58,41 @@ last_nav_cmd = {'throttle':1900,'yaw':1500}
 def parse_genome(genome):
 	
 	global max_turn_strength
-	global max_difference
+	global max_yaw_change_per_cb
 	global min_detection_distance
 	global num_vision_cones
-	pass
+	global sweep_weight_factor
+	global distance_weight_factor
+	
+	for genome_trait in genome['behavioral']:
+		#print('{}\n'.format(genome_trait))
+		if 'max_turn_strength' in genome_trait:
+			max_turn_strength = genome_trait['max_turn_strength']
+		if 'max_yaw_change_per_cb' in genome_trait:
+			max_yaw_change_per_cb = genome_trait['max_yaw_change_per_cb']
+		if 'num_vision_cones' in genome_trait:
+			num_vision_cones = genome_trait['num_vision_cones']
+		if 'sweep_weight_factor' in genome_trait:
+			sweep_weight_factor = genome_trait['sweep_weight_factor']
+		if 'distance_weight_factor' in genome_trait:
+			distance_weight_factor = genome_trait['distance_weight_factor']
+		
+
+	print("""Gnome - max_turn_strength {}, \n
+	max_yaw_change_per_cb {}, \n
+	num_vision_cones {}, \n
+	sweep_weight_factor {}, \n
+	distance_weight_factor {}""".format(max_turn_strength,max_yaw_change_per_cb,num_vision_cones, sweep_weight_factor,distance_weight_factor))
+
 	
 
 def check_vision(data, vision):
 	global start_sim
 	global end_sim
+	global sim_timeout
 	global sim_end_time
 	global last_nav_cmd
-	global max_difference
+	global max_yaw_change_per_cb
 	global last_known_region
 	global ending_region
 		
@@ -76,11 +106,11 @@ def check_vision(data, vision):
 
 		#weight for how steep to turn based off of where the object is
 		#	detected in lidar sweep. Closer to center gets higher weight
-		sweep_weight = float((i+1)) / (len(vision)/2)
+		sweep_weight = sweep_weight_factor * (float((i+1)) / (len(vision)/2))
 		
 		#weight for how steep to turn based off of how close the object 
 		#	is to the rover. Closer gets higher weight
-		distance_weight = float((data.range_max - vision[i]) / data.range_max)
+		distance_weight = distance_weight_factor * float((data.range_max - vision[i]) / data.range_max)
 		
 		#If we don't see anything in this cone, don't change yaw at all
 		if vision[i] == data.range_max:
@@ -88,7 +118,7 @@ def check_vision(data, vision):
 		#turn left. Sharpest turn will happen with close objects closer to the front of the rover
 		#	while distance objects off to the side will result in little to no turn
 		else:
-			nav_cmds['yaw'] = nav_cmds['yaw'] - (max_turn_strength * sweep_weight * distance_weight)
+			nav_cmds['yaw'] = nav_cmds['yaw'] - (400 * sweep_weight * distance_weight)
 		
 		#print('Right side: \t i: {} \t sweep_weight: {} \n\t distance_weight: {} \t yaw: {}'.format(i,sweep_weight, distance_weight,nav_cmds['yaw']))
 
@@ -104,11 +134,11 @@ def check_vision(data, vision):
 
 		#weight for how steep to turn based off of where the object is
 		#	detected in lidar sweep. Closer to center gets higher weight
-		sweep_weight = float((j+1)) / (len(vision)/2)
+		sweep_weight = sweep_weight_factor * (float((j+1)) / (len(vision)/2))
 		
 		#weight for how steep to turn based off of how close the object 
 		#	is to the rover. Closer gets higher weight
-		distance_weight = float((data.range_max - vision[i]) / data.range_max)
+		distance_weight = distance_weight_factor * float((data.range_max - vision[i]) / data.range_max)
 		
 		#If we don't see anything in this cone, don't change yaw at all
 		if vision[i] == data.range_max:
@@ -116,7 +146,7 @@ def check_vision(data, vision):
 		#turn right. Sharpest turn will happen with close objects closer to the front of the rover
 		#	while distance objects off to the side will result in little to no turn
 		else:
-			nav_cmds['yaw'] = nav_cmds['yaw'] + (max_turn_strength * sweep_weight * distance_weight)
+			nav_cmds['yaw'] = nav_cmds['yaw'] + (400 * sweep_weight * distance_weight)
 				
 		#print('Left side: \t i: {} \t j: {} \t sweep_weight: {} \n\t distance_weight: {} \t yaw: {}'.format(i,j,sweep_weight, distance_weight,nav_cmds['yaw']))
 	
@@ -128,7 +158,7 @@ def check_vision(data, vision):
 	
 	#weight for how steep to turn based off of how close the object 
 	#	is to the rover. Closer gets higher weight
-	distance_weight = float((data.range_max - vision[middle_index]) / data.range_max)
+	distance_weight = distance_weight_factor * float((data.range_max - vision[middle_index]) / data.range_max)
 	
 	#If we don't see anything in this cone, don't change yaw at all
 	if vision[middle_index] == data.range_max:
@@ -136,36 +166,40 @@ def check_vision(data, vision):
 	else:
 		#if rover is already turning right, turn right sharper based on how close the object is
 		if nav_cmds['yaw'] >= 1500:
-			nav_cmds['yaw'] = nav_cmds['yaw'] + (max_turn_strength * distance_weight)
-			if nav_cmds['yaw'] > 1900:
-				nav_cmds['yaw'] = 1900
+			nav_cmds['yaw'] = nav_cmds['yaw'] + (400 * distance_weight)
+			
 		#same but with if rover is already turning left
 		else:
-			nav_cmds['yaw'] = nav_cmds['yaw'] - (max_turn_strength * distance_weight)
-			if nav_cmds['yaw'] < 1100:
-				nav_cmds['yaw'] = 1100
-				
-	
+			nav_cmds['yaw'] = nav_cmds['yaw'] - (400 * distance_weight)
+			
+			
+	#Make sure that yaw stays between [1500 - max_turn_strength, 1500 + max_turn_strength]
+	if nav_cmds['yaw'] > 1500 + max_turn_strength:
+		nav_cmds['yaw'] = 1500 + max_turn_strength			
+	if nav_cmds['yaw'] < 1500 - max_turn_strength:
+		nav_cmds['yaw'] = 1500 - max_turn_strength
 	
 	#smooth out jerkiness of turns by limiting how much yaw can change
 	#	on each callback
 	difference = nav_cmds['yaw'] - last_nav_cmd['yaw']
-	if  abs(difference) > max_difference:
+	if  abs(difference) > max_yaw_change_per_cb:
 		if difference > 0:
-			nav_cmds['yaw'] = last_nav_cmd['yaw'] + max_difference
+			nav_cmds['yaw'] = last_nav_cmd['yaw'] + max_yaw_change_per_cb
 		else:
-			nav_cmds['yaw'] = last_nav_cmd['yaw'] - max_difference
+			nav_cmds['yaw'] = last_nav_cmd['yaw'] - max_yaw_change_per_cb
 		
 	last_nav_cmd = nav_cmds
-	
 	
 	
 	#detect if the rover is about to hit something
 	if vision[middle_index] <= min_detection_distance:
 		nav_cmds['throttle'] = 1500
-		print('stopping!')	
-	
-	
+		print('stopping!')
+		end_sim = True
+		start_sim = False
+		sim_timeout = True
+		
+
 	#detect if the rover has exited the maze
 	if last_known_region == ending_region:
 		nav_cmds['throttle'] = 1500
@@ -174,6 +208,7 @@ def check_vision(data, vision):
 		print("Rover finished at {} seconds and {} nanoseconds!".format(sim_end_time[0], sim_end_time[1]))
 		end_sim = True
 		start_sim = False
+		
 		
 	###
 	# To Do
@@ -253,7 +288,7 @@ def callback(data):
 	
 	#Wait to receive genome to start simulation and start sending commands
 	if start_sim is False:
-		print("No genome received yet!")
+		#print("No genome received yet!")
 		return None
 	
 	#partition data ranges into sections
@@ -278,21 +313,23 @@ def callback(data):
 	msg.channels[7] = 0
 	pub.publish(msg)   
 
+""" Callback to conduct a simulation. """
 def simCallback(msg):
 	global start_sim
 	global end_sim
 	global sim_timeout
 	global max_sim_time
+	global last_known_region
 	
 	print('Starting sim!')
 	
 	begin_time = getWorldProp().sim_time 
-	""" Callback to conduct a simulation. """
-	genome_data = rospy.get_param('rover_genome')
-	#print("                 Got genome data of:"+str(genome_data))
+	
+	#Get genome data
+	genome_data = rospy.get_param('rover_genome')	
 	
 	#Parse genome received from GA
-	
+	parse_genome(genome_data)
 	
 	#start the simulation with this genome
 	#to-do send genome to other callback function
@@ -312,9 +349,9 @@ def simCallback(msg):
 	if	end_sim is True and sim_timeout is False:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
-		print("Found object at in {} seconds".format(total_sim_time))
+		print("Rover finished in {} seconds".format(total_sim_time))
 	elif end_sim is True and sim_timeout is True:
-		print('Rover failed to find object in time!')
+		print('Rover failed to finish in time!')
 		total_sim_time = -1
 		
 	
@@ -323,6 +360,7 @@ def simCallback(msg):
 	start_sim = False
 	end_sim = False
 	sim_timeout = False
+	last_known_region = 'start'
 	
 	print("Attempting to reset...")
 	resetWorld()

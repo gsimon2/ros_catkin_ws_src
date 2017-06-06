@@ -13,7 +13,7 @@
   
   
   
-  <arg name="world_name" value="$(find rover_ga)/worlds/test/test.sdf"/>
+  <arg name="world_name" value="$(find rover_ga)/worlds/custom_mazes/custom_maze_1.sdf"/>
   <!-- <arg name="world_name" value="$(find rover_ga)/worlds/single_object/single.world"/> -->
   
   

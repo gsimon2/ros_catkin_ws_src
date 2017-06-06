@@ -27,8 +27,10 @@ GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
-BEHAVIOR_SCRIPT = 'object_finder.py'
-max_sim_time = 200 #In real-time seconds
+BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA.py'
+LAUNCH_FILE = 'test.launch'
+
+max_single_sim_running_time = 200 #In real-time seconds
 
 HEADLESS = 'true'
 GUI = 'false'
@@ -40,6 +42,7 @@ parser.add_argument('-sp', '--ga_send_port', type=int, help='Port number that th
 parser.add_argument('-rp' , '--ga_recv_port', type=int, help='Port number that the GA is receiving the results on')
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
 parser.add_argument('-bs' , '--behavior_script', type=str, help='behaviour script controlling the rover')
+parser.add_argument('-lf' , '--launch_file', type=str, help='the launch file that is to be used')
 parser.add_argument('-gui', '--graphics', action='store_true', help='Start gazebo gui for each simulation')
 
 args= parser.parse_args()
@@ -55,6 +58,9 @@ if args.ga_ip_addr is not None:
 
 if args.behavior_script is not None:
 	BEHAVIOR_SCRIPT = args.behaviour_script
+	
+if args.launch_file is not None:
+	LAUNCH_FILE = args.launch_file
 	
 if args.graphics is True:
 	print('Turning on Gazebo GUI')
@@ -111,13 +117,19 @@ while True:
 		cmd_str = "pkill -1 -f {}".format(BEHAVIOR_SCRIPT)
 		os.system(cmd_str)
 		last_physical_genome = []
+		cmd_str = "pkill -1 -f region_events_node"
+		os.system(cmd_str)
 	else:
 		# Get data off the pipe from the external source
 		print('Waiting for data from GA...')
 		data = 'stuff'
 		data = json.loads(receiver.recv())
 		print('Transporter: Received: {}'.format(data))
-		
+	
+	#start program timer on first recv'd msg
+	if recv_first_msg == False:
+		start_time = datetime.datetime.now()
+		recv_first_msg = True
 
 	
 	#Check for ending msg
@@ -200,11 +212,11 @@ while True:
 	
 		# Run launch file
 		if args.debug:
-			cmd_str = "xterm -hold -e 'roslaunch rover_ga msu.launch model:={} gui:={} headless:={}'&".format(str_rover_file, GUI, HEADLESS)
+			cmd_str = "xterm -hold -e 'roslaunch rover_ga {} model:={} gui:={} headless:={}'&".format(LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
 			os.system(cmd_str)
 			time.sleep(1)
 		else:
-			cmd_str = 'roslaunch rover_ga msu.launch model:={} gui:={} headless:={}'.format(str_rover_file, GUI, HEADLESS)
+			cmd_str = 'roslaunch rover_ga {} model:={} gui:={} headless:={}'.format(LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
 			launch_file = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 		print('Started launch file!')
 	
@@ -226,10 +238,7 @@ while True:
 		time.sleep(12)
 	#End If different physical genome
 	
-	#start program timer on first recv'd msg
-	if recv_first_msg == False:
-		start_time = datetime.datetime.now()
-		recv_first_msg = True
+	
 
 	
 	print('Loading received genome into ros param and setting ready msg')
@@ -248,10 +257,10 @@ while True:
 	this_eval_start = datetime.datetime.now()
 	while evaluation_result == '':
 		current_time = datetime.datetime.now()
-		if (current_time - this_eval_start).total_seconds() > max_sim_time:
+		if (current_time - this_eval_start).total_seconds() > max_single_sim_running_time:
 			evaluation_result = -1
 			last_physical_genome = []
-			#dependent_software_crash = True
+			dependent_software_crash = True
 			break
 		time.sleep(0.5)
 	
@@ -272,6 +281,8 @@ while True:
 cmd_str = "killall -9 gzserver gzclient xterm roscore rosmaster rosout mavproxy.py"
 os.system(cmd_str)
 cmd_str = "pkill -1 -f {}".format(BEHAVIOR_SCRIPT)
+os.system(cmd_str)
+cmd_str = "pkill -1 -f region_events_node"
 os.system(cmd_str)
 if args.debug is False:
 	mavproxy.kill()

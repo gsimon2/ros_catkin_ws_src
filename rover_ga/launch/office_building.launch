@@ -12,8 +12,7 @@
   <arg name="headless" default="false"/>
   <arg name="gui" default="true"/>
   
-  <!-- <arg name="world_name" value="$(find rover_ga)/worlds/office_building/office_building.sdf"/> -->
-  <arg name="world_name" value="$(find rover_ga)/worlds/test/test.sdf"/>
+  <arg name="world_name" value="$(find rover_ga)/worlds/office_building/office_building.sdf"/>
   
   <env name="GAZEBO_MODEL_PATH" value="$(find drcsim_model_resources)/gazebo_models/environments:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_sensors:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_outdoor:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_warehouse"/>
   <arg name="name" default="rover"/>
@@ -61,8 +60,5 @@
     <arg name="gui" value="$(arg gui)"/>
     <arg name="world_name" value="$(arg world_name)"/>
   </include>
-  
-  <!-- Load obstacle avoidance controller node -->
-  <node name="object_finder" pkg="rover_ga" type="obstacle_avoidance.py" output="screen"></node>
-    
+
 </launch>
