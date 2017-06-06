@@ -21,6 +21,7 @@ max_sim_time = 150
 start_sim = False
 end_sim = False
 sim_timeout = False
+obstacle_collision = False
 sim_end_time = [0,0]
 
 #How dratastically the rover will try to turn
@@ -95,6 +96,7 @@ def check_vision(data, vision):
 	global max_yaw_change_per_cb
 	global last_known_region
 	global ending_region
+	global obstacle_collision
 		
 	#print('partitioned_vision: {}'.format(vision))
 	nav_cmds = {'throttle':1900,'yaw':1500}
@@ -197,7 +199,7 @@ def check_vision(data, vision):
 		print('stopping!')
 		end_sim = True
 		start_sim = False
-		sim_timeout = True
+		obstacle_collision = True
 		
 
 	#detect if the rover has exited the maze
@@ -214,7 +216,7 @@ def check_vision(data, vision):
 	# To Do
 	# -Rover skirts the edges of obstacles and sometimes catches it back wheels
 	# -Detect when a collision is going to occur, put rover in reverse to gain some distance and try going around again
-		
+	
 	
 	#print(vision)
 	#print(nav_cmds)
@@ -316,6 +318,7 @@ def callback(data):
 """ Callback to conduct a simulation. """
 def simCallback(msg):
 	global start_sim
+	global obstacle_collision
 	global end_sim
 	global sim_timeout
 	global max_sim_time
@@ -346,13 +349,16 @@ def simCallback(msg):
 	
 	
 	#Object found in time
-	if	end_sim is True and sim_timeout is False:
+	if	end_sim is True and sim_timeout is False and obstacle_collision is False:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
 		print("Rover finished in {} seconds".format(total_sim_time))
 	elif end_sim is True and sim_timeout is True:
 		print('Rover failed to finish in time!')
 		total_sim_time = -1
+	elif end_sim is True and obstacle_collision is True:
+		print('Rover hit a wall')
+		total_sim_time = -2
 		
 	
 	# Publish the resulting time on the topic.
