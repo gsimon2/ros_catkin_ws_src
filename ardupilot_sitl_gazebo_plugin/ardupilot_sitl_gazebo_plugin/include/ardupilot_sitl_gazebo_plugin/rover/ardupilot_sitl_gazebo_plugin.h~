@@ -55,6 +55,7 @@
 #include <sensor_msgs/NavSatFix.h>          // for the GPS fix
 #include <geometry_msgs/Vector3Stamped.h>   // for the GPS velocity fix
 #include <std_msgs/Empty.h>
+#include <geometry_msgs/Twist.h>
 
 // This plugin implements a thread, based on boost, for the communication with Ardupilot
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -66,7 +67,7 @@
 #include <stdio.h>
 
 // Plugin's inner headers
-#include "SocketAPM.h"
+#include "../SocketAPM.h"
 
 // Plugin's services
 #include "ardupilot_sitl_gazebo_plugin/TakeApmLapseLock.h"
@@ -82,11 +83,11 @@
 
 //--------------------------------------------
 // URDF/XACRO models descriptions names
-#define UAV_MODEL_NAME                 "iris"
-#define UAV_MODEL_CG_LINK              "base_link"
+#define UAV_MODEL_NAME                 "rover"
+//#define UAV_MODEL_CG_LINK              "base_link"
 
-#define PARACHUTE_MODEL_NAME           "parachute_small"
-#define PARACHUTE_MODEL_ATTACH_LINK    "chute"
+//#define PARACHUTE_MODEL_NAME           "parachute_small"
+//#define PARACHUTE_MODEL_ATTACH_LINK    "chute"
 
 // All ROS topics emitted by this plugin with have the
 // namespace "/fdmUDP" prepended.
@@ -103,9 +104,9 @@
 #define NB_SERVOS                 16
 #define NB_SERVOS_MOTOR_SPEED     4            // 4(iris) or 5(cessna)
 
-#define SERVO_PARACHUTE           9
+//#define SERVO_PARACHUTE           9
 
-#define STEP_SIZE_FOR_ARDUPILOT    0.0025      // in [s], = 400 Hz //default = 0.0025
+#define STEP_SIZE_FOR_ARDUPILOT    0.005      // in [s], = 400 Hz //default = 0.0025
 
 
 
@@ -120,7 +121,7 @@
 
 //--------------------------------------------
 // Log/Debug
-#define PLUGIN_LOG_PREPEND       "ARI: "
+#define PLUGIN_LOG_PREPEND       "ROVER: "
 
 // Uncomment the following lines to activate some debug
 //#define DEBUG_DISP_GPS_POSITION
@@ -149,6 +150,7 @@ class ArdupilotSitlGazeboPlugin : public WorldPlugin
     // GAZEBO related methods ------------------
     void on_gazebo_update();
     void on_gazebo_control(ConstWorldControlPtr &_msg);
+    void on_rover_model_loaded();
     void on_gazebo_modelInfo(ConstModelPtr &_msg);
   
     // ROS related methods ---------------------
@@ -219,23 +221,44 @@ class ArdupilotSitlGazeboPlugin : public WorldPlugin
     void check_parachute_cmd(float servo_parachute);
     void load_parachute_model();
     void on_parachute_model_loaded();
-  
     
+    void OnUpdate();
+    void OnVelMsg(const mav_msgs::CommandMotorSpeed msg);
+    double get_collision_radius(physics::CollisionPtr _collision);
     
     // ROS related methods ---------------------
     void quat_to_euler(float q1, float q2, float q3, float q4,
                        float &roll, float &pitch, float &yaw);
     void publish_commandMotorSpeed();
     
-    
+    // Connection data
+    std::vector<event::ConnectionPtr> connections;
+
+    // Rover
+    physics::ModelPtr _rover_model;
+
+    // Rover Joints
+    physics::JointPtr flWheelJoint;
+    physics::JointPtr frWheelJoint;
+    physics::JointPtr blWheelJoint;
+    physics::JointPtr brWheelJoint;
+    physics::JointPtr flWheelSteeringJoint;
+    physics::JointPtr frWheelSteeringJoint;
+
+    // Time of last update, used to detect resets
+    common::Time lastTime;
+
+    // Transport node for the rover
+    transport::NodePtr node;
+
     // Node Handles
     
     // Gazebo messages / data
     gazebo::physics::WorldPtr   _parent_world;
     gazebo::physics::ModelPtr   _uav_model;
-    gazebo::physics::ModelPtr   _parachute_model;
-    gazebo::physics::LinkPtr    _chute_link_on_uav;
-    gazebo::physics::JointPtr   _uav_chute_joint;
+    //gazebo::physics::ModelPtr   _parachute_model;
+    //gazebo::physics::LinkPtr    _chute_link_on_uav;
+    //gazebo::physics::JointPtr   _uav_chute_joint;
     sdf::ElementPtr             _sdf;
     transport::SubscriberPtr    _controlSub;      // Subscriber used to receive updates on world_control topic.
     transport::SubscriberPtr    _modelInfoSub;
@@ -255,7 +278,8 @@ class ArdupilotSitlGazeboPlugin : public WorldPlugin
     ros::Subscriber             _sonar_front_subscriber;
     ros::Subscriber             _gps_subscriber;
     ros::Subscriber             _gps_velocity_subscriber;
-    
+    ros::Subscriber             velSub;
+
     ros::Publisher              _motorSpd_publisher;
         
     float                       _cmd_motor_speed[NB_SERVOS_MOTOR_SPEED];    // Local copy of the motor speed command, in [rad/s]
@@ -282,6 +306,7 @@ class ArdupilotSitlGazeboPlugin : public WorldPlugin
     
     boost::thread               _callback_loop_thread;
     
+    bool roverSpawn;
     // LapseLock:
     //  A calling process can block the main loop from running, for a specified maximum time (wall-time, not sim time).
     //  The main loop is resumed if the calling process releases the lock, of if the time has elapsed.

@@ -366,6 +366,7 @@ def simCallback(msg):
 	start_sim = False
 	end_sim = False
 	sim_timeout = False
+	obstacle_collision = False
 	last_known_region = 'start'
 	
 	print("Attempting to reset...")
