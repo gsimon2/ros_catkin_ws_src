@@ -874,8 +874,8 @@
 	<region>
 	    <name>maze_exit</name>
 	    <volume>
-	      <min>2.5 -8.86 -1</min>
-	      <max>3.5 -7.38 1</max>
+	      <min>16.336267 -9.465412 -1</min>
+	      <max>19.416 -7.78524 1</max>
 	    </volume>
 	 </region>
 	 <event>

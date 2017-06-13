@@ -13,9 +13,8 @@
   
   
   
-  <arg name="world_name" value="$(find rover_ga)/worlds/custom_mazes/custom_maze_1.sdf"/>
+  <arg name="world_name" default="$(find rover_ga)/worlds/custom_mazes/custom_maze_1.sdf"/>
   <!-- <arg name="world_name" value="$(find rover_ga)/worlds/single_object/single.world"/> -->
-  
   
   
   <env name="GAZEBO_MODEL_PATH" value="$(find drcsim_model_resources)/gazebo_models/environments:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_sensors:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_outdoor:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_warehouse"/>
@@ -41,6 +40,8 @@
     enable_ground_truth:=$(arg enable_ground_truth)
     log_file:=$(arg log_file)"
   />
+    
+  
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
 <!-- ********************* End Parameter/Argument Defaults ******************************** -->  
