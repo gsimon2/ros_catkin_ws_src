@@ -59,11 +59,11 @@ class senderThread(threading.Thread):
         
         for i in range(self.num_genomes):
             ind['id'] = i
-            ind['genome']['behavioral'][0]['max_turn_strength'] = random.randrange(50,400,1)
-            ind['genome']['behavioral'][1]['max_yaw_change_per_cb'] = random.randrange(1,100,1)
-            ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
-            ind['genome']['behavioral'][3]['sweep_weight_factor'] = random.random()*5
-            ind['genome']['behavioral'][4]['distance_weight_factor'] = random.random()*5
+            #ind['genome']['behavioral'][0]['max_turn_strength'] = random.randrange(50,400,1)
+            #ind['genome']['behavioral'][1]['max_yaw_change_per_cb'] = random.randrange(1,100,1)
+            #ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
+            #ind['genome']['behavioral'][3]['sweep_weight_factor'] = random.random()*5
+            #ind['genome']['behavioral'][4]['distance_weight_factor'] = random.random()*5
             msg = json.dumps(ind)
             socket.send(msg)
             
