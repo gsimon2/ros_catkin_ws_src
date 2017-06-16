@@ -23,5 +23,4 @@ Scripts for running the Erle Rover in the GA framework
 - Updates for files
 -- rover_non_ga_server_obstacle_avoidance
 --- v1.0 Basic non_ga server complete
---- v1.1 Added capability for changing the world that the rover spawns in 
 --

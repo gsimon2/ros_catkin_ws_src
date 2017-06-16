@@ -51,7 +51,7 @@ distance_weight_factor = 1
 last_known_region = 'start'
 
 #Region that rover must find to end the simulation
-ending_region = 'exited_the_maze'
+ending_region = 'hallway_1'
 
 last_nav_cmd = {'throttle':1900,'yaw':1500}
 

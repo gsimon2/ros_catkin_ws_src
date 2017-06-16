@@ -278,7 +278,7 @@ while True:
 	
 #clean up
 # Tear down this simulation instance
-cmd_str = "killall -9 gzserver gzclient xterm roscore rosmaster rosout mavproxy.py"
+cmd_str = "killall -9 gzserver gzclient xterm roscore rosmaster rosout mavproxy.py python"
 os.system(cmd_str)
 cmd_str = "pkill -1 -f {}".format(BEHAVIOR_SCRIPT)
 os.system(cmd_str)

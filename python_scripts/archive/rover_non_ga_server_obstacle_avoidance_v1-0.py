@@ -50,7 +50,7 @@ class senderThread(threading.Thread):
                     ],
                     'behavioral':[
                     {'max_turn_strength':200}, #int, [50-400]
-                    {'max_yaw_change_per_cb':10}, #int, [0-100]
+                    {'max_yaw_change_per_cb':15}, #int, [0-100]
                     {'num_vision_cones':7}, #int, [1-101], must be odd
                     {'sweep_weight_factor':1},#float, [0-5]
                     {'distance_weight_factor':1}#float, [0-5]
