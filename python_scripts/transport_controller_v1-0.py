@@ -30,7 +30,7 @@ GA_IP_ADDR = '127.0.0.1'
 BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA.py'
 LAUNCH_FILE = 'test.launch'
 
-max_single_sim_running_time = 200 #In real-time seconds
+max_single_sim_running_time = 230 #In real-time seconds
 
 HEADLESS = 'true'
 GUI = 'false'
