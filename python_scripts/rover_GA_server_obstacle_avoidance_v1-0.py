@@ -1,5 +1,5 @@
 """
-    Simple non-ga server for the basicbot.
+    Simple non-ga server for the rover.
 """
  
 import json
@@ -11,25 +11,37 @@ import subprocess
 import os
 import datetime
 import copy 
+import sys
 
-random.seed(10)
+from GA_operators import random_value_mutation
+from GA_operators import single_point_crossover
 
-Num_evaluation_workers = 1
+random.seed(66)
+
+Num_evaluation_workers = 4
 
 GA_IP_ADDR = '' #This can be provided as a command line argument, otherwise
 				# the it defaults to the computers IP address
 GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 
+#Log file name
+log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 20
+POP_SIZE = 30
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 10
+GEN_COUNT = 50
 
 # Reports the current generation
 CURRENT_GEN = 0
+
+#Probability that an individual will have a random gene mutated
+mutation_prob = 0.15
+
+#Probability that two individuals will cross over and producing mixed offspring
+cross_over_prob = 0.25
 
 ind = {'id':0,'genome':{
 					'physical':[
@@ -199,8 +211,8 @@ class GA(object):
 		
 		#print('Returned data: {}'.format(return_data))
 		print('\n\n Winning Ind for generation {}:\n {}\n'.format(CURRENT_GEN,self.elite_ind))
-		print('Average turn strength: {} \nAvg yaw per cb: {} \nAvg vision cones: {} \nAvg sweep factor: {} \nAvg dist factor: {} \n\n'.format(avg_max_turn_strength,avg_max_yaw_change_per_cb
-			,avg_num_vision_cones,avg_sweep_weight_factor,avg_distance_weight_factor))
+		#print('Average turn strength: {} \nAvg yaw per cb: {} \nAvg vision cones: {} \nAvg sweep factor: {} \nAvg dist factor: {} \n\n'.format(avg_max_turn_strength,avg_max_yaw_change_per_cb
+		#	,avg_num_vision_cones,avg_sweep_weight_factor,avg_distance_weight_factor))
 		#print(max_fit)
 		
 	def next_generation(self):
@@ -210,7 +222,6 @@ class GA(object):
 		# Perform tournament selection.
 		for i in range(len(self.genomes)-1):
 			tourn = random.sample(self.genomes,2)
-			
 			if tourn[0]['fitness'] < tourn[1]['fitness']:
 				child_pop.append(copy.deepcopy(tourn[0]))
 			else:
@@ -218,16 +229,21 @@ class GA(object):
 			child_pop[-1]['id'] = self.child_id
 			self.child_id += 1
 
-		# Mutate genes in the child genomes.
-		#for i in child_pop[1:len(child_pop)]:
-		#	i['genome'][random.randint(0,len(i['genome'])-1)] = random.random()
-		
 		
 		#Crossover
+		child_pop = single_point_crossover(child_pop, cross_over_prob)
 
+		# Mutate genes in the child genomes.
+		child_pop = random_value_mutation(child_pop, mutation_prob)
+		
 
 		self.genomes = child_pop
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
+		
+	def ga_log(self, log):
+		global CURRENT_GEN
+		for ind in self.genomes:
+			log.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(CURRENT_GEN, ind['id'], ind['genome']['behavioral'][0]['max_turn_strength'], ind['genome']['behavioral'][1]['max_yaw_change_per_cb'], ind['genome']['behavioral'][2]['num_vision_cones'], ind['genome']['behavioral'][3]['sweep_weight_factor'], ind['genome']['behavioral'][4]['distance_weight_factor'],ind['fitness']))
 		
 
 
@@ -260,19 +276,32 @@ if args.ga_recv_port is not None:
 	GA_RECV_PORT = args.ga_recv_port
 	
 
+#Create a log file
+log = open('logs/{}'.format(log_file_name), 'w+')
+
+#Write experiment parameters to log
+log.write('*****Rover GA expirement*****\n')
+log.write('Date:{}\n'.format(datetime.datetime.now()))
+log.write('Population size:{}\n'.format(POP_SIZE))
+log.write('Generation Count:{}\n'.format(GEN_COUNT))
+log.write('Mutation Probability:{}\n'.format(mutation_prob))
+log.write('Cross Over Probability:{}\n'.format(cross_over_prob))
+log.write('*****************************\n')
+log.write('Generation, ID, Max Turn Strength, Max Yaw Change per CB, Num Vision Cones, Sweep Weight Factor, Distance Weight Factor, Fitness\n')
+
+
 print("Press Enter when the workers are ready: ")
 _ = raw_input()
 print("Sending tasks to workers")
 
 start_time = datetime.datetime.now()
-
-
 global CURRENT_GEN
 ga= GA()
 
 for i in range(GEN_COUNT):
 	CURRENT_GEN = i
 	ga.calculate_fitness()
+	ga.ga_log(log)
 	ga.next_generation()
 	
 ga.tear_down()
