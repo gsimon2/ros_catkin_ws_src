@@ -13,14 +13,14 @@ import datetime
 
 random.seed(10)
 
-Num_evaluation_workers = 1
+Num_evaluation_workers = 0
 
 GA_IP_ADDR = '127.0.0.1'
 GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 
 # How many genomes to test sending
-test_genome_num = 3
+test_genome_num = 10
 
  
 class senderThread(threading.Thread):

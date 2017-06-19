@@ -59,5 +59,6 @@ while(True):
 		
 		# Transmit the result back to the external source
 		msg = json.dumps({'id':data['id'],'fitness':evaluation_result, 'ns':str_host_name})
+		time.sleep(0.5)
 		sender.send(msg)
 		evaluation_result = ''
