@@ -1,5 +1,7 @@
 import random
 
+random.seed(10)
+
 def single_point_crossover(population, cross_over_prob):
 	for i in range(len(population)-1):
 		couple = random.sample(population,2)

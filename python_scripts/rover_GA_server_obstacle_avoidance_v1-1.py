@@ -17,7 +17,7 @@ import time
 from GA_operators import random_value_mutation
 from GA_operators import single_point_crossover
 
-random.seed(66)
+random.seed(243)
 
 Num_evaluation_workers = 4
 
@@ -33,7 +33,7 @@ log_file_name = 'log.txt'
 POP_SIZE = 30
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 50
+GEN_COUNT = 30
 
 # Reports the current generation
 CURRENT_GEN = 0
@@ -42,7 +42,7 @@ CURRENT_GEN = 0
 mutation_prob = 0.15
 
 #Probability that two individuals will cross over and producing mixed offspring
-cross_over_prob = 0.25
+cross_over_prob = 0.35
 
 ind = {'id':0,'genome':{
 					'physical':[
