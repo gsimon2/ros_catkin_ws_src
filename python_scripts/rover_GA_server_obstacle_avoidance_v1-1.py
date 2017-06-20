@@ -30,7 +30,7 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 30
+POP_SIZE = 40
 
 # How many generations is this experiment going to run for
 GEN_COUNT = 30
@@ -39,7 +39,7 @@ GEN_COUNT = 30
 CURRENT_GEN = 0
 
 #Probability that an individual will have a random gene mutated
-mutation_prob = 0.15
+mutation_prob = 0.2
 
 #Probability that two individuals will cross over and producing mixed offspring
 cross_over_prob = 0.35
@@ -339,6 +339,7 @@ for i in range(GEN_COUNT):
 	
 	j = len(genomes)
 	while j > 0:
+		print('{}/{} genomes recv\'d'.format(len(genomes) - j, len(genomes)))
 		data = json.loads(receiver.recv())
 		return_data.append({'id':data['id'], 'fitness':data['fitness']})
 		j -= 1

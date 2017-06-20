@@ -17,7 +17,7 @@ import std_msgs.msg
 pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
 
 
-max_sim_time = 150
+max_sim_time = 120
 start_sim = False
 end_sim = False
 sim_timeout = False
