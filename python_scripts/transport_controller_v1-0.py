@@ -258,9 +258,9 @@ while True:
 	while evaluation_result == '':
 		current_time = datetime.datetime.now()
 		if (current_time - this_eval_start).total_seconds() > max_single_sim_running_time:
-			evaluation_result = -1
+			evaluation_result = -3
 			last_physical_genome = []
-			dependent_software_crash = True
+			#dependent_software_crash = True
 			break
 		time.sleep(0.5)
 	
