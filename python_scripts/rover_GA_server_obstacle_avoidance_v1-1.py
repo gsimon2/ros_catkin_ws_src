@@ -30,7 +30,7 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 40
+POP_SIZE = 30
 
 # How many generations is this experiment going to run for
 GEN_COUNT = 30
@@ -39,10 +39,10 @@ GEN_COUNT = 30
 CURRENT_GEN = 0
 
 #Probability that an individual will have a random gene mutated
-mutation_prob = 0.2
+mutation_prob = 0.1
 
 #Probability that two individuals will cross over and producing mixed offspring
-cross_over_prob = 0.35
+cross_over_prob = 0.25
 
 ind = {'id':0,'genome':{
 					'physical':[
