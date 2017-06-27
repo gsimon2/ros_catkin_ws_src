@@ -25,15 +25,15 @@ Scripts for running the Erle Rover in the GA framework
 -
 
 - Updates for files
--- rover_non_ga_server_obstacle_avoidance
+-- rover_GA_server_obstacle_avoidance
 --- v1.0 Basic non_ga server complete
 --- v1.1 Moved socket comminication to the global scope to fix bug where only one VM was getting genomes
---- v1.2
+--- v1.2 Added new trait to genome for obstacle_avoidance_GA v1.1 update and added generation to sent msgs for transport_controller v1.1 update
 --
 
 -- transport_controller
 --- v1.0 Basic transport controller finished
---- v1.1 
+--- v1.1 Added capabilities for changing which world the rover spawns in on the fly
 --
 
 -

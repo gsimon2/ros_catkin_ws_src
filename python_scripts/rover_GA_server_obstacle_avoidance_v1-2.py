@@ -30,10 +30,10 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 4
+POP_SIZE = 2
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 1
+GEN_COUNT = 3
 
 # Reports the current generation
 CURRENT_GEN = 0
@@ -44,19 +44,23 @@ mutation_prob = 0.2
 #Probability that two individuals will cross over and producing mixed offspring
 cross_over_prob = 0.35
 
-ind = {'id':0,'genome':{
-					'physical':[
-                    {'sensor':'lidar', 'pos':[0,0,0.4], 'orient':[0,0,0]}
-                    ],
-                    'behavioral':[
-                    {'max_turn_strength':200}, #int, [50-400]
-                    {'max_yaw_change_per_cb':15}, #int, [0-100]
-                    {'num_vision_cones':7}, #int, [1-101], must be odd
-                    {'sweep_weight_factor':1},#float, [0-5]
-                    {'distance_weight_factor':1},#float, [0-5]
-                    {'wall_distance':3} #float, [0-10]
-                    ]
-                }, 'fitness':-1.0}
+ind = {'id':0,
+		'genome':{
+			'physical':[
+				{'sensor':'lidar', 'pos':[0,0,0.4], 'orient':[0,0,0]}
+			],
+			'behavioral':[
+				{'max_turn_strength':200}, #int, [50-400]
+				{'max_yaw_change_per_cb':15}, #int, [0-100]
+				{'num_vision_cones':7}, #int, [1-101], must be odd
+				{'sweep_weight_factor':1},#float, [0-5]
+				{'distance_weight_factor':1},#float, [0-5]
+				{'wall_distance':3} #float, [0-10]
+			]
+			},
+		'fitness':-1.0,
+		'generation':0
+		}
 
 
 class SenderThread(threading.Thread):
@@ -158,6 +162,7 @@ class GA(object):
 		for i in range(self.pop_size):
 			new_ind = copy.deepcopy(ind)
 			new_ind['id'] = i
+			new_ind['generation'] = CURRENT_GEN
 			new_ind['genome']['behavioral'][0]['max_turn_strength'] = random.randrange(50,400,1)
 			new_ind['genome']['behavioral'][1]['max_yaw_change_per_cb'] = random.randrange(1,100,1)
 			new_ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
@@ -223,6 +228,8 @@ class GA(object):
 		# Mutate genes in the child genomes.
 		child_pop = random_value_mutation(child_pop, mutation_prob)
 		
+		for child in child_pop:
+			child['generation'] = CURRENT_GEN + 1
 
 		self.genomes = child_pop
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
@@ -306,7 +313,6 @@ for i in range(GEN_COUNT):
 	CURRENT_GEN = i
 	
 	genomes = ga.get_pop()
-	
 	return_data = []
 	
 	# Start a thread to send the data.
