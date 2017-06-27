@@ -1,6 +1,9 @@
 import random
+import datetime
 
-random.seed(10)
+random.seed(datetime.datetime.now())
+
+num_traits = 6
 
 def single_point_crossover(population, cross_over_prob):
 	for i in range(len(population)-1):
@@ -8,9 +11,9 @@ def single_point_crossover(population, cross_over_prob):
 		
 		#pick a random spot for single point cross over
 		if random.random() < cross_over_prob:
-			split = random.randrange(0,5,1)
-			new_genome = couple[0]['genome']['behavioral'][0:split] + couple[1]['genome']['behavioral'][-1*(5-split):]
-			new_genome2 = couple[1]['genome']['behavioral'][0:split] + couple[0]['genome']['behavioral'][-1*(5-split):]
+			split = random.randrange(0,num_traits,1)
+			new_genome = couple[0]['genome']['behavioral'][0:split] + couple[1]['genome']['behavioral'][-1*(num_traits-split):]
+			new_genome2 = couple[1]['genome']['behavioral'][0:split] + couple[0]['genome']['behavioral'][-1*(num_traits-split):]
 			
 			couple[0]['genome']['behavioral'] = new_genome
 			couple[1]['genome']['behavioral'] = new_genome2
@@ -21,7 +24,7 @@ def random_value_mutation(population, mutation_prob):
 	for ind in population:
 		if random.random() < mutation_prob:
 			#Select a gene that is to be mutated
-			gene_num = random.randrange(0, 5,1)
+			gene_num = random.randrange(0, num_traits,1)
 
 			if gene_num == 0:
 				ind['genome']['behavioral'][0]['max_turn_strength'] = random.randrange(50,400,1)
@@ -33,6 +36,8 @@ def random_value_mutation(population, mutation_prob):
 				ind['genome']['behavioral'][3]['sweep_weight_factor'] = random.random()*5
 			if gene_num == 4:
 				ind['genome']['behavioral'][4]['distance_weight_factor'] = random.random()*5
+			if gene_num == 5:
+				ind['genome']['behavioral'][5]['wall_distance'] = random.random()*10
 				
 	return population
 

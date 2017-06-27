@@ -17,7 +17,7 @@ import std_msgs.msg
 pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
 
 
-max_sim_time = 120
+max_sim_time = 240
 start_sim = False
 end_sim = False
 sim_timeout = False
@@ -46,6 +46,9 @@ sweep_weight_factor = 1
 
 #Modifies the weighting of the objects as they come closer to the rover
 distance_weight_factor = 1
+
+#How close the rover gets to a wall before it turns at max strength to try to avoid it
+wall_distance = 1
 
 #The last known region that the rover was in
 last_known_region = 'start'
@@ -77,13 +80,16 @@ def parse_genome(genome):
 			sweep_weight_factor = genome_trait['sweep_weight_factor']
 		if 'distance_weight_factor' in genome_trait:
 			distance_weight_factor = genome_trait['distance_weight_factor']
+		if 'wall_distance' in genome_trait:
+			wall_distance = genome_trait['wall_distance']
 		
 
 	print("""Gnome - max_turn_strength {}, \n
 	max_yaw_change_per_cb {}, \n
 	num_vision_cones {}, \n
 	sweep_weight_factor {}, \n
-	distance_weight_factor {}""".format(max_turn_strength,max_yaw_change_per_cb,num_vision_cones, sweep_weight_factor,distance_weight_factor))
+	distance_weight_factor {}, \n
+	wall_distance {} \n""".format(max_turn_strength,max_yaw_change_per_cb,num_vision_cones, sweep_weight_factor,distance_weight_factor, wall_distance))
 
 	
 
@@ -174,7 +180,10 @@ def check_vision(data, vision):
 		else:
 			nav_cmds['yaw'] = nav_cmds['yaw'] - (400 * distance_weight)
 			
-			
+	
+
+		
+	
 	#Make sure that yaw stays between [1500 - max_turn_strength, 1500 + max_turn_strength]
 	if nav_cmds['yaw'] > 1500 + max_turn_strength:
 		nav_cmds['yaw'] = 1500 + max_turn_strength			
@@ -192,6 +201,18 @@ def check_vision(data, vision):
 		
 	last_nav_cmd = nav_cmds
 	
+	# If an object is detected within the wall_distance, turn at max strength
+	if vision[middle_index] <= wall_distance:
+		nav_cmds['throttle'] = 1600
+	#if rover is already turning right, turn right sharp
+		if nav_cmds['yaw'] >= 1500:
+			nav_cmds['yaw'] = 1500 + max_turn_strength	
+		#same but with if rover is already turning left
+		else:
+			nav_cmds['yaw'] = 1500 - max_turn_strength
+		#print('Wall detected!')
+		#print(nav_cmds)
+		
 	
 	#detect if the rover is about to hit something
 	if vision[middle_index] <= min_detection_distance:
@@ -372,7 +393,7 @@ def simCallback(msg):
 	print("Attempting to reset...")
 	resetWorld()
 	#resetSimulation()
-	time.sleep(1)
+	time.sleep(3)
 	print("Reset!")
 
 

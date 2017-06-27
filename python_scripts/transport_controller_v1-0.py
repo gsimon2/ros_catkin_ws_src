@@ -27,10 +27,10 @@ GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
-BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA.py'
+BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA_v1-1.py'
 LAUNCH_FILE = 'test.launch'
 
-max_single_sim_running_time = 230 #In real-time seconds
+max_single_sim_running_time = 360 #In real-time seconds
 
 HEADLESS = 'true'
 GUI = 'false'
@@ -44,6 +44,7 @@ parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the 
 parser.add_argument('-bs' , '--behavior_script', type=str, help='behaviour script controlling the rover')
 parser.add_argument('-lf' , '--launch_file', type=str, help='the launch file that is to be used')
 parser.add_argument('-gui', '--graphics', action='store_true', help='Start gazebo gui for each simulation')
+parser.add_argument('--less_wait',action='store_true',help='minimize the sleep timers to make running on local machines faster. This is cause problems when running on remote VMs')
 
 args= parser.parse_args()
 
@@ -228,14 +229,16 @@ while True:
 			cmd_str = 'rosrun rover_ga {}'.format(BEHAVIOR_SCRIPT)
 			rover_behavior = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 	
+		
 		#Give time for everything to start up
-		if args.debug:
-			time.sleep(15) #spawning a bunch of xterms for debugging takes longer than subprocesses
+		if args.less_wait:
+			time.sleep(10)
 		else:
-			time.sleep(5)
-			
-		#Adding sleep timer for working on robo1vm1
-		time.sleep(12)
+			if args.debug:
+				time.sleep(27) #spawning a bunch of xterms for debugging takes longer than subprocesses
+			else:
+				time.sleep(17)
+
 	#End If different physical genome
 	
 	

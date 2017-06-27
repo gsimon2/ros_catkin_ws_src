@@ -12,13 +12,14 @@ import os
 import datetime
 import copy 
 import sys
+import time
 
 from GA_operators import random_value_mutation
 from GA_operators import single_point_crossover
 
-random.seed(66)
+random.seed(datetime.datetime.now())
 
-Num_evaluation_workers = 4
+Num_evaluation_workers = 1
 
 GA_IP_ADDR = '' #This can be provided as a command line argument, otherwise
 				# the it defaults to the computers IP address
@@ -29,19 +30,19 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 30
+POP_SIZE = 3
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 50
+GEN_COUNT = 5
 
 # Reports the current generation
 CURRENT_GEN = 0
 
 #Probability that an individual will have a random gene mutated
-mutation_prob = 0.15
+mutation_prob = 0.2
 
 #Probability that two individuals will cross over and producing mixed offspring
-cross_over_prob = 0.25
+cross_over_prob = 0.35
 
 ind = {'id':0,'genome':{
 					'physical':[
@@ -52,7 +53,8 @@ ind = {'id':0,'genome':{
                     {'max_yaw_change_per_cb':15}, #int, [0-100]
                     {'num_vision_cones':7}, #int, [1-101], must be odd
                     {'sweep_weight_factor':1},#float, [0-5]
-                    {'distance_weight_factor':1}#float, [0-5]
+                    {'distance_weight_factor':1},#float, [0-5]
+                    {'wall_distance':3} #float, [0-10]
                     ]
                 }, 'fitness':-1.0}
 
@@ -161,20 +163,26 @@ class GA(object):
 			new_ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
 			new_ind['genome']['behavioral'][3]['sweep_weight_factor'] = random.random()*5
 			new_ind['genome']['behavioral'][4]['distance_weight_factor'] = random.random()*5
+			new_ind['genome']['behavioral'][5]['wall_distance'] = random.random()*10
 			self.genomes.append(new_ind)
 		
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		self.elite_ind = -1
-		self.ga_communicator = GACommunicator()
+		#self.ga_communicator = GACommunicator()
 		self.child_id = self.pop_size
 		
 	def tear_down(self):
 		self.ga_communicator.send_tear_down_msg()
 		
-	def calculate_fitness(self):
-		return_data = self.ga_communicator.send_genomes(self.genomes)
+	def calculate_fitness(self, return_data):
+		#return_data = self.ga_communicator.send_genomes(self.genomes)
 		
 		max_fit = float('Inf')
+		
+		
+		#print(self.id_map)
+		#print(return_data)
+		#print(self.genomes)
 		
 		for rd in return_data:
 			#Filter out the negative values for genomes that either crashed in the maze or timed out
@@ -189,31 +197,10 @@ class GA(object):
 				self.elite_ind = copy.deepcopy(self.genomes[self.id_map[rd['id']]])
 		
 		
-		avg_max_turn_strength = 0
-		avg_max_yaw_change_per_cb = 0
-		avg_num_vision_cones = 0
-		avg_sweep_weight_factor = 0
-		avg_distance_weight_factor = 0
-		#Calculate Averages for this generation
-		for single_ind in self.genomes:
-			avg_max_turn_strength = avg_max_turn_strength + single_ind['genome']['behavioral'][0]['max_turn_strength']
-			avg_max_yaw_change_per_cb = avg_max_yaw_change_per_cb + single_ind['genome']['behavioral'][1]['max_yaw_change_per_cb']
-			avg_num_vision_cones = avg_num_vision_cones + single_ind['genome']['behavioral'][2]['num_vision_cones']
-			avg_sweep_weight_factor = avg_sweep_weight_factor + single_ind['genome']['behavioral'][3]['sweep_weight_factor']
-			avg_distance_weight_factor = avg_distance_weight_factor + single_ind['genome']['behavioral'][4]['distance_weight_factor']
-			
-		avg_max_turn_strength = avg_max_turn_strength / self.pop_size
-		avg_max_yaw_change_per_cb = avg_max_yaw_change_per_cb / self.pop_size
-		avg_num_vision_cones = avg_num_vision_cones / self.pop_size
-		avg_sweep_weight_factor = avg_sweep_weight_factor / self.pop_size
-		avg_distance_weight_factor = avg_distance_weight_factor / self.pop_size
-			
-		
 		#print('Returned data: {}'.format(return_data))
 		print('\n\n Winning Ind for generation {}:\n {}\n'.format(CURRENT_GEN,self.elite_ind))
-		#print('Average turn strength: {} \nAvg yaw per cb: {} \nAvg vision cones: {} \nAvg sweep factor: {} \nAvg dist factor: {} \n\n'.format(avg_max_turn_strength,avg_max_yaw_change_per_cb
-		#	,avg_num_vision_cones,avg_sweep_weight_factor,avg_distance_weight_factor))
 		#print(max_fit)
+		return
 		
 	def next_generation(self):
 		""" Modify the population for the next generation. """
@@ -243,9 +230,10 @@ class GA(object):
 	def ga_log(self, log):
 		global CURRENT_GEN
 		for ind in self.genomes:
-			log.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(CURRENT_GEN, ind['id'], ind['genome']['behavioral'][0]['max_turn_strength'], ind['genome']['behavioral'][1]['max_yaw_change_per_cb'], ind['genome']['behavioral'][2]['num_vision_cones'], ind['genome']['behavioral'][3]['sweep_weight_factor'], ind['genome']['behavioral'][4]['distance_weight_factor'],ind['fitness']))
+			log.write('{}, {}, {}, {}, {}, {}, {}, {}, {}\n'.format(CURRENT_GEN, ind['id'], ind['genome']['behavioral'][0]['max_turn_strength'], ind['genome']['behavioral'][1]['max_yaw_change_per_cb'], ind['genome']['behavioral'][2]['num_vision_cones'], ind['genome']['behavioral'][3]['sweep_weight_factor'], ind['genome']['behavioral'][4]['distance_weight_factor'], ind['genome']['behavioral'][5]['wall_distance'], ind['fitness']))
 		
-
+	def get_pop(self):
+		return self.genomes
 
 
 # Set up arg parser
@@ -287,9 +275,25 @@ log.write('Generation Count:{}\n'.format(GEN_COUNT))
 log.write('Mutation Probability:{}\n'.format(mutation_prob))
 log.write('Cross Over Probability:{}\n'.format(cross_over_prob))
 log.write('*****************************\n')
-log.write('Generation, ID, Max Turn Strength, Max Yaw Change per CB, Num Vision Cones, Sweep Weight Factor, Distance Weight Factor, Fitness\n')
+log.write('Generation, ID, Max Turn Strength, Max Yaw Change per CB, Num Vision Cones, Sweep Weight Factor, Distance Weight Factor, Wall Distance, Fitness\n')
 
 
+
+
+#Initialize the socket for data
+
+# Setup the socket to send data out on.
+context = zmq.Context()
+socket = context.socket(zmq.PUSH)
+#socket.setsockopt(zmq.LINGER, 0)    # discard unsent messages on close
+socket.bind('tcp://{}:{}'.format(GA_IP_ADDR, GA_SEND_PORT))
+ 
+# Setup the socket to read the responses on.
+receiver = context.socket(zmq.PULL)
+receiver.bind('tcp://{}:{}'.format(GA_IP_ADDR, GA_RECV_PORT))
+
+		
+		
 print("Press Enter when the workers are ready: ")
 _ = raw_input()
 print("Sending tasks to workers")
@@ -300,11 +304,36 @@ ga= GA()
 
 for i in range(GEN_COUNT):
 	CURRENT_GEN = i
-	ga.calculate_fitness()
+	
+	genomes = ga.get_pop()
+	
+	return_data = []
+	
+	# Start a thread to send the data.
+	sendThread = SenderThread(1, socket, genomes)
+	
+	sendThread.start()
+	
+	# Wait for the send thread to complete.
+	sendThread.join()
+	
+	j = len(genomes)
+	while j > 0:
+		print('{}/{} genomes recv\'d'.format(len(genomes) - j, len(genomes)))
+		data = json.loads(receiver.recv())
+		return_data.append({'id':data['id'], 'fitness':data['fitness']})
+		j -= 1
+		
+	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
 	ga.next_generation()
+	time.sleep(3)
 	
-ga.tear_down()
+#Tear down evo-ros framework
+sendThread = SenderThread(1, socket, '')
+sendThread.send_tear_down_msg()
+sendThread.start()
+sendThread.join()
 
 end_time = datetime.datetime.now()
 running_time = end_time - start_time
