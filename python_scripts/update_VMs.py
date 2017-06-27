@@ -10,22 +10,13 @@ args= parser.parse_args()
 
 print('Starting update scripts on robo nodes...')
 
-current_vm = 1
+current_vm = 2
 cmd_str = """xterm -title 'Update Script" -hold -e '
-			
+			sshpass -p '{}' ssh -X robo1vm{}.cse.msu.edu;
+			echo \"Login Successful!\"
+		'&""".format(args.password, current_vm)
 
-		"""
+mavproxy = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+#os.system(cmd_str)
 
-
-
-		if args.debug:
-			cmd_str = """xterm -title 'MAVProxy' -hold  -e '
-				source ~/simulation/ros_catkin_ws/devel/setup.bash;
-				cd ~/simulation/ardupilot/APMrover2;
-				echo \"param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param\";
-				echo
-				echo \" (For manual control) - param set SYSID_MYGCS 255\";
-				echo
-				echo \" (For script control) - param set SYSID_MYGCS 1\";
-				../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo'&"""
-			os.system(cmd_str)
+print('Script finished!')
