@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	
 	// Setup subscriptions and publishers
 	sub = node->Subscribe("~/region", callback); 
-	pub = n.advertise<std_msgs::String>("ros_regions", 1000);
+	pub = n.advertise<std_msgs::String>("ros_regions", 1);
 
 	ros::spin();
 	

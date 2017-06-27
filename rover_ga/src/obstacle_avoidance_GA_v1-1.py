@@ -400,9 +400,11 @@ def simCallback(msg):
 #listen to the ros_regions topic and store what region is being published
 #	to global var last_known_region
 def regionCallback(msg):
-	global last_known_region
-	last_known_region = msg.data
-	#print(last_known_region)
+	global start_sim
+	if start_sim is True:
+		global last_known_region
+		last_known_region = msg.data
+		#print(last_known_region)
 
 #######################################################################	
 
@@ -432,7 +434,7 @@ sim_sub = rospy.Subscriber('simulation_start', std_msgs.msg.Empty, simCallback)
 sim_pub = rospy.Publisher('simulation_result', std_msgs.msg.Float64, queue_size=1)
 
 # Setup the callback for listening to what region the rover is in
-region_sub = rospy.Subscriber('ros_regions', std_msgs.msg.String, regionCallback)
+region_sub = rospy.Subscriber('ros_regions', std_msgs.msg.String, regionCallback, queue_size=1)
 
 print('Done! Going into spin.')
 

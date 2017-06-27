@@ -30,10 +30,10 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 3
+POP_SIZE = 4
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 5
+GEN_COUNT = 1
 
 # Reports the current generation
 CURRENT_GEN = 0
@@ -319,10 +319,10 @@ for i in range(GEN_COUNT):
 	
 	j = len(genomes)
 	while j > 0:
-		print('{}/{} genomes recv\'d'.format(len(genomes) - j, len(genomes)))
 		data = json.loads(receiver.recv())
 		return_data.append({'id':data['id'], 'fitness':data['fitness']})
 		j -= 1
+		print('{}/{} genomes recv\'d'.format(len(genomes) - j, len(genomes)))
 		
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
