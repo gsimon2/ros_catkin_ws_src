@@ -10,8 +10,12 @@ args= parser.parse_args()
 
 print('Starting update scripts on robo nodes...')
 
+
+number_of_vms_on_machine = 4
+number_of_machines = 1
+
 current_vm = 1
-while current_vm <= 4:
+while current_vm <= number_of_vms_on_machine:
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
 		cd simulation/ros_catkin_ws/src/;
 		git fetch --all;
