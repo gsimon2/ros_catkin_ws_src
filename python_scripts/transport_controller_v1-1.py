@@ -182,7 +182,7 @@ while True:
 	if different_physical_genome is True:
 		
 		# Tear down this simulation instance
-		cmd_str = "killall -9 gzserver gzclient xterm mavproxy.py"
+		cmd_str = "killall -9 gzserver gzclient mavproxy.py"
 		os.system(cmd_str)
 		if args.debug is False:
 			mavproxy.kill()
@@ -312,7 +312,7 @@ while True:
 	
 #clean up
 # Tear down this simulation instance
-cmd_str = "killall -9 gzserver gzclient xterm roscore rosmaster rosout mavproxy.py python"
+cmd_str = "killall -9 gzserver gzclient roscore rosmaster rosout mavproxy.py python"
 os.system(cmd_str)
 cmd_str = "pkill -1 -f {}".format(BEHAVIOR_SCRIPT)
 os.system(cmd_str)
