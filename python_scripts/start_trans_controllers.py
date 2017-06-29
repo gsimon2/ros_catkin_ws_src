@@ -10,7 +10,7 @@ args= parser.parse_args()
 
 print('Starting transport_controller.py scripts on robo nodes...')
 
-number_of_vms_on_machine = 1
+number_of_vms_on_machine = 8
 number_of_machines = 1
 
 GA_IP_ADDR = '35.9.28.201'
@@ -27,7 +27,7 @@ while current_vm <= number_of_vms_on_machine:
 		python transport_controller_v1-1.py -ip {};
 		exec bash
 		""".format(GA_IP_ADDR)
-	cmd_str = """gnome-terminal -t "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
+	cmd_str = """xterm -title -hold "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
 	os.system(cmd_str)
 	current_vm += 1
 
