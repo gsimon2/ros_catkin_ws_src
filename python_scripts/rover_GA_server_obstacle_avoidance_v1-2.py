@@ -30,10 +30,10 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 3
+POP_SIZE = 50
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 1
+GEN_COUNT = 50
 
 # Reports the current generation
 CURRENT_GEN = 0
