@@ -27,7 +27,7 @@ while current_vm <= number_of_vms_on_machine:
 		python transport_controller_v1-1.py -ip {};
 		exec bash
 		""".format(GA_IP_ADDR)
-	cmd_str = """xterm -title -hold "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
+	cmd_str = """xterm -hold -title "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
 	os.system(cmd_str)
 	current_vm += 1
 
