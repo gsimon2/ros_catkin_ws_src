@@ -24,7 +24,7 @@ while current_vm <= number_of_vms_on_machine:
 		export PYTHONPATH=$PYTHONPATH:/home/simongle/simulation/ros_catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages;
 		cd simulation/ros_catkin_ws/src/python_scripts/;
 		echo $PYTHONPATH
-		python transport_controller_v1-1.py -ip {};
+		python transport_controller_v1-2.py -ip {};
 		exec bash
 		""".format(GA_IP_ADDR)
 	cmd_str = """xterm -hold -title "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)

@@ -350,7 +350,7 @@ def simCallback(msg):
 	begin_time = getWorldProp().sim_time 
 	
 	#Get genome data
-	genome_data = rospy.get_param('rover_genome')	
+	genome_data = rospy.get_param('rover_genome')
 	
 	#Parse genome received from GA
 	parse_genome(genome_data)

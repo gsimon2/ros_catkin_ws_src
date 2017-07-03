@@ -40,7 +40,7 @@ GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
-BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA_v1-1.py'
+BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA_v1-2.py'
 LAUNCH_FILE = 'test.launch'
 
 max_single_sim_running_time = 360 #In real-time seconds
@@ -182,7 +182,7 @@ while True:
 	if different_physical_genome is True:
 		
 		# Tear down this simulation instance
-		cmd_str = "killall -9 gzserver gzclient mavproxy.py"
+		cmd_str = "killall -9 gzserver gzclient mavproxy.py xterm"
 		os.system(cmd_str)
 		if args.debug is False:
 			mavproxy.kill()
@@ -312,7 +312,7 @@ while True:
 	
 #clean up
 # Tear down this simulation instance
-cmd_str = "killall -9 gzserver gzclient roscore rosmaster rosout mavproxy.py python"
+cmd_str = "killall -9 gzserver gzclient roscore rosmaster rosout mavproxy.py python xterm"
 os.system(cmd_str)
 cmd_str = "pkill -1 -f {}".format(BEHAVIOR_SCRIPT)
 os.system(cmd_str)

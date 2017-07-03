@@ -15,6 +15,7 @@ Provides all needed files for running the Erle Rover in the GA framework
 -- obstacle_avoidance_GA
 --- v1.0 Basic obstacle avoidance script with  traits in behav genome
 --- v1.1 Adding behavior for turning sharply when gettig close to wall with new trait for how close to the wall this kicks in
+--- v1.2 Adding more sophisticated fitness function that corresponds to how far the rover makes it in the maze and awards bonuses based off of time if the rover finishes
 --
 
 -
@@ -29,11 +30,13 @@ Scripts for running the Erle Rover in the GA framework
 --- v1.0 Basic non_ga server complete
 --- v1.1 Moved socket comminication to the global scope to fix bug where only one VM was getting genomes
 --- v1.2 Added new trait to genome for obstacle_avoidance_GA v1.1 update and added generation to sent msgs for transport_controller v1.1 update
+--- v1.2.1 Adding more sophisticated fitness function that corresponds to how far the rover makes it in the maze and awards bonuses based off of time if the rover finishes
 --
 
 -- transport_controller
 --- v1.0 Basic transport controller finished
 --- v1.1 Added capabilities for changing which world the rover spawns in on the fly
+--- v1.2 Adding more sophisticated fitness function that corresponds to how far the rover makes it in the maze and awards bonuses based off of time if the rover finishes
 --
 
 -
