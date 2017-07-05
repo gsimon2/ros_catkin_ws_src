@@ -13,6 +13,7 @@ import datetime
 import copy 
 import sys
 import time
+import math
 
 from GA_operators import random_value_mutation
 from GA_operators import single_point_crossover
@@ -30,10 +31,10 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 50
+POP_SIZE = 4
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 50
+GEN_COUNT = 1
 
 # Reports the current generation
 CURRENT_GEN = 0
@@ -182,22 +183,27 @@ class GA(object):
 	def calculate_fitness(self, return_data):
 		#return_data = self.ga_communicator.send_genomes(self.genomes)
 		
-		max_fit = float('Inf')
-		
-		
+		max_fit = 0
+				
 		#print(self.id_map)
 		#print(return_data)
 		#print(self.genomes)
 		
 		for rd in return_data:
-			#Filter out the negative values for genomes that either crashed in the maze or timed out
-			if (rd['fitness'] == -1 or rd['fitness'] == -2):
-				rd['fitness'] = float('Inf')
 
+			temp1 = rd['fitness']
+			
+			temp = math.pow(( float(rd['fitness'][1]) / 100  + 1),2)
+			
+			#if rover finishes the maze give it a time related bonus
+			if rd['fitness'][0] is not 0:
+				rd['fitness'] = temp + math.pow((rd['fitness'][0] + 1),2)
+
+			print('return data fitness: {} \t Calc fitness: {}'.format(temp1, rd['fitness']))
 
 			self.genomes[self.id_map[rd['id']]]['fitness'] = rd['fitness']
 			
-			if rd['fitness'] < max_fit:
+			if rd['fitness'] > max_fit:
 				max_fit = rd['fitness']
 				self.elite_ind = copy.deepcopy(self.genomes[self.id_map[rd['id']]])
 		
@@ -328,7 +334,7 @@ for i in range(GEN_COUNT):
 		data = json.loads(receiver.recv())
 		return_data.append({'id':data['id'], 'fitness':data['fitness']})
 		j -= 1
-		print('{}/{} genomes recv\'d'.format(len(genomes) - j, len(genomes)))
+		print('{}/{} genomes recv\'d. Fitness: {}'.format(len(genomes) - j, len(genomes), data['fitness']))
 		
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)

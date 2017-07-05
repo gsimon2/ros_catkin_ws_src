@@ -15,7 +15,7 @@
   <env name="GAZEBO_MODEL_PATH" value="$(find drcsim_model_resources)/gazebo_models/environments:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_sensors:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_outdoor:$(find ardupilot_sitl_gazebo_plugin)/meshes/meshes_warehouse"/>
   
   
-    <arg name="world_name" default="$(find rover_ga)/worlds/custom_mazes/simple_maze_blank.sdf"/>
+    <arg name="world_name" default="$(find rover_ga)/worlds/custom_mazes/custom_maze_3.sdf"/>
   <!-- <arg name="world_name" default="$(find rover_ga)/worlds/custom_mazes/simple_maze_1.sdf"/> -->
   
   

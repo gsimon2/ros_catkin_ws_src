@@ -41,7 +41,7 @@ GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
 BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA_v1-2.py'
-LAUNCH_FILE = 'test.launch'
+LAUNCH_FILE = 'maze_1.launch'
 
 max_single_sim_running_time = 360 #In real-time seconds
 
@@ -303,8 +303,11 @@ while True:
 		evaluation_result = ''
 		continue
 	else:
+		#get percent complete from rospy params
+		percent_complete = rospy.get_param('percent_complete')
+		print('percent complete: {}'.format(percent_complete))
 		# Transmit the result back to the external source
-		msg = json.dumps({'id':data['id'],'fitness':evaluation_result, 'ns':str_host_name, 'name':rospy.get_name()})
+		msg = json.dumps({'id':data['id'],'fitness':(evaluation_result, percent_complete), 'ns':str_host_name, 'name':rospy.get_name()})
 		sender.send(msg)
 		print (rospy.get_namespace(), evaluation_result)
 		evaluation_result = ''

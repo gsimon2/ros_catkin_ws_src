@@ -56,6 +56,11 @@ last_known_region = 'start'
 #Region that rover must find to end the simulation
 ending_region = 'exited_the_maze'
 
+#Percent of the maze that is complete
+percent_complete = 0
+#region_completeness = {'R1':16.66, 'R2':33.33, 'R3':50, 'R4':66.66, 'R5':83.3333, 'exited_the_maze':100}
+
+
 last_nav_cmd = {'throttle':1900,'yaw':1500}
 
 
@@ -344,6 +349,7 @@ def simCallback(msg):
 	global sim_timeout
 	global max_sim_time
 	global last_known_region
+	global percent_complete
 	
 	print('Starting sim!')
 	
@@ -368,27 +374,35 @@ def simCallback(msg):
 			end_sim = True
 		pass
 	
-	
+	time_fitness  = 0
 	#Object found in time
 	if	end_sim is True and sim_timeout is False and obstacle_collision is False:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
+		percent_complete = 100
+		time_fitness = (max_sim_time - total_sim_time) / max_sim_time
 		print("Rover finished in {} seconds".format(total_sim_time))
+	#took too long
 	elif end_sim is True and sim_timeout is True:
 		print('Rover failed to finish in time!')
 		total_sim_time = -1
+	#Hit an object
 	elif end_sim is True and obstacle_collision is True:
 		print('Rover hit a wall')
 		total_sim_time = -2
-		
+	
+	rospy.set_param('percent_complete', percent_complete)
 	
 	# Publish the resulting time on the topic.
-	sim_pub.publish(total_sim_time)
+	sim_pub.publish(time_fitness)
+	
+	
 	start_sim = False
 	end_sim = False
 	sim_timeout = False
 	obstacle_collision = False
 	last_known_region = 'start'
+	percent_complete = 0
 	
 	print("Attempting to reset...")
 	resetWorld()
@@ -403,8 +417,17 @@ def regionCallback(msg):
 	global start_sim
 	if start_sim is True:
 		global last_known_region
-		last_known_region = msg.data
-		#print(last_known_region)
+		global percent_complete
+		
+		if msg.data == last_known_region:
+			#print('pass')
+			pass
+		else:
+			last_known_region = msg.data
+			if last_known_region != ending_region:
+				percent_complete = float(msg.data)
+			print('Percent complete: {}'.format(percent_complete))
+			
 
 #######################################################################	
 
