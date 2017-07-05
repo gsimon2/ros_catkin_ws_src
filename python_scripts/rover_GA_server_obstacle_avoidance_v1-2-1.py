@@ -199,7 +199,7 @@ class GA(object):
 			if rd['fitness'][0] is not 0:
 				rd['fitness'] = temp + math.pow((rd['fitness'][0] + 1),2)
 
-			print('return data fitness: {} \t Calc fitness: {}'.format(temp1, rd['fitness']))
+			#print('return data fitness: {} \t Calc fitness: {}'.format(temp1, rd['fitness']))
 
 			self.genomes[self.id_map[rd['id']]]['fitness'] = rd['fitness']
 			
