@@ -110,7 +110,7 @@ def check_vision(data, vision):
 	global obstacle_collision
 		
 	#print('partitioned_vision: {}'.format(vision))
-	nav_cmds = {'throttle':1900,'yaw':1500}
+	nav_cmds = {'throttle':1500,'yaw':1500}
 	
 	
 	#Handle right half of vision (not counting center cone)
@@ -320,7 +320,7 @@ def callback(data):
 		return None
 	
 	#partition data ranges into sections
-	partitioned_vision = partition_vision(data, num_vision_cones, False)
+	partitioned_vision = partition_vision(data, num_vision_cones, True)
 	
 	# Use obstacle avoidance algorithm
 	nav_cmds = check_vision(data, partitioned_vision)

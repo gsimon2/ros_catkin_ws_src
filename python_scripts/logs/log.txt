@@ -1,12 +1,8 @@
 *****Rover GA expirement*****
-Date:2017-07-05 11:10:45.597739
-Population size:4
-Generation Count:1
+Date:2017-07-11 20:03:50.583857
+Population size:10
+Generation Count:3
 Mutation Probability:0.2
 Cross Over Probability:0.35
 *****************************
 Generation, ID, Max Turn Strength, Max Yaw Change per CB, Num Vision Cones, Sweep Weight Factor, Distance Weight Factor, Wall Distance, Fitness
-0, 0, 214, 97, 87, 0.315407347924, 2.73240799874, 3.72035947292, 6.86180659766
-0, 1, 290, 73, 45, 4.79882366554, 0.436754071385, 3.73410578559, 3.77755556
-0, 2, 333, 9, 95, 0.995276276631, 1.68971240246, 4.55372222695, 2.0
-0, 3, 369, 54, 29, 1.55003854525, 4.34764092826, 4.51729477922, 6.8015785434

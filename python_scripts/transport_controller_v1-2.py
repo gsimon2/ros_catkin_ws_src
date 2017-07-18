@@ -41,7 +41,7 @@ GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
 BEHAVIOR_SCRIPT = 'obstacle_avoidance_GA_v1-2.py'
-LAUNCH_FILE = 'maze_1.launch'
+LAUNCH_FILE = 'maze_3.launch'
 
 max_single_sim_running_time = 360 #In real-time seconds
 
