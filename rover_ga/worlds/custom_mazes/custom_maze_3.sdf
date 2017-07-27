@@ -901,7 +901,7 @@
 	    <type>occupied</type>
 	    <region>maze_exit</region>
 	    <topic>~/region</topic>
-	    <msg_data>exited_the_maze</msg_data>
+	    <msg_data>100</msg_data>
 	  </event>
 	  
 	  </plugin>

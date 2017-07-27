@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+
+# obstacle avoidance controller
+#
+# Listens to the /Scan topic and provides navigation commands to avoid
+# 	obstacles.
+#	(Add in more of a description of how this works)
+#
+# GAS 2017-07-24
 import rospy
 import time
 
@@ -9,20 +17,9 @@ import math
 from sensor_msgs.msg import LaserScan
 from mavros_msgs.msg import OverrideRCIn
 
-from gazebo_msgs.srv import GetWorldProperties
 import numpy as np
-from std_srvs.srv import Empty
 import std_msgs.msg
 
-pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
-
-
-max_sim_time = 240
-start_sim = False
-end_sim = False
-sim_timeout = False
-obstacle_collision = False
-sim_end_time = [0,0]
 
 #How dratastically the rover will try to turn
 # 0 = no turning
@@ -50,20 +47,12 @@ distance_weight_factor = 1
 #How close the rover gets to a wall before it turns at max strength to try to avoid it
 wall_distance = 1
 
-#The last known region that the rover was in
-last_known_region = 'start'
-
-#Region that rover must find to end the simulation
-ending_region = '100'
-
-#Percent of the maze that is complete
-percent_complete = 0
-#region_completeness = {'R1':16.66, 'R2':33.33, 'R3':50, 'R4':66.66, 'R5':83.3333, 'exited_the_maze':100}
-
-
 last_nav_cmd = {'throttle':1900,'yaw':1500}
 
 
+### Parse Genome ###
+### 	Parses the received genome and assigns any obstacle avoidance
+###		related traits to script variables
 def parse_genome(genome):
 	
 	global max_turn_strength
@@ -96,19 +85,12 @@ def parse_genome(genome):
 	distance_weight_factor {}, \n
 	wall_distance {} \n""".format(max_turn_strength,max_yaw_change_per_cb,num_vision_cones, sweep_weight_factor,distance_weight_factor, wall_distance))
 
-	
-
+### Check Vision ###
+###		Takes the partitioned vision and calculates a navigation command
+###		to avoid any obstacles in the way
 def check_vision(data, vision):
-	global start_sim
-	global end_sim
-	global sim_timeout
-	global sim_end_time
 	global last_nav_cmd
-	global max_yaw_change_per_cb
-	global last_known_region
-	global ending_region
-	global obstacle_collision
-		
+	
 	#print('partitioned_vision: {}'.format(vision))
 	nav_cmds = {'throttle':1900,'yaw':1500}
 	
@@ -186,9 +168,6 @@ def check_vision(data, vision):
 			nav_cmds['yaw'] = nav_cmds['yaw'] - (400 * distance_weight)
 			
 	
-
-		
-	
 	#Make sure that yaw stays between [1500 - max_turn_strength, 1500 + max_turn_strength]
 	if nav_cmds['yaw'] > 1500 + max_turn_strength:
 		nav_cmds['yaw'] = 1500 + max_turn_strength			
@@ -215,42 +194,13 @@ def check_vision(data, vision):
 		#same but with if rover is already turning left
 		else:
 			nav_cmds['yaw'] = 1500 - max_turn_strength
-		#print('Wall detected!')
-		#print(nav_cmds)
-		
-	
-	#detect if the rover is about to hit something
-	if vision[middle_index] <= min_detection_distance:
-		nav_cmds['throttle'] = 1500
-		print('stopping!')
-		end_sim = True
-		start_sim = False
-		obstacle_collision = True
-		
-
-	#detect if the rover has exited the maze
-	if last_known_region == ending_region:
-		nav_cmds['throttle'] = 1500
-		sim_end_time[0] = data.header.stamp.secs
-		sim_end_time[1] = data.header.stamp.nsecs
-		print("Rover finished at {} seconds and {} nanoseconds!".format(sim_end_time[0], sim_end_time[1]))
-		end_sim = True
-		start_sim = False
-		
-		
-	###
-	# To Do
-	# -Rover skirts the edges of obstacles and sometimes catches it back wheels
-	# -Detect when a collision is going to occur, put rover in reverse to gain some distance and try going around again
-	
-	
-	#print(vision)
-	#print(nav_cmds)
 	return nav_cmds
-	
-# Takes in the data from the lidar sensor and divides it into a variable number of partitions each with the average range value for that section
-#	Can optionally display a visual representation of what is being seen by the lidar
-def partition_vision(data, num_vision_cones = 5, show_visual = True):
+
+### Partition Vision ###
+###		Takes in the data from the lidar sensor and divides it into a variable
+###		number of partitions each with the average range value for that section.
+###		Can optionally display a visual representation of what is being seen by the lidar
+def partition_vision(data, num_vision_cones = 5, show_visual = False):
 	
 	#Set up cv2 image to visualize the lidar readings
 	frame = np.zeros((500, 500,3), np.uint8)
@@ -310,17 +260,21 @@ def partition_vision(data, num_vision_cones = 5, show_visual = True):
 	
 	return partitioned_vision
 	
+
+
+def eval_start_callback(data):
+	print("Starting evaluation")
 	
-def callback(data):
-	global num_vision_cones
+	#Get genome data
+	ind_data = rospy.get_param('rover_genome')
+	genome_data = ind_data['genome'] 
 	
-	#Wait to receive genome to start simulation and start sending commands
-	if start_sim is False:
-		#print("No genome received yet!")
-		return None
-	
+	#Parse genome received from GA
+	parse_genome(genome_data)
+
+def scan_callback(data):
 	#partition data ranges into sections
-	partitioned_vision = partition_vision(data, num_vision_cones, True)
+	partitioned_vision = partition_vision(data, num_vision_cones)
 	
 	# Use obstacle avoidance algorithm
 	nav_cmds = check_vision(data, partitioned_vision)
@@ -339,127 +293,12 @@ def callback(data):
 	msg.channels[5] = 0
 	msg.channels[6] = 0
 	msg.channels[7] = 0
-	pub.publish(msg)   
-
-""" Callback to conduct a simulation. """
-def simCallback(msg):
-	global start_sim
-	global obstacle_collision
-	global end_sim
-	global sim_timeout
-	global max_sim_time
-	global last_known_region
-	global percent_complete
+	obstacle_avoidance_cmds_pub.publish(msg)   
 	
-	print('Starting sim!')
-	
-	begin_time = getWorldProp().sim_time 
-	
-	#Get genome data
-	genome_data = rospy.get_param('rover_genome')
-	
-	#Parse genome received from GA
-	parse_genome(genome_data)
-	
-	#start the simulation with this genome
-	#to-do send genome to other callback function
-	start_sim = True
-	
-	#Wait for sim to end
-	while end_sim is False:
-		current_time = getWorldProp().sim_time 
-		total_sim_time = current_time - begin_time
-		if total_sim_time >= max_sim_time:
-			sim_timeout = True
-			end_sim = True
-		pass
-	
-	time_fitness  = 0
-	#Object found in time
-	if	end_sim is True and sim_timeout is False and obstacle_collision is False:
-		current_time = getWorldProp().sim_time 
-		total_sim_time = current_time - begin_time
-		percent_complete = 100
-		time_fitness = (max_sim_time - total_sim_time) / max_sim_time
-		print("Rover finished in {} seconds".format(total_sim_time))
-	#took too long
-	elif end_sim is True and sim_timeout is True:
-		print('Rover failed to finish in time!')
-		total_sim_time = -1
-	#Hit an object
-	elif end_sim is True and obstacle_collision is True:
-		print('Rover hit a wall')
-		total_sim_time = -2
-	
-	rospy.set_param('percent_complete', percent_complete)
-	
-	# Publish the resulting time on the topic.
-	sim_pub.publish(time_fitness)
-	
-	
-	start_sim = False
-	end_sim = False
-	sim_timeout = False
-	obstacle_collision = False
-	last_known_region = 'start'
-	percent_complete = 0
-	
-	print("Attempting to reset...")
-	resetWorld()
-	#resetSimulation()
-	time.sleep(3)
-	print("Reset!")
 
-
-#listen to the ros_regions topic and store what region is being published
-#	to global var last_known_region
-def regionCallback(msg):
-	global start_sim
-	if start_sim is True:
-		global last_known_region
-		global percent_complete
-		
-		if msg.data == last_known_region:
-			#print('pass')
-			pass
-		else:
-			last_known_region = msg.data
-			if last_known_region != ending_region:
-				percent_complete = float(msg.data)
-			print('Percent complete: {}'.format(percent_complete))
-			
-
-#######################################################################	
-
-print('Waiting for gazebo services')
-rospy.wait_for_service('/gazebo/get_world_properties')
-rospy.wait_for_service('/gazebo/reset_world')
-rospy.wait_for_service('/gazebo/reset_simulation')
-rospy.wait_for_service('/gazebo/pause_physics')
-rospy.wait_for_service('/gazebo/unpause_physics')
-
-rospy.init_node('laser_listener', anonymous=True)
-
-rospy.Subscriber("/scan", LaserScan,callback)
-
-print('Done!')
-print('Setting up ros service proxies')
-
-getWorldProp = rospy.ServiceProxy('/gazebo/get_world_properties', GetWorldProperties)
-resetWorld = rospy.ServiceProxy('/gazebo/reset_world', Empty)
-resetSimulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
-
-print('Done!')
-print('Starting obstacle_avoidance node and setuping topics')
-
-# Setup the callbacks for starting and reporting results.
-sim_sub = rospy.Subscriber('simulation_start', std_msgs.msg.Empty, simCallback)
-sim_pub = rospy.Publisher('simulation_result', std_msgs.msg.Float64, queue_size=1)
-
-# Setup the callback for listening to what region the rover is in
-region_sub = rospy.Subscriber('ros_regions', std_msgs.msg.String, regionCallback, queue_size=1)
-
-print('Done! Going into spin.')
-
+### Set up ROS subscribers and publishers ###
+rospy.init_node('obstacle_avoidance_controller',anonymous=False)
+scan_sub = rospy.Subscriber("/scan", LaserScan,scan_callback)
+eval_start_sub = rospy.Subscriber('evaluation_start', std_msgs.msg.Empty, eval_start_callback)
+obstacle_avoidance_cmds_pub = rospy.Publisher('obstacle_avoindance_cmds', OverrideRCIn, queue_size=10)
 rospy.spin()
-	

@@ -10,23 +10,22 @@ args= parser.parse_args()
 
 print('Starting transport_controller.py scripts on robo nodes...')
 
-number_of_vms_on_machine = 8
+number_of_vms_on_machine = 2
 number_of_machines = 1
-
+name_of_script = "software_manager.py"
 GA_IP_ADDR = '35.9.28.201'
+script_arguments = "-ip {}".format(GA_IP_ADDR)
 
-current_vm = 1
+current_vm = 2
 while current_vm <= number_of_vms_on_machine:
-	cmds = """echo Starting__transport_controller.py...;
+	cmds = """echo {}...;
 		cd;
 		source /opt/ros/indigo/setup.bash;
 		source ~/simulation/ros_catkin_ws/devel/setup.bash;
 		export PYTHONPATH=$PYTHONPATH:/home/simongle/simulation/ros_catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages;
-		cd simulation/ros_catkin_ws/src/python_scripts/;
-		echo $PYTHONPATH
-		python transport_controller_v1-2.py -ip {};
+		rosrun evo-ros {} {};
 		exec bash
-		""".format(GA_IP_ADDR)
+		""".format(name_of_script, name_of_script, script_arguments)
 	cmd_str = """xterm -hold -title "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
 	os.system(cmd_str)
 	current_vm += 1

@@ -31,7 +31,7 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 10
+POP_SIZE = 5
 
 # How many generations is this experiment going to run for
 GEN_COUNT = 3
@@ -166,8 +166,7 @@ class GA(object):
 			new_ind['generation'] = CURRENT_GEN
 			new_ind['genome']['behavioral'][0]['max_turn_strength'] = random.randrange(50,400,1)
 			new_ind['genome']['behavioral'][1]['max_yaw_change_per_cb'] = random.randrange(1,100,1)
-			#new_ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
-			new_ind['genome']['behavioral'][2]['num_vision_cones'] = 5
+			new_ind['genome']['behavioral'][2]['num_vision_cones'] = random.randrange(1,101,2)
 			new_ind['genome']['behavioral'][3]['sweep_weight_factor'] = random.random()*5
 			new_ind['genome']['behavioral'][4]['distance_weight_factor'] = random.random()*5
 			new_ind['genome']['behavioral'][5]['wall_distance'] = random.random()*10
