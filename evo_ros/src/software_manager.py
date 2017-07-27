@@ -208,9 +208,9 @@ def software_setup(data):
 		time.sleep(10)
 	else:
 		if args.debug:
-			time.sleep(27) #spawning a bunch of xterms for debugging takes longer than subprocesses
+			time.sleep(45) #spawning a bunch of xterms for debugging takes longer than subprocesses
 		else:
-			time.sleep(17)
+			time.sleep(30)
 	
 	
 ### Simulation Start Callback ###
