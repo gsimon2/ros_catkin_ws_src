@@ -10,13 +10,13 @@ args= parser.parse_args()
 
 print('Starting transport_controller.py scripts on robo nodes...')
 
-number_of_vms_on_machine = 2
+number_of_vms_on_machine = 8
 number_of_machines = 1
 name_of_script = "software_manager.py"
 GA_IP_ADDR = '35.9.28.201'
 script_arguments = "-ip {}".format(GA_IP_ADDR)
 
-current_vm = 2
+current_vm = 1
 while current_vm <= number_of_vms_on_machine:
 	cmds = """echo {}...;
 		cd;
