@@ -259,15 +259,15 @@ def sim_start_callback(recv_data):
 	###		and try to run the simulation again
 	this_eval_start = datetime.datetime.now()
 	while evaluation_result == '':
-		#current_time = datetime.datetime.now()
-		#if (current_time - this_eval_start).total_seconds() > max_single_sim_running_time:
-		#	print("Simulation timed out. Trying again")
-		#	global last_physical_genome
-		#	global evaluation_result
-		#	evaluation_result = -3
-		#	last_physical_genome = []
-		#	sim_start_callback(recv_data)
-		#	return
+		current_time = datetime.datetime.now()
+		if (current_time - this_eval_start).total_seconds() > max_single_sim_running_time:
+			print("Simulation timed out. Trying again")
+			global last_physical_genome
+			global evaluation_result
+			evaluation_result = -3
+			last_physical_genome = []
+			sim_start_callback(recv_data)
+			return
 		time.sleep(0.5)
 	
 	# Another callback function should handle monitor the scan and ros region topics for ending conditions and send results to transporter
