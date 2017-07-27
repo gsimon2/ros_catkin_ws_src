@@ -16,7 +16,7 @@ name_of_script = "software_manager.py"
 GA_IP_ADDR = '35.9.28.201'
 script_arguments = "-ip {}".format(GA_IP_ADDR)
 
-current_vm = 1
+current_vm = 2
 while current_vm <= number_of_vms_on_machine:
 	cmds = """echo {}...;
 		cd;
