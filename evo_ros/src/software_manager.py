@@ -35,10 +35,6 @@ evaluation_result = ''
 
 random.seed(datetime.datetime.now())
 
-# Max time a simulation is allowed to run (in real-time seconds)
-#	before it times out and retries the simulation	
-max_single_sim_running_time = 360
-
 # Default controller script
 # TO-DO change this to contorller_script
 CONTROLLER_SCRIPT = 'rover_controller.py'
@@ -69,8 +65,14 @@ GA_RECV_PORT = 5010
 ### Simulation Result Callback ###
 ### 	Collect received sim result data and store it in global var
 def sim_result_callback(data):
-    global evaluation_result
-    evaluation_result = data.data
+	global last_physical_genome
+	print('Evaluation instance completed with result: {}'.format(data.data))
+	# Check when the simulation takes too long to complete and reset the software
+	#	For the next received genome
+	if data.data == -2:
+		print('Reseting stored genome due to sim timeout')
+		last_physical_genome = []
+	
 
 ### Pick New Launch ###
 ###		Uses random number to select which launch file is used next 
@@ -253,29 +255,6 @@ def sim_start_callback(recv_data):
 	
 	print('Done! Entering sleep onto sim evaluation is complete.')
 	
-	### Loop ###
-	### 	Keep checking time and if the time spent on this simulation
-	###		passes the max time allowed for one simulation run, reset 
-	###		and try to run the simulation again
-	this_eval_start = datetime.datetime.now()
-	while evaluation_result == '':
-		current_time = datetime.datetime.now()
-		if (current_time - this_eval_start).total_seconds() > max_single_sim_running_time:
-			print("Simulation timed out. Trying again")
-			global last_physical_genome
-			global evaluation_result
-			evaluation_result = -3
-			last_physical_genome = []
-			sim_start_callback(recv_data)
-			return
-		time.sleep(0.5)
-	
-	# Another callback function should handle monitor the scan and ros region topics for ending conditions and send results to transporter
-	print('Evaluation instance complete!')
-	evaluation_result == ''
-	
-
-
 
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""

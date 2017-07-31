@@ -17,6 +17,7 @@ import subprocess
 import socket
 import datetime
 import random
+import sys
 
 import std_msgs.msg
 
@@ -51,7 +52,14 @@ def software_ready_callback(data):
 	time_fitness = 0
 	
 	# Get the beginning time for the simulation
-	begin_time = getWorldProp().sim_time 
+	# Error handling for if a required process crashes
+	#	Mainly for Gazebo, which has a tendency to crash during
+	#	long runs
+	try:
+		begin_time = getWorldProp().sim_time 
+	except:
+		print('Required processes has failed. Sending reset message to software manager')
+		sim_result_pub.publish(-2)
 	
 	# Send a ready message on the evaluation start topic to let controller
 	#	know that the simulation enviroment is ready
@@ -61,24 +69,37 @@ def software_ready_callback(data):
 
 	# Wait until a simulation end event is triggered
 	#	or for the max simulation time to be reached
+	sim_timeout = False
 	while simulation_end is False:
-		current_time = getWorldProp().sim_time 
+		# Error handling for if a required process crashes
+		#	Mainly for Gazebo, which has a tendency to crash during
+		#	long runs
+		try:
+			current_time = getWorldProp().sim_time
+		except:
+			print('Required processes has failed. Sending reset message to software manager')
+			sim_result_pub.publish(-2)
 		if (current_time - begin_time) > max_sim_time:
 			print("Simulation timed out.")
 			simulation_end = True
+			sim_timeout = True
 		time.sleep(0.1)
 	
 	rospy.set_param('simulation_running', False)
 	
 	# If the vehicle was able to finish successfully, give it a time bonus
 	#	Else send back a result of -1 indicating a collision
+	#	Or -2 indicating that the simulation took too long to finish sucessfully
 	global percent_complete
 	if percent_complete == 100:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
 		time_fitness = (max_sim_time - total_sim_time) / max_sim_time
 	else:
-		time_fitness = -1
+		if sim_timeout == True:
+			time_fitness = -2
+		else:
+			time_fitness = -1
 		
 
 	
@@ -148,6 +169,7 @@ resetSimulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sim_manager',anonymous=False)
 rospy.set_param('simulation_running', False)
+rospy.set_param('percent_complete', 0)
 eval_start_pub = rospy.Publisher('evaluation_start', std_msgs.msg.Empty, queue_size=1)
 sim_result_pub = rospy.Publisher('simulation_result', std_msgs.msg.Float64, queue_size=1)
 sim_start_sub = rospy.Subscriber('software_ready', std_msgs.msg.Empty, software_ready_callback)

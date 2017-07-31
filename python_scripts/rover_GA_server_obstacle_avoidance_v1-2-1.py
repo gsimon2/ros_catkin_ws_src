@@ -31,10 +31,10 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # How large the population size is for each generation
-POP_SIZE = 100
+POP_SIZE = 5
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 100
+GEN_COUNT = 5
 
 # Reports the current generation
 CURRENT_GEN = 0
@@ -193,13 +193,16 @@ class GA(object):
 
 			temp1 = rd['fitness']
 			
+			#Calc fitness score based off of how far the rover made it in the maze
 			temp = math.pow(( float(rd['fitness'][1]) / 100  + 1),2)
 			
 			#if rover finishes the maze give it a time related bonus
-			if rd['fitness'][0] is not 0:
-				rd['fitness'] = temp + math.pow((rd['fitness'][0] + 1),2)
+			if rd['fitness'][0] >= 0:
+				temp = temp + math.pow((rd['fitness'][0] + 1),2)
 
-			#print('return data fitness: {} \t Calc fitness: {}'.format(temp1, rd['fitness']))
+			rd['fitness'] = temp
+			
+			print('returned result: {} \t Calc fitness: {}'.format(temp1, rd['fitness']))
 
 			self.genomes[self.id_map[rd['id']]]['fitness'] = rd['fitness']
 			
@@ -334,7 +337,7 @@ for i in range(GEN_COUNT):
 		data = json.loads(receiver.recv())
 		return_data.append({'id':data['id'], 'fitness':data['fitness']})
 		j -= 1
-		print('{}/{} genomes recv\'d. Fitness: {}'.format(len(genomes) - j, len(genomes), data['fitness']))
+		print('{}/{} genomes recv\'d. Result: {}'.format(len(genomes) - j, len(genomes), data['fitness']))
 		
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
