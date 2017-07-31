@@ -337,7 +337,7 @@ for i in range(GEN_COUNT):
 		data = json.loads(receiver.recv())
 		return_data.append({'id':data['id'], 'fitness':data['fitness']})
 		j -= 1
-		print('{}/{} genomes recv\'d. Result: {}'.format(len(genomes) - j, len(genomes), data['fitness']))
+		print('{}/{} genomes recv\'d. Result: {} \n\t Tested on: {}'.format(len(genomes) - j, len(genomes), data['fitness'], data['ns']))
 		
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
