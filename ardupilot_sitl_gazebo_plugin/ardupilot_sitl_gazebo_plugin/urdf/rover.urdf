@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rover">
+   
   <joint name="front_left_steering_joint" type="revolute">
     <parent link="chassis"/>
     <child link="front_left_wheel_steering_block"/>
@@ -49,17 +50,30 @@
       <origin rpy="0 0 0" xyz="0.02 0.0 0.08"/>
       <inertia ixx="140" ixy="0.0" ixz="0.0" iyy="550" iyz="0.0" izz="550"/>
     </inertial>
-    <collision name="chassis_bottom">
-      <origin rpy="0 0 0" xyz=" 0.04 0.0 0.067"/>
+    <collision name="chassis_collision">
+      <!-- <origin rpy="0 0 0" xyz=" 0.04 0.0 0.067"/>  Default-->
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
       <geometry>
-        <box size="0.268 0.2 0.012"/>
+        <box size="0.55 0.2 0.012"/> <!-- 0.268 0.2 0.012 -->
       </geometry>
     </collision>
     <visual name="visual">
+		
+      
+      <!-- Use this for visual of the collision area of the chasis
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
+      <geometry>
+        <box size="0.55 0.2 0.012"/>
+      </geometry>
+      -->
+      
+      <!-- Erle Rover Chassis -->
       <origin rpy="-1.5708 0 3.1416" xyz="0.04 0.392 0.052"/>
       <geometry>
         <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_chassis.STL" scale="0.0011 0.0011 0.0011"/>
       </geometry>
+      
+      
     </visual>
   </link>
   <link name="front_left_wheel">
@@ -68,7 +82,7 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
     </inertial>
-    <collision name="collision">
+    <collision name="front_left_wheel_collision">
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.05588" radius="0.0635"/>
@@ -354,6 +368,7 @@
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
    <origin xyz="0 0 0.4" rpy="0 0 0"/>
  </xacro:lidar_sensor><!-- 542 -->
+ 
 
 <!--
 <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
@@ -381,6 +396,37 @@
  </xacro:sensor_kinect>
 -->
 
+
+<gazebo reference="chassis">
+    <sensor name="chassis_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>chassis_collision_collision</collision>
+      </contact>
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_contact_sensor_state</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+<!--
+<gazebo reference="front_left_wheel">
+    <sensor name="wheel_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <contact>
+        <collision>front_left_wheel_collision_collision</collision>
+      </contact>
+      <plugin name="contact_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_sensor_state</bumperTopicName>
+        <frameName>world</frameName>
+      </plugin>
+    </sensor>
+ </gazebo>
+-->
 
 
 </robot>

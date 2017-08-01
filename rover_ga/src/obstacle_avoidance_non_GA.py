@@ -130,9 +130,9 @@ def check_vision(data, vision):
 	
 	#detect if the rover is about to hit something
 
-	if vision[middle_index] <= min_detection_distance:
-		nav_cmds['throttle'] = 1500
-		print('stopping!')	
+	#if vision[middle_index] <= min_detection_distance:
+	#	nav_cmds['throttle'] = 1500
+	#	print('stopping!')	
 	
 	
 	###

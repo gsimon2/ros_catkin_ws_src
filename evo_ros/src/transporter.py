@@ -76,8 +76,8 @@ print("GA is running at IP: {} \n Sending port: {} \n Receiving port: {} \n".for
 
 ### Setup the ROS topics for communicating with connected nodes. ###
 rospy.init_node('transporter',anonymous=False)
-pub = rospy.Publisher('simulation_start', std_msgs.msg.Empty, queue_size=1)
-sub = rospy.Subscriber('simulation_result', std_msgs.msg.Float64, sim_result_callback)
+pub = rospy.Publisher('received_genome', std_msgs.msg.Empty, queue_size=1)
+sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
 print("Ros transport node and simulation start/result topics have been initialized")
 
 

@@ -324,8 +324,8 @@ else:
 # Set up ROS subscribers and publishers
 rospy.init_node('software_manager',anonymous=False)
 software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=1)
-sim_result_sub = rospy.Subscriber('simulation_result', std_msgs.msg.Float64, sim_result_callback)
-sim_start_sub = rospy.Subscriber('simulation_start', std_msgs.msg.Empty, sim_start_callback)
+sim_result_sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
+sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, sim_start_callback)
 
 
 rospy.on_shutdown(shutdown_hook)
