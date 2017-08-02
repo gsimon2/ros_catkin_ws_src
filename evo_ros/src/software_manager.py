@@ -20,6 +20,7 @@ import subprocess
 import socket
 import datetime
 import random
+import sys
 
 import std_msgs.msg
 
@@ -34,14 +35,6 @@ recv_first_msg = False
 evaluation_result = ''
 
 random.seed(datetime.datetime.now())
-
-# Default controller script
-# TO-DO change this to contorller_script
-CONTROLLER_SCRIPT = 'rover_controller.py'
-
-# Default launch file to be used
-# TO-DO modify launch files to reflect seperate changes
-LAUNCH_FILE = 'maze_1.launch'
 
 # Default GUI state for running Gazebo
 #	Note: Headless and GUI should always be opposite of each other
@@ -60,13 +53,74 @@ GA_SEND_PORT = 5000
 # The port number that the GA is collecting results on
 GA_RECV_PORT = 5010
 
+# The vehicle that is being used. Default is the erle-rover
+VEHICLE = 'rover'
 
-mavproxy_cmd_str = ''
+# Mavproxy software
+MAVPROXY_CMD_STR = ''
+ARDUPILOT_EXE = ''
+
+# Launch file being used
+LAUNCH_FILE = ''
+LAUNCH_FILE_PACKAGE = ''
+
+# Simulaton manager being used
+SIM_MANAGER_SCRIPT = ''
+SIM_MANAGER_PACKAGE = ''
+
+# Vehicle controller being used
+CONTROLLER_SCRIPT = ''
+CONTROLLER_SCRIPT_PACKAGE = ''
 
 
-### 
+### Vehicle Software Configuration ###
+###		This selects which software will be spawned for the vehicle 
+###		 passed in through command line
+###		There are 4 main components:
+###			1 - MAVProxy / Ardupilot
+###			2 - The ROS launch file
+###			3 - The simulation manager script
+###			4 - The vehicle controller script
 def vehicle_software_config(vehicle):
-	pass
+	global MAVPROXY_CMD_STR
+	global ARDUPILOT_EXE
+	global LAUNCH_FILE
+	global LAUNCH_FILE_PACKAGE
+	global SIM_MANAGER_SCRIPT
+	global SIM_MANAGER_PACKAGE
+	global CONTROLLER_SCRIPT
+	global CONTROLLER_SCRIPT_PACKAGE
+
+	print('Vehcile selected: {}'.format(VEHICLE))
+	
+	if VEHICLE == 'rover':
+		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
+			cd ~/simulation/ardupilot/APMrover2;
+			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param\";
+			echo
+			echo \" (For manual control) - param set SYSID_MYGCS 255\";
+			echo
+			echo \" (For script control) - param set SYSID_MYGCS 1\";
+			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
+		ARDUPILOT_EXE = 'APMrover2.elf'
+		
+		LAUNCH_FILE = 'maze_1.launch'
+		LAUNCH_FILE_PACKAGE = 'rover_ga'
+		
+		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
+		SIM_MANAGER_PACKAGE = 'evo-ros'
+		
+		CONTROLLER_SCRIPT = 'rover_controller.py'
+		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
+	elif VEHICLE == 'copter':
+		print('Copter software not configured yet!')
+		#rospy.signal_shutdown('Invalid vehicle selection')
+		sys.exit()
+	else:
+		print('Invalid vehicle selection! Please use the --help option for more info.')
+		#rospy.signal_shutdown('Invalid vehicle selection')
+		sys.exit()
+	
 	
 ### Simulation Result Callback ###
 ### 	Collect received sim result data and store it in global var
@@ -105,7 +159,7 @@ def shutdown_hook():
 	os.system(cmd_str)
 	cmd_str = "pkill -1 -f transporter.py"
 	os.system(cmd_str)
-	cmd_str = "pkill -1 -f sim_manager.py"
+	cmd_str = "pkill -1 -f {}".format(SIM_MANAGER_SCRIPT)
 	os.system(cmd_str)
 	time.sleep(2)
 	print('Tear down complete. Exiting...')
@@ -127,10 +181,10 @@ def software_setup(data):
 		try:
 			mavproxy.kill()
 			launch_file.kill()
-			rover_behavior.kill()
+			controller_script.kill()
 			mavproxy.wait()
 			launch_file.wait()
-			rover_behavior.wait()
+			controller_script.wait()
 		except Exception:
 			pass
 	time.sleep(3)
@@ -154,32 +208,15 @@ def software_setup(data):
 	### Start all needed processes ###
 	# Start MAVProxy
 	if args.debug:
-		cmd_str = """xterm -title 'MAVProxy' -hold  -e '
-			source ~/simulation/ros_catkin_ws/devel/setup.bash;
-			cd ~/simulation/ardupilot/APMrover2;
-			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param\";
-			echo
-			echo \" (For manual control) - param set SYSID_MYGCS 255\";
-			echo
-			echo \" (For script control) - param set SYSID_MYGCS 1\";
-			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo'&"""
-		os.system(cmd_str)
+		os.system("xterm -title 'MAVProxy' -hold  -e '{}'&".format(MAVPROXY_CMD_STR))
 	else:
-		cmd_str = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
-			cd ~/simulation/ardupilot/APMrover2;
-			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param\";
-			echo
-			echo \" (For manual control) - param set SYSID_MYGCS 255\";
-			echo
-			echo \" (For script control) - param set SYSID_MYGCS 1\";
-			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
-		mavproxy = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+		mavproxy = subprocess.Popen(MAVPROXY_CMD_STR, stdout=subprocess.PIPE, shell=True)
 	
 	#Give time to start up Mavproxy and Ardupilot (takes a while since Ardupilots sim_vehicle script calls xterm to start the ardupilot scripts)
 	str_PID = ''
 	while(str_PID == ''):
 		try:
-			str_PID = subprocess.check_output('pidof APMrover2.elf',stderr=subprocess.STDOUT,shell=True)
+			str_PID = subprocess.check_output('pidof {}'.format(ARDUPILOT_EXE),stderr=subprocess.STDOUT,shell=True)
 		except Exception:
 			pass
 		time.sleep(0.5)
@@ -187,29 +224,27 @@ def software_setup(data):
 	time.sleep(4)
 	
 	# Run launch file
+	launch_file_cmd_str = 'roslaunch {} {} model:={} gui:={} headless:={}'.format(LAUNCH_FILE_PACKAGE, LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
 	if args.debug:
-		cmd_str = "xterm -hold -e 'roslaunch rover_ga {} model:={} gui:={} headless:={}'&".format(LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
-		os.system(cmd_str)
-		time.sleep(1)
+		os.system("xterm -hold -e '{}'&".format(launch_file_cmd_str))
 	else:
-		cmd_str = 'roslaunch rover_ga {} model:={} gui:={} headless:={}'.format(LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
-		launch_file = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+		launch_file = subprocess.Popen(launch_file_cmd_str, stdout=subprocess.PIPE, shell=True)
 	print('Started launch file!')
-	
+	time.sleep(1)
+			
 	# Start Sim manager node
-	cmd_str = "rosrun evo-ros sim_manager.py"
+	sim_manager_cmd_str = "rosrun {} {}".format(SIM_MANAGER_PACKAGE, SIM_MANAGER_SCRIPT)
 	if args.debug:
-		os.system("xterm -hold -e '{}'&".format(cmd_str))
+		os.system("xterm -hold -e '{}'&".format(sim_manager_cmd_str))
 	else:
-		sim_manager = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+		sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
 		
 	#Start controller script
+	controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
 	if args.debug:
-		cmd_str = "xterm -hold -e 'rosrun evo-ros {}'&".format(CONTROLLER_SCRIPT)
-		os.system(cmd_str)
+		os.system("xterm -hold -e '{}'&".format(controller_cmd_str))
 	else:
-		cmd_str = 'rosrun evo-ros {}'.format(CONTROLLER_SCRIPT)
-		rover_behavior = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+		controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	#Give time for everything to start up
 	if args.less_wait:
@@ -224,6 +259,10 @@ def software_setup(data):
 ### Simulation Start Callback ###
 ###
 def sim_start_callback(recv_data):
+	global LAUNCH_FILE
+	global last_physical_genome
+	global GENERATION
+	
 	#Get genome data
 	data = rospy.get_param('rover_genome')
 	print('Received genome data!')
@@ -236,21 +275,18 @@ def sim_start_callback(recv_data):
 	
 	# Update Generation
 	if GENERATION != data['generation']:
-		global GENERATION
 		GENERATION = data['generation']
 		
 		# If want to spawn vehicle in a different world for each generation
 		#	change the launch file being used when we receive a new gen
 		if args.multiple_worlds:
 			last_physical_genome = []
-			global LAUNCH_FILE
 			LAUNCH_FILE = pick_new_launch()
 	print('Current generation: {}'.format(data['generation']))
 	
 	#Check to see if received physical genome is different from last received
 	if data['genome']['physical'] != last_physical_genome:
 		print("		Received different physical genome!")
-		global last_physical_genome
 		last_physical_genome = data['genome']['physical']
 		software_setup(data)
 	else:
@@ -293,7 +329,7 @@ if args.launch_file is not None:
 
 if args.multiple_worlds:
 	print("Multiple worlds option selected")
-	global LAUNCH_FILE
+	#global LAUNCH_FILE
 	LAUNCH_FILE = pick_new_launch()
 	
 if args.graphics:
@@ -310,7 +346,12 @@ if args.ga_recv_port is not None:
 if args.ga_ip_addr is not None:
 	GA_IP_ADDR = args.ga_ip_addr
 
+if args.vehicle is not None:
+	VEHICLE = args.vehicle
 
+
+### Configure the software command strings based on what vehicle is being used ###
+vehicle_software_config(VEHICLE)
 
 ### Start software that does not get reset on morphological change ###
 # Start ROS
