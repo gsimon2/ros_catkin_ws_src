@@ -43,23 +43,37 @@
     <limit effort="0" lower="0" upper="0" velocity="0"/>
   </joint>
 
-  <link name="chassis">
+    <link name="chassis">
     <inertial>
       <mass value="800.0"/>
       <origin rpy="0 0 0" xyz="0.02 0.0 0.08"/>
       <inertia ixx="140" ixy="0.0" ixz="0.0" iyy="550" iyz="0.0" izz="550"/>
     </inertial>
-    <collision name="chassis_bottom">
-      <origin rpy="0 0 0" xyz=" 0.04 0.0 0.067"/>
+   <collision name="chassis_collision">
+		
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
       <geometry>
-        <box size="0.268 0.2 0.012"/>
+        <box size="0.65 0.2 0.02"/>
       </geometry>
     </collision>
     <visual name="visual">
+		
+      
+      <!-- Use this for visual of the collision area of the chasis -->
+      <!--
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
+      <geometry>
+        <box size="0.65 0.2 0.02"/>
+      </geometry>
+      -->
+      
+      <!-- Erle Rover Chassis -->
       <origin rpy="-1.5708 0 3.1416" xyz="0.04 0.392 0.052"/>
       <geometry>
         <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_chassis.STL" scale="0.0011 0.0011 0.0011"/>
       </geometry>
+      
+      
     </visual>
   </link>
   <link name="front_left_wheel">
@@ -338,6 +352,20 @@
  </xacro:generic_camera>
 
 
+<!-- Contact sensor on the chassis of the rover -->
+<gazebo reference="chassis">
+    <sensor name="chassis_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>chassis_collision_collision</collision>
+      </contact>
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_contact_sensor_state</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
 
 <!-- ADD SENSORS HERE -->
 	

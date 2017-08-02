@@ -25,6 +25,7 @@ from argparse import RawTextHelpFormatter
 from sensor_msgs.msg import LaserScan
 from gazebo_msgs.srv import GetWorldProperties
 from std_srvs.srv import Empty
+from gazebo_msgs.msg import ContactsState
 
 max_sim_time = 240
 
@@ -114,7 +115,7 @@ def software_ready_callback(data):
 	sim_result_pub.publish(time_fitness)
 	
 
-
+# Old lidar based method of detecting a collision
 def scan_callback(data):
 	global simulation_end
 	
@@ -123,6 +124,20 @@ def scan_callback(data):
 			if current_range < collision_distance:
 				print('Collision detected!')
 				simulation_end = True
+
+				
+def contact_test(contacts):
+	global simulation_end
+	
+	if rospy.get_param('simulation_running') is True:
+		# Check for contact states
+		#	If none, pass
+		#	If any contact, mark a collision
+		if not contacts.states:
+			pass
+		else:
+			print('Collision detected!')
+			simulation_end = True
 
 
 def regions_callback(msg):
@@ -173,7 +188,8 @@ rospy.set_param('percent_complete', 0)
 eval_start_pub = rospy.Publisher('evaluation_start', std_msgs.msg.Empty, queue_size=1)
 sim_result_pub = rospy.Publisher('evaluation_result', std_msgs.msg.Float64, queue_size=1)
 sim_start_sub = rospy.Subscriber('software_ready', std_msgs.msg.Empty, software_ready_callback)
-scan_sub = rospy.Subscriber("/scan", LaserScan,scan_callback)
+#scan_sub = rospy.Subscriber("/scan", LaserScan,scan_callback)
+contact_sensor_sub = rospy.Subscriber("/chassis_contact_sensor_state", ContactsState,contact_test)
 region_sub = rospy.Subscriber('ros_regions', std_msgs.msg.String, regions_callback, queue_size=1)
 print("Done!")
 rospy.spin()

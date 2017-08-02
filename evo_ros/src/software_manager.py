@@ -61,7 +61,13 @@ GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 
 
+mavproxy_cmd_str = ''
 
+
+### 
+def vehicle_software_config(vehicle):
+	pass
+	
 ### Simulation Result Callback ###
 ### 	Collect received sim result data and store it in global var
 def sim_result_callback(data):
@@ -273,6 +279,7 @@ parser.add_argument('--less_wait',action='store_true',help='Minimize the sleep t
 parser.add_argument('-sp', '--ga_send_port', type=int, help='Port number that the GA is sending the genomes on')
 parser.add_argument('-rp' , '--ga_recv_port', type=int, help='Port number that the GA is receiving the results on')
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
+parser.add_argument('-v', '--vehicle', type=str, help='Type of vehicle being used \n\t Accepts: \'rover\' and \'copter\'')
 
 args= parser.parse_args()
 
