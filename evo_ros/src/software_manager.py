@@ -30,7 +30,6 @@ from argparse import RawTextHelpFormatter
 
 
 last_physical_genome = []
-recv_first_msg = False
 
 evaluation_result = ''
 
@@ -114,11 +113,9 @@ def vehicle_software_config(vehicle):
 		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
 	elif VEHICLE == 'copter':
 		print('Copter software not configured yet!')
-		#rospy.signal_shutdown('Invalid vehicle selection')
 		sys.exit()
 	else:
 		print('Invalid vehicle selection! Please use the --help option for more info.')
-		#rospy.signal_shutdown('Invalid vehicle selection')
 		sys.exit()
 	
 	
@@ -264,7 +261,7 @@ def sim_start_callback(recv_data):
 	global GENERATION
 	
 	#Get genome data
-	data = rospy.get_param('rover_genome')
+	data = rospy.get_param('vehicle_genome')
 	print('Received genome data!')
 	
 	# Check for ending msg
@@ -329,7 +326,6 @@ if args.launch_file is not None:
 
 if args.multiple_worlds:
 	print("Multiple worlds option selected")
-	#global LAUNCH_FILE
 	LAUNCH_FILE = pick_new_launch()
 	
 if args.graphics:

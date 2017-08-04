@@ -97,7 +97,7 @@ while True:
 	print('Transporter: Received: {}'.format(data))
 			
 	# Load the data into a parameter in ROS
-	rospy.set_param('rover_genome', data)
+	rospy.set_param('vehicle_genome', data)
 	
 	
 	# Send a ready message on the sim_start topic

@@ -266,7 +266,7 @@ def eval_start_callback(data):
 	print("Starting evaluation")
 	
 	#Get genome data
-	ind_data = rospy.get_param('rover_genome')
+	ind_data = rospy.get_param('vehicle_genome')
 	genome_data = ind_data['genome'] 
 	
 	#Parse genome received from GA
