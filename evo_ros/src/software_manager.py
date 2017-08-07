@@ -24,8 +24,10 @@ import sys
 
 import std_msgs.msg
 
-from add_sensor_functions import add_lidar
+from add_sensor_functions import add_lidar_rover
 from add_sensor_functions import copy_base_rover_file
+from add_sensor_functions import add_lidar_copter
+from add_sensor_functions import copy_base_copter_file
 from argparse import RawTextHelpFormatter
 
 
@@ -112,8 +114,25 @@ def vehicle_software_config(vehicle):
 		CONTROLLER_SCRIPT = 'rover_controller.py'
 		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
 	elif VEHICLE == 'copter':
+		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
+			cd ~/simulation/ardupilot/ArduCopter;
+			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/Erle-Copter.param\";
+			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
+		
+		ARDUPILOT_EXE = 'ArduCopter.elf'
+		
+		LAUNCH_FILE = 'erlecopter_spawn.launch'
+		LAUNCH_FILE_PACKAGE = 'copter_ga'
+		
+		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
+		SIM_MANAGER_PACKAGE = 'evo-ros'
+		
+		CONTROLLER_SCRIPT = 'copter_controller.py'
+		CONTROLLER_SCRIPT_PACKAGE = 'copter-GA'
+		
+
 		print('Copter software not configured yet!')
-		sys.exit()
+		#sys.exit()
 	else:
 		print('Invalid vehicle selection! Please use the --help option for more info.')
 		sys.exit()
@@ -189,16 +208,36 @@ def software_setup(data):
 	# Get host name of machine #
 	str_host_name = socket.gethostname()
 
-	#Create a copy of the base rover file for this instance
-	str_rover_file = copy_base_rover_file(str_host_name)
-	
-	#Build rover sensors based off recveived genome
-	for genome_trait in data['genome']['physical']:
-		print('{}\n'.format(genome_trait))
-		if 'lidar' in genome_trait['sensor']:
-			print("Adding a lidar sensor to the rover")
-			#Add sensors based off genome
-			add_lidar(str_rover_file, genome_trait['pos'], genome_trait['orient'])
+	### Set up vehicle URDF files ###
+	###		First make a copy of the base_vehicle URDF file with the name
+	###			of the local machine appending to it
+	###		Second open the URDF file and add any sensors that are defined
+	###			in the recv'd vehicle genome
+	if VEHICLE == 'rover':
+		#Create a copy of the base rover file for this instance
+		str_vehicle_file = copy_base_rover_file(str_host_name)
+		
+		#Build rover sensors based off recveived genome
+		for genome_trait in data['genome']['physical']:
+			print('{}\n'.format(genome_trait))
+			if 'lidar' in genome_trait['sensor']:
+				print("Adding a lidar sensor to the rover")
+				#Add sensors based off genome
+				add_lidar_rover(str_vehicle_file, genome_trait['pos'], genome_trait['orient'])
+	elif VEHICLE == 'copter':
+		#Create a copy of the base rover file for this instance
+		str_vehicle_file = copy_base_copter_file(str_host_name)
+		
+		#Build copter sensors based off recveived genome
+		for genome_trait in data['genome']['physical']:
+			print('{}\n'.format(genome_trait))
+			if 'lidar' in genome_trait['sensor']:
+				print("Adding a lidar sensor to the copter")
+				#Add sensors based off genome
+				add_lidar_copter(str_vehicle_file, genome_trait['pos'], genome_trait['orient'])
+	else:
+		print('Invalid vehicle selection during the set up vehicle URDF file section!')
+		sys.exit()
 
 	time.sleep(1)
 	
@@ -221,7 +260,7 @@ def software_setup(data):
 	time.sleep(4)
 	
 	# Run launch file
-	launch_file_cmd_str = 'roslaunch {} {} model:={} gui:={} headless:={}'.format(LAUNCH_FILE_PACKAGE, LAUNCH_FILE, str_rover_file, GUI, HEADLESS)
+	launch_file_cmd_str = 'roslaunch {} {} model:={} gui:={} headless:={}'.format(LAUNCH_FILE_PACKAGE, LAUNCH_FILE, str_vehicle_file, GUI, HEADLESS)
 	if args.debug:
 		os.system("xterm -hold -e '{}'&".format(launch_file_cmd_str))
 	else:
