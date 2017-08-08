@@ -124,11 +124,13 @@ def vehicle_software_config(vehicle):
 		LAUNCH_FILE = 'erlecopter_spawn.launch'
 		LAUNCH_FILE_PACKAGE = 'copter_ga'
 		
-		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
-		SIM_MANAGER_PACKAGE = 'evo-ros'
+		#SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
+		SIM_MANAGER_SCRIPT = ''
+		#SIM_MANAGER_PACKAGE = 'evo-ros'
 		
-		CONTROLLER_SCRIPT = 'copter_controller.py'
-		CONTROLLER_SCRIPT_PACKAGE = 'copter-GA'
+		CONTROLLER_SCRIPT = 'copter_controller_ga.py'
+		#CONTROLLER_SCRIPT = ''
+		CONTROLLER_SCRIPT_PACKAGE = 'copter_ga'
 		
 
 		print('Copter software not configured yet!')
@@ -235,6 +237,11 @@ def software_setup(data):
 				print("Adding a lidar sensor to the copter")
 				#Add sensors based off genome
 				add_lidar_copter(str_vehicle_file, genome_trait['pos'], genome_trait['orient'])
+		
+		# Pass a null value for the model to the launch file which causes the default specifed to be used
+		#	For the copter this is a model with a Gazebo wrapper which will open the file we modified in the
+		# 	above functions
+		str_vehicle_file = ""
 	else:
 		print('Invalid vehicle selection during the set up vehicle URDF file section!')
 		sys.exit()
@@ -269,18 +276,20 @@ def software_setup(data):
 	time.sleep(1)
 			
 	# Start Sim manager node
-	sim_manager_cmd_str = "rosrun {} {}".format(SIM_MANAGER_PACKAGE, SIM_MANAGER_SCRIPT)
-	if args.debug:
-		os.system("xterm -hold -e '{}'&".format(sim_manager_cmd_str))
-	else:
-		sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
-		
+	if SIM_MANAGER_SCRIPT is not '':
+		sim_manager_cmd_str = "rosrun {} {}".format(SIM_MANAGER_PACKAGE, SIM_MANAGER_SCRIPT)
+		if args.debug:
+			os.system("xterm -hold -e '{}'&".format(sim_manager_cmd_str))
+		else:
+			sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
+			
 	#Start controller script
-	controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
-	if args.debug:
-		os.system("xterm -hold -e '{}'&".format(controller_cmd_str))
-	else:
-		controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
+	if CONTROLLER_SCRIPT is not '':
+		controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
+		if args.debug:
+			os.system("xterm -hold -e '{}'&".format(controller_cmd_str))
+		else:
+			controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	#Give time for everything to start up
 	if args.less_wait:

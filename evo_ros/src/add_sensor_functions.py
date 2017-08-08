@@ -71,7 +71,9 @@ def add_lidar_rover(str_rover_file, pos = [0,0,0.4], orient = [0,0,0]):
 # 	param - str_host_name - string of the name of the host computer
 #	returns - str_copter_file - string of the complete path for the new file
 def copy_base_copter_file(str_host_name):
-	str_copter_file_name = str_host_name + '_erlecopter.xacro' #New file name = This computers name + '_erlecopter.xacro'
+	#str_copter_file_name = str_host_name + '_erlecopter.xacro' #New file name = This computers name + '_erlecopter.xacro'
+	
+	str_copter_file_name = 'evo_ros_erlecopter.xacro'
 	str_user_home_dir = 'locate ~ --limit 1'
 	str_user_home_dir = subprocess.check_output(str_user_home_dir,stderr=subprocess.STDOUT,shell=True) #gets the home directory of the current user
 		#needs this if multiple users on the same machine have the ros_catkin directory

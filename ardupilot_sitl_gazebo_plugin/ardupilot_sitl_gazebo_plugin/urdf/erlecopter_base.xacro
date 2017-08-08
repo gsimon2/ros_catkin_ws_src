@@ -3,7 +3,7 @@
 <robot name="erlecopter" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate erlecopter "mechanics" -->
-  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/erlecopter.xacro" />
+  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/evo_ros_erlecopter.xacro" />
   
   <!-- Specify reference parameters for GNSS receiver. -->
   <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/gps_home_location.xacro" />

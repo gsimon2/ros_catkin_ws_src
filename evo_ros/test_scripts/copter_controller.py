@@ -80,39 +80,38 @@ def download_mission():
 
 
 def adds_square_mission(aLocation, aSize):
-    """
-    Adds a takeoff command and four waypoint commands to the current mission. 
-    The waypoints are positioned to form a square of side length 2*aSize around the specified LocationGlobal (aLocation).
-
-    The function assumes vehicle.commands matches the vehicle mission state 
-    (you must have called download at least once in the session and after clearing the mission)
-    """	
-
-    cmds = vehicle.commands
-
-    print " Clear any existing commands"
-    cmds.clear() 
-    
-    print " Define/add new commands."
-    # Add new commands. The meaning/order of the parameters is documented in the Command class. 
-     
-    #Add MAV_CMD_NAV_TAKEOFF command. This is ignored if the vehicle is already in the air.
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 2))
-
-    #Define the four MAV_CMD_NAV_WAYPOINT locations and add the commands
-    point1 = get_location_metres(aLocation, aSize, -aSize)
-    point2 = get_location_metres(aLocation, aSize, aSize)
-    point3 = get_location_metres(aLocation, -aSize, aSize)
-    point4 = get_location_metres(aLocation, -aSize, -aSize)
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point1.lat, point1.lon, 2))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point2.lat, point2.lon, 2))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point3.lat, point3.lon, 2))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 2))
-    #add dummy waypoint "5" at point 4 (lets us know when have reached destination)
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 2))    
-
-    print " Upload new commands to vehicle"
-    cmds.upload()
+	"""
+	Adds a takeoff command and four waypoint commands to the current mission. 
+	The waypoints are positioned to form a square of side length 2*aSize around the specified LocationGlobal (aLocation).
+	
+	The function assumes vehicle.commands matches the vehicle mission state 
+	(you must have called download at least once in the session and after clearing the mission)
+	"""	
+	
+	cmds = vehicle.commands
+	
+	print " Clear any existing commands"
+	cmds.clear() 
+	
+	print " Define/add new commands."
+	# Add new commands. The meaning/order of the parameters is documented in the Command class. 
+	 
+	#Add MAV_CMD_NAV_TAKEOFF command. This is ignored if the vehicle is already in the air.
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 0, 5))
+	
+	#Define the four MAV_CMD_NAV_WAYPOINT locations and add the commands
+	point1 = get_location_metres(aLocation, aSize, -aSize)
+	point2 = get_location_metres(aLocation, aSize, aSize)
+	point3 = get_location_metres(aLocation, -aSize, aSize)
+	point4 = get_location_metres(aLocation, -aSize, -aSize)
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point1.lat, point1.lon, 5))
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point2.lat, point2.lon, 5))
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point3.lat, point3.lon, 5))
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point4.lat, point4.lon, 5))
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point1.lat, point1.lon, 5))    
+	cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, point1.lat, point1.lon, 5))  
+	print " Upload new commands to vehicle"
+	cmds.upload()
 
 
 def arm_and_takeoff(aTargetAltitude):
@@ -148,13 +147,33 @@ def arm_and_takeoff(aTargetAltitude):
             break
         time.sleep(1)
 
+
+
+def is_vehicle_home():
+	global vehicle
+	
+	bool_home = True
+	if round(vehicle.home_location.lat,4) != round(vehicle.location.global_frame.lat,4):
+		bool_home = False
+	else:
+		print('lat locked')
+	if round(vehicle.home_location.lon,4) != round(vehicle.location.global_frame.lon,4):
+		bool_home = False
+	else:
+		print('lon locked')
+	if round(vehicle.home_location.alt,3) != round(vehicle.location.global_frame.alt/1000,3):
+		bool_home = False
+	else:
+		print('alt locked')
+	return bool_home
+
         
 print 'Create a new mission (for current location)'
-adds_square_mission(vehicle.location.global_frame,50)
+adds_square_mission(vehicle.location.global_frame,5)
 
 
 # From Copter 3.3 you will be able to take off using a mission item. Plane must take off using a mission item (currently).
-arm_and_takeoff(2)
+arm_and_takeoff(5)
 
 print "Starting mission"
 # Reset mission set to first (0) waypoint
@@ -169,21 +188,20 @@ vehicle.mode = VehicleMode("AUTO")
 # Uses distance_to_current_waypoint(), a convenience function for finding the 
 #   distance to the next waypoint.
 
-while True:
-    nextwaypoint=vehicle.commands.next
-    print 'Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint())
-  
-    if nextwaypoint==3: #Skip to next waypoint
-        print 'Skipping to Waypoint 5 when reach waypoint 3'
-        vehicle.commands.next = 5
-    if nextwaypoint==5: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
-        print "Exit 'standard' mission when start heading to final waypoint (5)"
-        break;
-    time.sleep(1)
+while not is_vehicle_home():
+	nextwaypoint=vehicle.commands.next
+	if nextwaypoint==6:
+		print 'Returning to launch'
+		vehicle.mode = VehicleMode("RTL")	
+	else:
+		print 'Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint())
+	time.sleep(1)
 
-print 'Return to launch'
-vehicle.mode = VehicleMode("RTL")
+print('mission complete!')
 
+vehicle.mode = VehicleMode("STABILIZE")
+time.sleep(4)
+vehicle.armed = False
 
 #Close vehicle object before exiting script
 print "Close vehicle object"
