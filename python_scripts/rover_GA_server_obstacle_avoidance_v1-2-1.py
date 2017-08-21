@@ -30,8 +30,11 @@ GA_RECV_PORT = 5010
 #Log file name
 log_file_name = 'log.txt'
 
+# Max wait time on evaluation collection socket before we resend genomes
+MAX_WAIT_TIME = 5 * 60 * 1000 # In miliseconds
+
 # How large the population size is for each generation
-POP_SIZE = 5
+POP_SIZE = 3
 
 # How many generations is this experiment going to run for
 GEN_COUNT = 5
@@ -252,6 +255,25 @@ class GA(object):
 		return self.genomes
 
 
+
+def resend(genomes, socket, return_data):
+	print('Resending!')
+	
+	#load any genomes that have not had results collected from them into a list
+	uncollected_ind = []
+	for ind in genomes:
+		if not any(return_ind['id'] == ind['id'] for return_ind in return_data):
+			uncollected_ind.append(ind)
+	
+	print('Uncollected indvidiuals:')
+	for ind in uncollected_ind:
+		print(ind['id'])
+	
+	# Load resend genomes that have not had results collected for them yet
+	sendThread = SenderThread(1, socket, uncollected_ind)
+	sendThread.start()
+	sendThread.join()
+
 # Set up arg parser
 parser = argparse.ArgumentParser(description='Test set up for a GA to use the rover simulation framework. Creates genomes and sends them over a TCP socket, then waits for responses from evaluation workers')
 parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal')
@@ -308,7 +330,10 @@ socket.bind('tcp://{}:{}'.format(GA_IP_ADDR, GA_SEND_PORT))
 receiver = context.socket(zmq.PULL)
 receiver.bind('tcp://{}:{}'.format(GA_IP_ADDR, GA_RECV_PORT))
 
-		
+# Setup ZMQ poller
+poller = zmq.Poller()
+poller.register(receiver, zmq.POLLIN)
+
 		
 print("Press Enter when the workers are ready: ")
 _ = raw_input()
@@ -322,6 +347,10 @@ for i in range(GEN_COUNT):
 	CURRENT_GEN = i
 	
 	genomes = ga.get_pop()
+	
+	#print('Sending out IDs:')
+	#for ind in genomes:
+	#	print('\t {}'.format(ind['id']))
 	return_data = []
 	
 	# Start a thread to send the data.
@@ -332,13 +361,48 @@ for i in range(GEN_COUNT):
 	# Wait for the send thread to complete.
 	sendThread.join()
 	
-	j = len(genomes)
-	while j > 0:
-		data = json.loads(receiver.recv())
-		return_data.append({'id':data['id'], 'fitness':data['fitness']})
-		j -= 1
-		print('{}/{} genomes recv\'d. Result: {} \n\t Tested on: {}'.format(len(genomes) - j, len(genomes), data['fitness'], data['ns']))
-		
+	num_unevaluated_ind = len(genomes)
+	while num_unevaluated_ind > 0:
+		try:
+			print('Waiting for data')
+			socks = dict(poller.poll(MAX_WAIT_TIME))
+			if socks:
+				if socks.get(receiver) == zmq.POLLIN:
+					data = json.loads(receiver.recv(zmq.NOBLOCK))
+			else:
+				print('Timeout on receiver socket occured!')
+				resend(genomes, socket, return_data)
+				continue
+			
+			# Check if data for the recv'd ind is already in returned data
+			#	This can happen if we have to resend out data mid generation
+			if any(return_ind['id'] == data['id'] for return_ind in return_data):
+				print('Recv\'d multiple results for ID: {}'.format(data['id']))
+			
+			# New data so store it in the returned data
+			else:
+				#check to make sure collected result is from this generation
+				if any(ind['id'] == data['id'] for ind in genomes):
+					return_data.append({'id':data['id'], 'fitness':data['fitness']})
+					num_unevaluated_ind -= 1
+					print('{}/{} genomes recv\'d. ID: {} Result: {} \n\t Tested on: {}'.format(len(genomes) - num_unevaluated_ind, len(genomes), data['id'], data['fitness'], data['ns']))
+				else:
+					print('Recv\'d result from previous generation')
+				
+		#if results are not being collected send out any individuals from generation that have not been evaluated yet
+		except KeyboardInterrupt:
+			user_input = raw_input("\nEnter 'r' to resend uncollected individuals or enter anything else to quit: ")
+			if user_input is 'r':
+				resend(genomes, socket, return_data)
+			else:
+				#Tear down evo-ros framework
+				sendThread = SenderThread(1, socket, '')
+				sendThread.send_tear_down_msg()
+				sendThread.start()
+				#sendThread.join()
+				sys.exit()
+	
+	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
 	ga.next_generation()
