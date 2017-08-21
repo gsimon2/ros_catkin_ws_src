@@ -29,6 +29,8 @@ GA_SEND_PORT = 5000
 GA_RECV_PORT = 5010
 GA_IP_ADDR = '127.0.0.1'
 
+# Max wait time on evaluation collection socket before we resend genomes
+MAX_WAIT_TIME = 5 * 60 * 1000 # In miliseconds
 
 ### Callback function for the simulation_result topic ###
 ### 	Receives data and loads it into the global evaluation_ressult var ###
@@ -72,6 +74,10 @@ sender = context.socket(zmq.PUSH)
 sender.connect(send_addr_str)
 print("GA is running at IP: {} \n Sending port: {} \n Receiving port: {} \n".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT))
 
+# Setup ZMQ poller
+poller = zmq.Poller()
+poller.register(receiver, zmq.POLLIN)
+
 
 
 ### Setup the ROS topics for communicating with connected nodes. ###
@@ -93,12 +99,21 @@ while True:
 	
 	# Receive data from GA
 	print('Waiting for data from GA...')
-	data = json.loads(receiver.recv())
+	
+	socks = dict(poller.poll(MAX_WAIT_TIME))
+	if socks:
+		if socks.get(receiver) == zmq.POLLIN:
+			data = json.loads(receiver.recv(zmq.NOBLOCK))
+	else:
+		print('Timeout on receiver socket occured!')
+		continue
+	
 	print('Transporter: Received: {}'.format(data))
 			
 	# Load the data into a parameter in ROS
 	rospy.set_param('vehicle_genome', data)
 	
+	time.sleep(1)
 	
 	# Send a ready message on the sim_start topic
 	pub.publish(std_msgs.msg.Empty())

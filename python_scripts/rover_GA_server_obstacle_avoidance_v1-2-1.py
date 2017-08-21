@@ -31,7 +31,7 @@ GA_RECV_PORT = 5010
 log_file_name = 'log.txt'
 
 # Max wait time on evaluation collection socket before we resend genomes
-MAX_WAIT_TIME = 5 * 60 * 1000 # In miliseconds
+MAX_WAIT_TIME = 7 * 60 * 1000 # In miliseconds
 
 # How large the population size is for each generation
 POP_SIZE = 3
@@ -396,9 +396,9 @@ for i in range(GEN_COUNT):
 				resend(genomes, socket, return_data)
 			else:
 				#Tear down evo-ros framework
-				sendThread = SenderThread(1, socket, '')
-				sendThread.send_tear_down_msg()
-				sendThread.start()
+				#sendThread = SenderThread(1, socket, '')
+				#sendThread.send_tear_down_msg()
+				#sendThread.start()
 				#sendThread.join()
 				sys.exit()
 	
