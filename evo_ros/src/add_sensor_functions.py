@@ -52,7 +52,7 @@ def add_lidar_rover(str_rover_file, pos = [0,0,0.4], orient = [0,0,0]):
 	update_rate="10"
 	min_range="0.06"
 	max_range="20.0"
-	field_of_view_horizontal="${{180*M_PI/180}}"
+	field_of_view_horizontal="${{270*M_PI/180}}"
 	field_of_view_vertical="${{1*M_PI/180}}"
 	ray_count_horizontal="542"
 	ray_count_vertical="1"
