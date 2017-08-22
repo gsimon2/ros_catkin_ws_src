@@ -105,14 +105,18 @@ def vehicle_software_config(vehicle):
 			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
 		ARDUPILOT_EXE = 'APMrover2.elf'
 		
-		LAUNCH_FILE = 'maze_1.launch'
+		#LAUNCH_FILE = 'maze_1.launch'
+		LAUNCH_FILE = 'mission.launch'
 		LAUNCH_FILE_PACKAGE = 'rover_ga'
 		
 		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
 		SIM_MANAGER_PACKAGE = 'evo-ros'
 		
-		CONTROLLER_SCRIPT = 'rover_controller.py'
-		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
+		#CONTROLLER_SCRIPT = 'rover_controller.py'
+		#CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
+		CONTROLLER_SCRIPT = 'ga_dronekit_controller.py'
+		CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
+		
 	elif VEHICLE == 'copter':
 		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
 			cd ~/simulation/ardupilot/ArduCopter;
@@ -404,18 +408,20 @@ time.sleep(1)
 
 # If debugging open transporter in a seperate terminal window
 #	Otherwise open is as a subprocess
+"""
 if args.debug:
 	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
 	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
 else:
 	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
 	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
-
-	
+"""
+cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
 
 # Set up ROS subscribers and publishers
 rospy.init_node('software_manager',anonymous=False)
-software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=1)
+software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=5)
 sim_result_sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
 sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, sim_start_callback)
 

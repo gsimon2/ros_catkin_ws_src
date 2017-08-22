@@ -82,7 +82,7 @@ poller.register(receiver, zmq.POLLIN)
 
 ### Setup the ROS topics for communicating with connected nodes. ###
 rospy.init_node('transporter',anonymous=False)
-pub = rospy.Publisher('received_genome', std_msgs.msg.Empty, queue_size=1)
+pub = rospy.Publisher('received_genome', std_msgs.msg.Empty, queue_size=5)
 sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
 print("Ros transport node and simulation start/result topics have been initialized")
 
