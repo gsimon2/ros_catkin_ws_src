@@ -31,7 +31,7 @@ while current_vm <= number_of_vms_on_machine:
 	os.system(cmd_str)
 	
 	#Start Transporter
-	cmds = """echo {}...;
+	cmds = """echo Transporter.py...;
 		cd;
 		source /opt/ros/indigo/setup.bash;
 		source ~/simulation/ros_catkin_ws/devel/setup.bash;
