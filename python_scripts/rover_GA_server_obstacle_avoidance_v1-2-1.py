@@ -20,7 +20,7 @@ from GA_operators import single_point_crossover
 
 random.seed(datetime.datetime.now())
 
-Num_evaluation_workers = 1
+Num_evaluation_workers = 7
 
 GA_IP_ADDR = '' #This can be provided as a command line argument, otherwise
 				# the it defaults to the computers IP address
@@ -34,10 +34,10 @@ log_file_name = 'log.txt'
 MAX_WAIT_TIME = 7 * 60 * 1000 # In miliseconds
 
 # How large the population size is for each generation
-POP_SIZE = 3
+POP_SIZE = 30
 
 # How many generations is this experiment going to run for
-GEN_COUNT = 5
+GEN_COUNT = 30
 
 # Reports the current generation
 CURRENT_GEN = 0
