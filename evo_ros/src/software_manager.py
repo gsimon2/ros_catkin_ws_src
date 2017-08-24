@@ -408,16 +408,15 @@ time.sleep(1)
 
 # If debugging open transporter in a seperate terminal window
 #	Otherwise open is as a subprocess
-"""
-if args.debug:
-	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
-	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
-else:
-	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
-	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
-"""
-cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
-os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
+
+#if args.debug:
+#	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+#	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
+#else:
+#	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+#	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+
+	
 
 # Set up ROS subscribers and publishers
 rospy.init_node('software_manager',anonymous=False)
@@ -427,6 +426,7 @@ sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, sim_star
 
 
 rospy.on_shutdown(shutdown_hook)
+print('Everything is set up waiting for data from GA')
 rospy.spin()
 
 
