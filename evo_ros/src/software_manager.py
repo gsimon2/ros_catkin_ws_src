@@ -110,10 +110,10 @@ def vehicle_software_config(vehicle):
 		LAUNCH_FILE_PACKAGE = 'rover_ga'
 		
 		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
-		SIM_MANAGER_PACKAGE = 'evo-ros'
+		SIM_MANAGER_PACKAGE = 'evo_ros'
 		
-		CONTROLLER_SCRIPT = 'rover_controller.py'
-		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
+		CONTROLLER_SCRIPT = 'rover_controller_GA.py'
+		CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
 		#CONTROLLER_SCRIPT = 'ga_dronekit_controller.py'
 		#CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
 		#CONTROLLER_SCRIPT = 'basic_obstacle_avoidance_controller.py'
@@ -131,7 +131,7 @@ def vehicle_software_config(vehicle):
 		
 		#SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
 		SIM_MANAGER_SCRIPT = ''
-		#SIM_MANAGER_PACKAGE = 'evo-ros'
+		#SIM_MANAGER_PACKAGE = 'evo_ros'
 		
 		CONTROLLER_SCRIPT = 'copter_controller_ga.py'
 		#CONTROLLER_SCRIPT = ''
@@ -410,10 +410,10 @@ time.sleep(1)
 # If debugging open transporter in a seperate terminal window
 #	Otherwise open is as a subprocess
 if args.debug:
-	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo_ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
 	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
 else:
-	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+	cmd_str = "rosrun evo_ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
 	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	

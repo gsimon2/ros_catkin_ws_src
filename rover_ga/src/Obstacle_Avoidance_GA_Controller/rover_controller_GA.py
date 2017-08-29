@@ -35,8 +35,8 @@ obstacle_avoidance_commands = ''
 ###			-Obstacle avoidance
 ###			-Map navigation (in testing)
 def start_lower_level_controllers():
-	os.system("rosrun evo-ros obstacle_avoidance.py")
-	os.system("rosrun evo-ros map_navigation.py")
+	os.system("rosrun rover_ga obstacle_avoidance_GA.py")
+	os.system("rosrun rover_ga map_navigation_GA.py")
 
 ### Shutdown Hook ###
 ### 	This is the last function executed before the script exits 
