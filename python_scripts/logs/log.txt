@@ -1,6 +1,6 @@
 *****Rover GA expirement*****
-Date:2017-08-08 15:35:41.047421
-Population size:5
+Date:2017-08-29 11:20:45.195565
+Population size:3
 Generation Count:5
 Mutation Probability:0.2
 Cross Over Probability:0.35

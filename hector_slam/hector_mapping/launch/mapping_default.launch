@@ -2,8 +2,8 @@
 
 <launch>
   <arg name="tf_map_scanmatch_transform_frame_name" default="scanmatcher_frame"/>
-  <arg name="base_frame" default="sonar2_link"/>
-  <arg name="odom_frame" default="sonar2_link"/>
+  <arg name="base_frame" default="lidar1_link"/>
+  <arg name="odom_frame" default="lidar1_link"/>
   <arg name="pub_map_odom_transform" default="true"/>
   <arg name="scan_subscriber_queue_size" default="5"/>
   <arg name="scan_topic" default="scan"/>
@@ -29,10 +29,10 @@
     <param name="map_multi_res_levels" value="2" />
     
     <!-- Map update parameters -->
-    <param name="update_factor_free" value="0.4"/>
-    <param name="update_factor_occupied" value="0.9" />    
-    <param name="map_update_distance_thresh" value="0.4"/>
-    <param name="map_update_angle_thresh" value="0.06" />
+    <param name="update_factor_free" value="0.4"/> <!-- 0.4 -->
+    <param name="update_factor_occupied" value="0.9" /> <!-- 0.9 -->   
+    <param name="map_update_distance_thresh" value="0.4"/> <!-- 0.4 -->
+    <param name="map_update_angle_thresh" value="0.06" /> <!-- 0.06 -->
     <param name="laser_z_min_value" value = "-1.0" />
     <param name="laser_z_max_value" value = "1.0" />
     
@@ -52,6 +52,7 @@
   </node>
     
   <!--<node pkg="tf" type="static_transform_publisher" name="map_nav_broadcaster" args="0 0 0 0 0 0 map nav 100"/>-->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="map_scanmatcher_broadcaster" args="0 0 0 0 0 0 map scanmatcher_frame 5"/> -->
 </launch>
   
   

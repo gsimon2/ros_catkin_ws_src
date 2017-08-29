@@ -116,6 +116,7 @@ def vehicle_software_config(vehicle):
 		CONTROLLER_SCRIPT_PACKAGE = 'evo-ros'
 		#CONTROLLER_SCRIPT = 'ga_dronekit_controller.py'
 		#CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
+		#CONTROLLER_SCRIPT = 'basic_obstacle_avoidance_controller.py'
 		
 	elif VEHICLE == 'copter':
 		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
@@ -305,9 +306,9 @@ def software_setup(data):
 			time.sleep(30)
 	
 	
-### Simulation Start Callback ###
+### received_genome Callback ###
 ###
-def sim_start_callback(recv_data):
+def received_genome_callback(recv_data):
 	global LAUNCH_FILE
 	global last_physical_genome
 	global GENERATION
@@ -408,13 +409,12 @@ time.sleep(1)
 
 # If debugging open transporter in a seperate terminal window
 #	Otherwise open is as a subprocess
-
-#if args.debug:
-#	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
-#	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
-#else:
-#	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
-#	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+if args.debug:
+	cmd_str = "bash -c \"source ~/.bashrc; rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}\"".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+	os.system("gnome-terminal --title 'Transporter' -e '{}'&".format(cmd_str))
+else:
+	cmd_str = "rosrun evo-ros transporter.py -ip '{}' -sp {} -rp {}".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT)
+	transporter = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	
 
@@ -422,7 +422,7 @@ time.sleep(1)
 rospy.init_node('software_manager',anonymous=False)
 software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=5)
 sim_result_sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
-sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, sim_start_callback)
+sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, received_genome_callback)
 
 
 rospy.on_shutdown(shutdown_hook)

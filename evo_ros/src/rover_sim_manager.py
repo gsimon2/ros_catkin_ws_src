@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Sim Manager
+# Rover Sim Manager
 #
 # Checks ending conditions of the simulation, gathers results, and 
 #	publishes them on the sim_result topic
@@ -65,6 +65,7 @@ def software_ready_callback(data):
 	# Send a ready message on the evaluation start topic to let controller
 	#	know that the simulation enviroment is ready
 	rospy.set_param('simulation_running', True)
+	rospy.set_param('collison_detected', False)
 	eval_start_pub.publish(std_msgs.msg.Empty())
 
 
@@ -84,6 +85,11 @@ def software_ready_callback(data):
 			print("Simulation timed out.")
 			simulation_end = True
 			sim_timeout = True
+			
+		if rospy.get_param('mission_success') is True:
+			percent_complete = 100
+			simulation_end = True
+			
 		time.sleep(0.1)
 	
 	rospy.set_param('simulation_running', False)
@@ -103,7 +109,7 @@ def software_ready_callback(data):
 			time_fitness = -1
 		
 
-	
+	time.sleep(3)
 	# Reset simulation
 	print("Attempting to reset...")
 	resetWorld()
@@ -124,6 +130,7 @@ def scan_callback(data):
 			if current_range < collision_distance:
 				print('Collision detected!')
 				simulation_end = True
+				rospy.set_param('collison_detected', True)
 
 				
 def contact_test(contacts):
@@ -184,6 +191,8 @@ resetSimulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sim_manager',anonymous=False)
 rospy.set_param('simulation_running', False)
+rospy.set_param('collison_detected', False)
+rospy.set_param('mission_success', False)
 rospy.set_param('percent_complete', 0)
 eval_start_pub = rospy.Publisher('evaluation_start', std_msgs.msg.Empty, queue_size=1)
 sim_result_pub = rospy.Publisher('evaluation_result', std_msgs.msg.Float64, queue_size=1)
