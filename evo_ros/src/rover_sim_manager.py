@@ -18,6 +18,7 @@ import socket
 import datetime
 import random
 import sys
+import yaml
 
 import std_msgs.msg
 
@@ -27,7 +28,6 @@ from gazebo_msgs.srv import GetWorldProperties
 from std_srvs.srv import Empty
 from gazebo_msgs.msg import ContactsState
 
-max_sim_time = 240
 
 # Percent of the maze that is complete
 percent_complete = 0
@@ -49,6 +49,7 @@ def software_ready_callback(data):
 	print("Software is ready! Starting sim....")
 	
 	global simulation_end
+	global percent_complete
 	simulation_end = False
 	time_fitness = 0
 	
@@ -81,7 +82,7 @@ def software_ready_callback(data):
 		except:
 			print('Required processes has failed. Sending reset message to software manager')
 			sim_result_pub.publish(-2)
-		if (current_time - begin_time) > max_sim_time:
+		if (current_time - begin_time) > MAX_SIM_TIME:
 			print("Simulation timed out.")
 			simulation_end = True
 			sim_timeout = True
@@ -97,11 +98,10 @@ def software_ready_callback(data):
 	# If the vehicle was able to finish successfully, give it a time bonus
 	#	Else send back a result of -1 indicating a collision
 	#	Or -2 indicating that the simulation took too long to finish sucessfully
-	global percent_complete
 	if percent_complete == 100:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
-		time_fitness = (max_sim_time - total_sim_time) / max_sim_time
+		time_fitness = (MAX_SIM_TIME - total_sim_time) / MAX_SIM_TIME
 	else:
 		if sim_timeout == True:
 			time_fitness = -2
@@ -169,8 +169,33 @@ def regions_callback(msg):
 parser = argparse.ArgumentParser(description="""
 Checks ending conditions of the simulation, gathers results, and publishes them on the sim_result topic
 	""", formatter_class=RawTextHelpFormatter)
-
+parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
+parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal, spawn subprocesses in xterm for seperated process outputs')
 args= parser.parse_args()
+
+### Start Configuration ###
+
+# Use default config file unless one is provided at command line
+config_file_name = 'default_config.yml'
+if args.config is not None:
+	config_file_name = args.config
+
+if args.debug:
+	print('Configuration file being used: \n\t {}'.format(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name)))
+
+# Open Config File
+with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
+	cfg = yaml.load(ymlfile)
+
+MAX_SIM_TIME = cfg['rover_sim_manager']['MAX_SIM_TIME']
+
+# If debugging print configuration settings to screen
+if args.debug:
+	print("""\n\tConfiguration Settings...
+		MAX_SIM_TIME: {}
+		""".format(MAX_SIM_TIME))
+
+### End Configuration ###
 
 
 ### Wait for Gazebo Services ###

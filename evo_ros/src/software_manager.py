@@ -21,6 +21,7 @@ import socket
 import datetime
 import random
 import sys
+import yaml
 
 import std_msgs.msg
 
@@ -37,113 +38,10 @@ evaluation_result = ''
 
 random.seed(datetime.datetime.now())
 
-# Default GUI state for running Gazebo
-#	Note: Headless and GUI should always be opposite of each other
-HEADLESS = 'true'
-GUI = 'false'
-
 # The current generation of genomes that is being evaluated
 GENERATION = 0
 
-# IP address that external GA is running at
-GA_IP_ADDR = '127.0.0.1'
 
-# The port number that the GA is sending genomes out on
-GA_SEND_PORT = 5000
-
-# The port number that the GA is collecting results on
-GA_RECV_PORT = 5010
-
-# The vehicle that is being used. Default is the erle-rover
-VEHICLE = 'rover'
-
-# Mavproxy software
-MAVPROXY_CMD_STR = ''
-ARDUPILOT_EXE = ''
-
-# Launch file being used
-LAUNCH_FILE = ''
-LAUNCH_FILE_PACKAGE = ''
-
-# Simulaton manager being used
-SIM_MANAGER_SCRIPT = ''
-SIM_MANAGER_PACKAGE = ''
-
-# Vehicle controller being used
-CONTROLLER_SCRIPT = ''
-CONTROLLER_SCRIPT_PACKAGE = ''
-
-
-### Vehicle Software Configuration ###
-###		This selects which software will be spawned for the vehicle 
-###		 passed in through command line
-###		There are 4 main components:
-###			1 - MAVProxy / Ardupilot
-###			2 - The ROS launch file
-###			3 - The simulation manager script
-###			4 - The vehicle controller script
-def vehicle_software_config(vehicle):
-	global MAVPROXY_CMD_STR
-	global ARDUPILOT_EXE
-	global LAUNCH_FILE
-	global LAUNCH_FILE_PACKAGE
-	global SIM_MANAGER_SCRIPT
-	global SIM_MANAGER_PACKAGE
-	global CONTROLLER_SCRIPT
-	global CONTROLLER_SCRIPT_PACKAGE
-
-	print('Vehcile selected: {}'.format(VEHICLE))
-	
-	if VEHICLE == 'rover':
-		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
-			cd ~/simulation/ardupilot/APMrover2;
-			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param\";
-			echo
-			echo \" (For manual control) - param set SYSID_MYGCS 255\";
-			echo
-			echo \" (For script control) - param set SYSID_MYGCS 1\";
-			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
-		ARDUPILOT_EXE = 'APMrover2.elf'
-		
-		LAUNCH_FILE = 'maze_1.launch'
-		#LAUNCH_FILE = 'mission.launch'
-		LAUNCH_FILE_PACKAGE = 'rover_ga'
-		
-		SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
-		SIM_MANAGER_PACKAGE = 'evo_ros'
-		
-		CONTROLLER_SCRIPT = 'rover_controller_GA.py'
-		CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
-		#CONTROLLER_SCRIPT = 'ga_dronekit_controller.py'
-		#CONTROLLER_SCRIPT_PACKAGE = 'rover_ga'
-		#CONTROLLER_SCRIPT = 'basic_obstacle_avoidance_controller.py'
-		
-	elif VEHICLE == 'copter':
-		MAVPROXY_CMD_STR = """source ~/simulation/ros_catkin_ws/devel/setup.bash;
-			cd ~/simulation/ardupilot/ArduCopter;
-			echo \"param load ~/simulation/ardupilot/Tools/Frame_params/Erle-Copter.param\";
-			../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo"""
-		
-		ARDUPILOT_EXE = 'ArduCopter.elf'
-		
-		LAUNCH_FILE = 'erlecopter_spawn.launch'
-		LAUNCH_FILE_PACKAGE = 'copter_ga'
-		
-		#SIM_MANAGER_SCRIPT = 'rover_sim_manager.py'
-		SIM_MANAGER_SCRIPT = ''
-		#SIM_MANAGER_PACKAGE = 'evo_ros'
-		
-		CONTROLLER_SCRIPT = 'copter_controller_ga.py'
-		#CONTROLLER_SCRIPT = ''
-		CONTROLLER_SCRIPT_PACKAGE = 'copter_ga'
-		
-
-		print('Copter software not configured yet!')
-		#sys.exit()
-	else:
-		print('Invalid vehicle selection! Please use the --help option for more info.')
-		sys.exit()
-	
 	
 ### Simulation Result Callback ###
 ### 	Collect received sim result data and store it in global var
@@ -220,7 +118,7 @@ def software_setup(data):
 	###			of the local machine appending to it
 	###		Second open the URDF file and add any sensors that are defined
 	###			in the recv'd vehicle genome
-	if VEHICLE == 'rover':
+	if 'rover' in VEHICLE:
 		#Create a copy of the base rover file for this instance
 		str_vehicle_file = copy_base_rover_file(str_host_name)
 		
@@ -231,7 +129,7 @@ def software_setup(data):
 				print("Adding a lidar sensor to the rover")
 				#Add sensors based off genome
 				add_lidar_rover(str_vehicle_file, genome_trait['pos'], genome_trait['orient'])
-	elif VEHICLE == 'copter':
+	elif 'copter' in VEHICLE:
 		#Create a copy of the base rover file for this instance
 		str_vehicle_file = copy_base_copter_file(str_host_name)
 		
@@ -287,7 +185,7 @@ def software_setup(data):
 			os.system("xterm -hold -e '{}'&".format(sim_manager_cmd_str))
 		else:
 			sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
-			
+		
 	#Start controller script
 	if CONTROLLER_SCRIPT is not '':
 		controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
@@ -356,51 +254,105 @@ Responsible for two main functions:
 	-Reading the physical (morphology) aspect of the genome and modifying
 		the vehicle .urdf file as needed
 	""", formatter_class=RawTextHelpFormatter)
-parser.add_argument('-cs' , '--controller_script', type=str, help='The controller script to be used for the vehicle')
-parser.add_argument('-lf' , '--launch_file', type=str, help='The launch file that is to be used')
 parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal, spawn subprocesses in xterm for seperated process outputs')
 parser.add_argument('-mw' , '--multiple_worlds', action='store_true', help='Tells software_manager to choose new launch files between generations \n New launch files must be specified in the pick_new_launch function')
 parser.add_argument('-gui', '--graphics', action='store_true', help='Start gazebo gui for each simulation')
 parser.add_argument('--less_wait',action='store_true',help='Minimize the sleep timers to make running on local machines faster. This option will cause problems when running on remote VMs')
-parser.add_argument('-sp', '--ga_send_port', type=int, help='Port number that the GA is sending the genomes on')
-parser.add_argument('-rp' , '--ga_recv_port', type=int, help='Port number that the GA is receiving the results on')
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
 parser.add_argument('-v', '--vehicle', type=str, help='Type of vehicle being used \n\t Accepts: \'rover\' and \'copter\'')
-
+parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
 args= parser.parse_args()
 
 
+### Start Configuration ###
 
-if args.controller_script is not None:
-	CONTROLLER_SCRIPT = args.controller_script
-	
-if args.launch_file is not None:
-	LAUNCH_FILE = args.launch_file
+# Use default config file unless one is provided at command line
+config_file_name = 'default_config.yml'
+if args.config is not None:
+	config_file_name = args.config
 
-if args.multiple_worlds:
-	print("Multiple worlds option selected")
-	LAUNCH_FILE = pick_new_launch()
-	
+if args.debug:
+	print('Configuration file being used: \n\t {}'.format(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name)))
+
+# Open Config File
+with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
+	cfg = yaml.load(ymlfile)
+
+
+# Default GUI state for running Gazebo
+#	Note: Headless and GUI should always be opposite of each other
 if args.graphics:
 	print('Turning on Gazebo GUI')
 	HEADLESS = 'false'
 	GUI = 'true'
-	
-if args.ga_send_port is not None:
-	GA_SEND_PORT = args.ga_send_port
+else:
+	HEADLESS  = 'true'
+	GUI = 'false'
 
-if args.ga_recv_port is not None:
-	GA_RECV_PORT = args.ga_recv_port
-	
+
+# IP address that external GA is running at
 if args.ga_ip_addr is not None:
 	GA_IP_ADDR = args.ga_ip_addr
+else:
+	GA_IP_ADDR = cfg['software_manager']['GA_IP_ADDR']
 
+# The port number that the GA is sending genomes out on
+GA_SEND_PORT = cfg['software_manager']['GA_SEND_PORT']
+
+# The port number that the GA is collecting results on
+GA_RECV_PORT = cfg['software_manager']['GA_RECV_PORT']
+
+# The vehicle that is being used. Default is the erle-rover
 if args.vehicle is not None:
 	VEHICLE = args.vehicle
+else:
+	VEHICLE = cfg['software_manager']['VEHICLE']
 
+# Mavproxy software
+MAVPROXY_CMD_STR = cfg['software_manager']['SCRIPTS'][VEHICLE]['MAVPROXY_CMD_STR']
+ARDUPILOT_EXE = cfg['software_manager']['SCRIPTS'][VEHICLE]['ARDUPILOT_EXE']
 
-### Configure the software command strings based on what vehicle is being used ###
-vehicle_software_config(VEHICLE)
+# Launch file being used
+LAUNCH_FILE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE']
+LAUNCH_FILE_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE_PACKAGE']
+
+# Simulaton manager being used
+SIM_MANAGER_SCRIPT = cfg['software_manager']['SCRIPTS'][VEHICLE]['SIM_MANAGER_SCRIPT']
+SIM_MANAGER_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['SIM_MANAGER_PACKAGE']
+
+# Vehicle controller being used
+CONTROLLER_SCRIPT = cfg['software_manager']['SCRIPTS'][VEHICLE]['CONTROLLER_SCRIPT']
+CONTROLLER_SCRIPT_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['CONTROLLER_SCRIPT_PACKAGE']
+
+# Option for randomly selecting which launch file is used
+#	Still under development!
+if args.multiple_worlds:
+	print("Multiple worlds option selected")
+	LAUNCH_FILE = pick_new_launch()
+	
+
+if args.debug:
+	print('Debugging option has been turned on!\n')
+
+# If debugging print configuration settings to screen
+if args.debug:
+	print("""\n\tConfiguration Settings...
+		GA_IP_ADDR: {}
+		GA_SEND_PORT: {}
+		GA_RECV_PORT: {}
+		VEHICLE: {}
+		MAVPROXY_CMD_STR: {}
+		ARDUPILOT_EXE: {}
+		LAUNCH_FILE: {}
+		LAUNCH_FILE_PACKAGE: {}
+		SIM_MANAGER_SCRIPT: {}	
+		SIM_MANAGER_PACKAGE: {}
+		CONTROLLER_SCRIPT: {}
+		CONTROLLER_SCRIPT_PACKAGE: {}
+		""".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT, VEHICLE, MAVPROXY_CMD_STR, ARDUPILOT_EXE, LAUNCH_FILE, LAUNCH_FILE_PACKAGE, SIM_MANAGER_SCRIPT, SIM_MANAGER_PACKAGE, CONTROLLER_SCRIPT, CONTROLLER_SCRIPT_PACKAGE))
+
+### End Configuration ###
+
 
 ### Start software that does not get reset on morphological change ###
 # Start ROS

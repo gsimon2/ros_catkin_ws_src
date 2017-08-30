@@ -21,7 +21,7 @@ import socket
 import datetime
 import random
 import std_msgs.msg
-
+import yaml
 
 evaluation_result = ''
 
@@ -46,21 +46,54 @@ parser = argparse.ArgumentParser(description="""Connects to the GA's TCP socket 
 	ros parameter and sending out the start_sim message on the start_sim topic.
 	It then waits for the simulation results and relays them over a TCP 
 	socket to the GA.""")
+parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal')
 parser.add_argument('-sp', '--ga_send_port', type=int, help='Port number that the GA is sending the genomes on')
 parser.add_argument('-rp' , '--ga_recv_port', type=int, help='Port number that the GA is receiving the results on')
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
-
+parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
 args= parser.parse_args()
+
+
+### Start Configuration ###
+
+# Use default config file unless one is provided at command line
+config_file_name = 'default_config.yml'
+if args.config is not None:
+	config_file_name = args.config
+
+if args.debug:
+	print('Configuration file being used: \n\t {}'.format(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name)))
+
+# Open Config File
+with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
+	cfg = yaml.load(ymlfile)
 
 if args.ga_send_port is not None:
 	GA_SEND_PORT = args.ga_send_port
+else:
+	GA_SEND_PORT = cfg['tranporter']['GA_SEND_PORT']
 
 if args.ga_recv_port is not None:
 	GA_RECV_PORT = args.ga_recv_port
+else:
+	GA_RECV_PORT = cfg['tranporter']['GA_RECV_PORT']
 	
 if args.ga_ip_addr is not None:
 	GA_IP_ADDR = args.ga_ip_addr
+else:
+	GA_IP_ADDR = cfg['tranporter']['GA_IP_ADDR']
 	
+# If debugging print configuration settings to screen
+if args.debug:
+	print("""\n\tConfiguration Settings...
+		GA_IP_ADDR: {}
+		GA_SEND_PORT: {}
+		GA_RECV_PORT: {}
+		""".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT))
+
+### End Configuration ###
+
+
 
 
 ### Setup the contexts for communicating with the outside server. ###
@@ -72,7 +105,7 @@ receiver = context.socket(zmq.PULL)
 receiver.connect(recv_addr_str)
 sender = context.socket(zmq.PUSH)
 sender.connect(send_addr_str)
-print("GA is running at IP: {} \n Sending port: {} \n Receiving port: {} \n".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT))
+#print("GA is running at IP: {} \n Sending port: {} \n Receiving port: {} \n".format(GA_IP_ADDR, GA_SEND_PORT, GA_RECV_PORT))
 
 # Setup ZMQ poller
 poller = zmq.Poller()
