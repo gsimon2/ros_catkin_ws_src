@@ -3,7 +3,7 @@
 ### Code comes from:
 # 	http://python.dronekit.io/examples/mission_basic.html
 ###
-from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
+#from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
 import time
 import math
 import sys
@@ -65,7 +65,8 @@ def eval_start_callback(data):
 
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('rover_basic_obs_avoid_controller',anonymous=False)
-eval_start_sub = rospy.Subscriber('evaluation_start', std_msgs.msg.Empty, eval_start_callback)
+#eval_start_sub = rospy.Subscriber('evaluation_start', std_msgs.msg.Empty, eval_start_callback)
 obstacle_avoidance_cmds_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
+scan_sub = rospy.Subscriber("/scan", LaserScan,scan_callback)
 
 rospy.spin()

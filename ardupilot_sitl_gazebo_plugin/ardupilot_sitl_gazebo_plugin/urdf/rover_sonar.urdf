@@ -69,11 +69,12 @@
       -->
       
       <!-- Erle Rover Chassis -->
+
       <origin rpy="-1.5708 0 3.1416" xyz="0.04 0.392 0.052"/>
       <geometry>
         <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_chassis.STL" scale="0.0011 0.0011 0.0011"/>
       </geometry>
-      
+
       
     </visual>
   </link>
@@ -355,6 +356,7 @@
 
 
 <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />
+<!--
  <xacro:lidar_sensor
    name="sonar2"
    parent="chassis"
@@ -368,24 +370,39 @@
    ray_count_vertical="1"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
    <origin xyz="0 0 0.4" rpy="0 0 0"/>
- </xacro:lidar_sensor><!-- 542 -->
- 
+ </xacro:lidar_sensor>
+ -->
 
-<!--
+
+
 <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
  <xacro:sonar_sensor
    name="Sonar1"
    parent="chassis"
-   ros_topic="sonar2"
-   update_rate="10"
+   ros_topic="sonar1"
+   update_rate="15"
    min_range="0.06"
-   max_range="20.0"
-   field_of_view="${1*M_PI/180}"
-   ray_count="1"
+   max_range="4.5"
+   field_of_view="${30*M_PI/180}"
+   ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.01 0 0.4" rpy="0 0 0"/>
+   <origin xyz="0.25 -0.1 0.17" rpy="0 0 ${-20*M_PI/180}"/>
  </xacro:sonar_sensor>
--->
+ 
+
+ <xacro:sonar_sensor
+   name="Sonar2"
+   parent="chassis"
+   ros_topic="sonar2"
+   update_rate="15"
+   min_range="0.06"
+   max_range="4.5"
+   field_of_view="${30*M_PI/180}"
+   ray_count="5"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="0.25 0.1 0.17" rpy="0 ${-14*M_PI/180} ${20*M_PI/180}"/>
+ </xacro:sonar_sensor>
+
 
 
  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/kinect.urdf.xacro" />

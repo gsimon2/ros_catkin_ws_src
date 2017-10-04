@@ -5,7 +5,7 @@ import os
 import sys
 import re
 
-config_file_name = 'default_config.yml'
+config_file_name = 'test.yml'
 print(__file__)
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:

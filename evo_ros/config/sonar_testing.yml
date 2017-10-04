@@ -1,5 +1,5 @@
 # Default configuration settings for Evo-Ros
-# GAS 8-29-2017
+# GAS 9-13-2017
 
 
 # GA Server Script
@@ -10,7 +10,7 @@ ga_server:
    LOG_FILE_NAME: log.txt
    MAX_WAIT_TIME: 420000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
    POP_SIZE: 3 # How large the population size is for each generation
-   GEN_COUNT: 5 # How many generations is this experiment going to run for
+   GEN_COUNT: 3 # How many generations is this experiment going to run for
    MUTATION_PROB: 0.2 #Probability that an individual will have a random gene mutated
    CROSS_OVER_PROB: 0.35 #Probability that two individuals will cross over and producing mixed offspring
    TOURNAMENT_SIZE: 3 # Number of individuals that enter each selection tournament to create the next generation
@@ -35,30 +35,13 @@ software_manager:
             echo " (For script control) - param set SYSID_MYGCS 1";
             ../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo
          ARDUPILOT_EXE: 'APMrover2.elf'
-         LAUNCH_FILE: 'maze_1.launch'
+         LAUNCH_FILE: 'mission.launch'
          LAUNCH_FILE_PACKAGE: 'rover_ga'
          SIM_MANAGER_SCRIPT: 'rover_sim_manager.py'
          SIM_MANAGER_PACKAGE: 'evo_ros'
-         CONTROLLER_SCRIPT: 'rover_controller_GA.py'
-         CONTROLLER_SCRIPT_PACKAGE: 'rover_ga'
-         
-      dronekit_rover:
-         MAVPROXY_CMD_STR: |
-            source ~/simulation/ros_catkin_ws/devel/setup.bash;
-            cd ~/simulation/ardupilot/APMrover2;
-            echo "param load ~/simulation/ardupilot/Tools/Frame_params/3DR_Rover.param";
-            echo
-            echo " (For manual control) - param set SYSID_MYGCS 255";
-            echo
-            echo " (For script control) - param set SYSID_MYGCS 1";
-            ../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo
-         ARDUPILOT_EXE: 'APMrover2.elf'
-         LAUNCH_FILE: 'mission.launch'
-         LAUNCH_FILE_PACKAGE: 'rover_ga'
-         SIM_MANAGER_SCRIPT: ''
-         SIM_MANAGER_PACKAGE: ''
          CONTROLLER_SCRIPT: 'ga_dronekit_controller.py'
          CONTROLLER_SCRIPT_PACKAGE: 'rover_ga'
+         
          
       copter:
          MAVPROXY_CMD_STR: |

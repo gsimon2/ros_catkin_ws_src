@@ -41,8 +41,32 @@ def get_distance_metres(aLocation1, aLocation2):
     """
     dlat = aLocation2.lat - aLocation1.lat
     dlong = aLocation2.lon - aLocation1.lon
+    
+    #print("Dlat: {} \t Dlong:{}".format(dlat, dlong))
     return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
-
+    
+    
+def angle_to_current_waypoint(vehicle):
+	nextwaypoint = vehicle.commands.next
+	if nextwaypoint==0:
+		return None
+	missionitem=vehicle.commands[nextwaypoint-1] #commands are zero indexed
+	lat = missionitem.x
+	lon = missionitem.y
+	alt = missionitem.z
+	targetWaypointLocation = LocationGlobalRelative(lat,lon,alt)
+	return get_bearing(vehicle.location.global_frame, targetWaypointLocation)
+	
+def get_bearing(loc1, loc2):
+    """get bearing from loc1 to loc2
+    https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+    """
+    off_x = loc2.lon - loc1.lon
+    off_y = loc2.lat - loc1.lat
+    bearing = 90.00 + math.atan2(-off_y, off_x) * 57.2957795
+    if bearing < 0:
+        bearing += 360.00
+    return bearing;
 
 
 def distance_to_current_waypoint(vehicle):

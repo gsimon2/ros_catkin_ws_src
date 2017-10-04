@@ -289,3 +289,75 @@ def ErleRover_Obstacle_Avoidance(data):
 	nav_cmds = {'throttle':throttle,'yaw':yaw}
 	return nav_cmds
 	
+
+
+# Sonar Avoidance
+#   Iterate through a variable number of sonars each one casting a vote on which direction to turn
+#   Votes are weighted by how close an object is detected on that sonar
+#	Votes are then used to decide course of action
+#	If result is close and mutliple objects are detected, then turn sharply one direction
+#
+# TO-DO: Implement timer that selections a direction to turn if result is close and multiple sonar detect an object
+def sonar_avoidance(sonar_ranges, sonar_angles, range_max):
+	nav_cmds = {'throttle':1900,'yaw':1500}
+	turn_voting = {'left':0.0, 'right':0.0}
+	angle_limit = 3 # degrees from center that define which sonars are to be considered to be pointing forward
+	#print('range max: {}'.format(range_max))
+	#print(sonar_ranges)
+	
+	# Let each sonar that detects an object cast a vote if they should turn right or left
+	for sonar_id in sonar_ranges:
+		# Detect if object within range
+		if sonar_ranges[sonar_id] < range_max:
+			
+			# Votes are weighted higher if the object is closer to the vehile
+			vote_weight = abs(sonar_ranges[sonar_id] - range_max)
+			
+			#object in the middle of view
+			if sonar_angles[sonar_id] >= -angle_limit and sonar_angles[sonar_id] <= angle_limit:
+				# Turn one way or the other
+				turn_voting['left'] += vote_weight
+			
+			# object on the right
+			if sonar_angles[sonar_id] < -angle_limit:
+				turn_voting['left'] += vote_weight
+			
+			# object on the left
+			if sonar_angles[sonar_id] > angle_limit:
+				turn_voting['right'] += vote_weight
+	
+	#print(turn_voting)
+	
+	# Calculate which way we should turn based off of the votes
+	result = turn_voting['right'] - turn_voting['left']
+	#print('Result: {}'.format(result))
+	
+	# if result is close to 0, but not 0 means that an object is most likely directly in front of vehicle
+	if abs(result) <= 1 and turn_voting['left'] > 1.5 and turn_voting['right'] > 1.5:
+		nav_cmds['yaw'] = 1100
+		# turn sharply left or right
+		
+	# Handle objects on the right or left
+	else:
+		# Cap result max at range_max
+		if result < -range_max:
+			result = -range_max
+		if result > range_max:
+			result = range_max
+		
+		# Weight the turn strength based off of the magnitude of the result
+		#	Higher magnitude corresponds to closer objects
+		turn_weight = 1 - (range_max - abs(result)) / range_max
+		
+		#print('turn_weight: {}'.format(turn_weight))
+		
+		# If result is negative turn left
+		if result < 0:
+			nav_cmds['yaw'] = 1500 - 400 * turn_weight
+		# If result is positive turn right
+		else:
+			nav_cmds['yaw'] = 1500 + 400 * turn_weight
+			
+	#print('nav Cmds: {}'.format(nav_cmds))
+	
+	return nav_cmds

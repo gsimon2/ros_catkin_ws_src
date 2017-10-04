@@ -273,6 +273,11 @@ void ArdupilotSitlGazeboPlugin::OnVelMsg(const mav_msgs::CommandMotorSpeed msg)
         double yaw = (500.0 - msg.motor_speed[0]) * 0.7727 / 400.0;
         //double throttle = (msg.motor_speed[2] - 500.0) / 80.0;
         double throttle = (msg.motor_speed[2] - 500.0) / 80.0;
+		
+		
+		//throttle *= 3;
+		//ROS_INFO("Motor Speeds: yaw %f    throttle %f", msg.motor_speed[0], msg.motor_speed[2]);
+		//ROS_INFO("Calc Values:  yaw %f    throttle %f", yaw, throttle);
 
         this->frWheelSteeringJoint->SetPosition(0, yaw);
         this->flWheelSteeringJoint->SetPosition(0, yaw);
