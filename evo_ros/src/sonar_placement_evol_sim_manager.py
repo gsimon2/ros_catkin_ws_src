@@ -28,6 +28,7 @@ from gazebo_msgs.srv import GetWorldProperties
 from std_srvs.srv import Empty
 from gazebo_msgs.msg import ContactsState
 
+from rover_ga.msg import waypoint
 
 # Percent of the maze that is complete
 percent_complete = 0
@@ -150,15 +151,20 @@ def waypoint_callback(msg):
 	global waypoint_history
 	global percent_complete
 	
-	if msg not in waypoint_history:
-		waypoint_history.append(msg)
-		print('Made it to waypoint {}'.format(msg))
-		percent_complete += 20
-		print('Percent complete: {}'.format(percent_complete))
+	if msg.last_visited_waypoint not in waypoint_history:
+		waypoint_history.append(msg.last_visited_waypoint)
+		print('Made it to waypoint {}'.format(msg.last_visited_waypoint))
+		percent_complete = 20 * msg.last_visited_waypoint
 	
+	if 	msg.last_visited_waypoint < 5:
+		print('Distance to nextwaypoint {}'.format(msg.distance_to_next_waypoint))
+		percent_complete = 20 * msg.last_visited_waypoint + 20 / (1 + msg.distance_to_next_waypoint - 2)
+		
+		if percent_complete > 99:
+			percent_complete = 99
 	
-
-
+	print('Percent Complete {}'.format(percent_complete))
+	
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""
 Checks ending conditions of the simulation, gathers results, and publishes them on the sim_result topic
@@ -217,7 +223,7 @@ eval_start_pub = rospy.Publisher('evaluation_start', std_msgs.msg.Empty, queue_s
 sim_result_pub = rospy.Publisher('evaluation_result', std_msgs.msg.Float64, queue_size=1)
 sim_start_sub = rospy.Subscriber('software_ready', std_msgs.msg.Empty, software_ready_callback)
 contact_sensor_sub = rospy.Subscriber("/chassis_contact_sensor_state", ContactsState,contact_test)
-waypoint_sub = rospy.Subscriber('rover/waypoints', std_msgs.msg.Float64, waypoint_callback)
+waypoint_sub = rospy.Subscriber('rover/waypoints', waypoint, waypoint_callback)
 print("Done!")
 rospy.spin()
 

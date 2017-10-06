@@ -1,0 +1,2 @@
+uint8 last_visited_waypoint
+float64 distance_to_next_waypoint

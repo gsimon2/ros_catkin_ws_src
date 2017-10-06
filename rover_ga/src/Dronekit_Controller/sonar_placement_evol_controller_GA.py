@@ -17,11 +17,9 @@ import std_msgs.msg
 import numpy as np
 import message_filters
 from obstacle_avoidance_functions import partition_vision, check_vision, parse_genome, findMiddle, ErleRover_Obstacle_Avoidance, sonar_avoidance
-
 import mav_msgs.msg as mav_msgs
-import collections
-history_queue = collections.deque(maxlen=200)
-history_queue.append(1500)
+
+from rover_ga.msg import waypoint
 
 last_vehicle_mode = VehicleMode("AUTO")
 
@@ -50,7 +48,7 @@ def get_sonar_angles():
 #   Collect sonar range data that is present into dict
 #   and pass to the sonar avoidance function to get current nav_cmds
 #   Send nav_cmds to MAVROS
-def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = ''):
+def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = '', sonar6 = '', sonar7 = '', sonar8 = '', sonar9 = '', sonar10 = ''):
 	
 	global vehicle
 	global last_vehicle_mode
@@ -60,18 +58,18 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = ''):
 	sonar_ranges = {}
 	range_max = 4
 	hybrid_zone_cutoff = 2
-	if sonar1 is not '':
-		#print('Sonar1: {}'.format(sonar1.range))
-		range_max = sonar1.max_range  - 0.5
-		sonar_ranges['sonar1'] = sonar1.range
-	if sonar2 is not '':
-		#print('Sonar2: {}'.format(sonar2.range))
-		sonar_ranges['sonar2'] = sonar2.range
-	if sonar3 is not '':
-		#print('Sonar3: {}'.format(sonar3.range))
-		sonar_ranges['sonar3'] = sonar3.range
-
 	
+	# Read any sonar data available and put it into a single dict called sonar_ranges
+	#	Also have a modifier for range_max - This is in case the max sensing capabilities are changed in the URDF file
+	#	It is -0.5 because at the default angle that sonars are passed on the rover, they catch the ground at the very end
+	#	of the sensing range. We want to ignore the ground readings while still picking up small objects
+	for j in range (1,11):
+		current_sonar = 'sonar' + str(j)
+		if eval(current_sonar) is not '':
+			range_max = eval(current_sonar).max_range  - 0.5
+			sonar_ranges[current_sonar] = eval(current_sonar).range
+			
+			
 	# Check to see if an object is in the path of the rover
 	if all(i >= range_max for i in sonar_ranges.values()):
 		# All is good
@@ -112,29 +110,22 @@ connection_string = '127.0.0.1:14551'
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_obstacle_avoidance',anonymous=False)
 obstacle_avoidance_cmds_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
-waypoint_pub = rospy.Publisher('/rover/waypoints', std_msgs.msg.Float64, queue_size=10)
+waypoint_pub = rospy.Publisher('/rover/waypoints', waypoint, queue_size=10)
 
 
 ### Detect which sonars are on the rover ### 
 sonar_sub_list = []
-sonar1_sub = ''
-sonar2_sub = ''
-sonar3_sub = ''
+
+time.sleep(3)
+
 topics_list = rospy.get_published_topics()
 
-
-if ['/sonar1', 'sensor_msgs/Range'] in topics_list:
-	print('Adding sonar 1')
-	sonar1_sub = message_filters.Subscriber('/sonar1', Range)
-	sonar_sub_list.append(sonar1_sub)
-if ['/sonar2', 'sensor_msgs/Range'] in topics_list:
-	print('Adding sonar 2')
-	sonar2_sub = message_filters.Subscriber('/sonar2', Range)
-	sonar_sub_list.append(sonar2_sub)
-if ['/sonar3', 'sensor_msgs/Range'] in topics_list:
-	print('Adding sonar 3')
-	sonar3_sub = message_filters.Subscriber('/sonar3', Range)
-	sonar_sub_list.append(sonar3_sub)
+for j in range(1,11):
+	sonar_topic = '/sonar' + str(j)
+	print('Sonar topic {}'.format(sonar_topic))
+	if [sonar_topic, 'sensor_msgs/Range'] in topics_list:
+		print('Adding sonar {}'.format(j))
+		sonar_sub_list.append(message_filters.Subscriber(sonar_topic, Range))
 
 print('Detected sonars: {}'.format(sonar_sub_list))
 
@@ -175,22 +166,36 @@ ts.registerCallback(sonar_callback)
 # Set mode to AUTO to start mission
 vehicle.mode = VehicleMode("AUTO")
 
+# carry out the mission and publish updates about what the last waypoint we visited was and how far we have until the next one
 while True:
+	msg = waypoint()
 	nextwaypoint=vehicle.commands.next
-	waypoint_pub.publish(nextwaypoint)
-	if nextwaypoint==6:
+	msg.last_visited_waypoint = nextwaypoint - 1
+	dist_to_current_waypoint = distance_to_current_waypoint(vehicle)
+	msg.distance_to_next_waypoint = dist_to_current_waypoint
+	waypoint_pub.publish(msg)
+	if nextwaypoint==5:
 		vehicle.mode = VehicleMode("RTL")
 		break
 	else:
-		print 'Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint(vehicle))
-	time.sleep(1)
+		print 'Distance to waypoint (%s): %s' % (nextwaypoint, dist_to_current_waypoint)
+	time.sleep(0.25)
 
-time.sleep(1)
 
+# Return to launch location and publish update messages about how far away we are
 while vehicle.mode != VehicleMode("HOLD"):
+	msg = waypoint()
+	msg.last_visited_waypoint = 4
+	dist_to_home = get_distance_metres(vehicle.location.global_frame, vehicle.home_location)
+	msg.distance_to_next_waypoint = dist_to_home
+	waypoint_pub.publish(msg)
 	print 'Returning to launch'
-	time.sleep(1)
+	time.sleep(0.25)
 
-
+# Made it to launch (home) location. Publish a message saying so
+msg = waypoint()
+msg.last_visited_waypoint = 5
+msg.distance_to_next_waypoint = 0
+waypoint_pub.publish(msg)
 print('mission complete!')
 rospy.spin()

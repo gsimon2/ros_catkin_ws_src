@@ -135,7 +135,7 @@ class GA(object):
 			while (j <= number_of_sonars):
 				
 				name_of_sensor = 'sonar' + str(j)
-				new_sonar = {'sensor':'name_of_sensor', 'pos':[0,0,0.17], 'orient':[0,-14,0]}
+				new_sonar = {'sensor':name_of_sensor, 'pos':[0,0,0.17], 'orient':[0,-14,0]}
 				
 				# Pick new position (3 decimal places) and orient (int degrees)
 				new_sonar['pos'][0] = round(random.uniform(genome_constraints['physical']['sonar']['pos']['x'][0], genome_constraints['physical']['sonar']['pos']['x'][1]), 3)
