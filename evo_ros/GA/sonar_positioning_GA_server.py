@@ -103,7 +103,7 @@ class GA(object):
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
 		new_ind['genome']['num_of_sensors'] = 1
-		new_sonar = {'sensor':'sonar', 'pos':[0.25,0,0.17], 'orient':[0,0,0]}
+		new_sonar = {'sensor':'sonar1', 'pos':[0.25,0,0.17], 'orient':[0,-14,0]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		
@@ -114,9 +114,9 @@ class GA(object):
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
 		new_ind['genome']['num_of_sensors'] = 2
-		new_sonar = {'sensor':'sonar', 'pos':[0.25,-0.1,0.17], 'orient':[0,0,-20]}
+		new_sonar = {'sensor':'sonar1', 'pos':[0.25,-0.1,0.17], 'orient':[0,-14,-20]}
 		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar', 'pos':[0.25,0.1,0.17], 'orient':[0,0,20]}
+		new_sonar = {'sensor':'sonar2', 'pos':[0.25,0.1,0.17], 'orient':[0,-14,20]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
@@ -133,7 +133,9 @@ class GA(object):
 			
 			j = 1
 			while (j <= number_of_sonars):
-				new_sonar = {'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+				
+				name_of_sensor = 'sonar' + str(j)
+				new_sonar = {'sensor':'name_of_sensor', 'pos':[0,0,0.17], 'orient':[0,-14,0]}
 				
 				# Pick new position (3 decimal places) and orient (int degrees)
 				new_sonar['pos'][0] = round(random.uniform(genome_constraints['physical']['sonar']['pos']['x'][0], genome_constraints['physical']['sonar']['pos']['x'][1]), 3)
@@ -152,7 +154,7 @@ class GA(object):
 		
 		
 	# Fitness is based off of 3 factors
-	#	1 - Percent of cource that the rover was able to complete
+	#	1 - Percent of course that the rover was able to complete
 	#	2 - A bonus is applied if the rover was able to complete full course based off of the % allowed time remaining
 	#	3 - A cost is applied corresponding to how many sonars are on the rover
 	def calculate_fitness(self, return_data):		

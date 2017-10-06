@@ -368,23 +368,6 @@
   </gazebo>
 
 <!-- ADD SENSORS HERE -->
-	
-	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />
-<xacro:lidar_sensor
-	name="lidar1"
-	parent="chassis"
-	ros_topic="sonar_front"
-	update_rate="10"
-	min_range="0.06"
-	max_range="20.0"
-	field_of_view_horizontal="${180*M_PI/180}"
-	field_of_view_vertical="${1*M_PI/180}"
-	ray_count_horizontal="542"
-	ray_count_vertical="1"
-	sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-	<origin xyz="0 0 0.4" rpy="0 0 0"/>
-</xacro:lidar_sensor>
-
 
 <!--
 <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />

@@ -30,6 +30,42 @@ def copy_base_rover_file(str_host_name):
 
 
 
+# Opens rover .urdf file, splits it where the add sensors tag is, and adds the code for a sonar sensor
+#	param - str_rover_file - string of the rover .urdf file path
+#	param - pos - position of sensor in respect to rover
+#	param - orient  orientation of sensor in respect to rover
+def add_sonar_rover(str_rover_file, pos = [0,0,0.4], orient = [0,0,0], sonar_name = 'sonar1'):
+	with open(str_rover_file) as f:
+		content = f.read()
+		
+	x = content.split('<!-- ADD SENSORS HERE -->')
+	
+	sonar_sensor = """<!-- ADD SENSORS HERE -->
+	
+	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
+ <xacro:sonar_sensor
+   name="{}"
+   parent="chassis"
+   ros_topic="{}"
+   update_rate="15"
+   min_range="0.06"
+   max_range="4.5"
+   field_of_view="${{30*M_PI/180}}"
+   ray_count="5"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="{} {} {}" rpy="{} ${{{}*M_PI/180}} ${{{}*M_PI/180}}"/>
+ </xacro:sonar_sensor>
+	""".format(sonar_name, sonar_name, pos[0], pos[1], pos[2], orient[0], orient[1], orient[2])
+	
+
+	content = x[0] + sonar_sensor + x[1]
+	
+	with open(str_rover_file, "w") as f:
+		f.write(content)
+
+
+
+
 # Opens rover .urdf file, splits it where the add sensors tag is, and adds the code for a lidar sensor
 #	param - str_rover_file - string of the rover .urdf file path
 #	param - pos - position of sensor in respect to rover

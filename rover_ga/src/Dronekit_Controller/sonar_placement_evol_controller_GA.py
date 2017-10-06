@@ -25,35 +25,6 @@ history_queue.append(1500)
 
 last_vehicle_mode = VehicleMode("AUTO")
 
-def rover_commands_cb(data):
-	global history_queue
-	global vehicle
-	
-	print('Angle to WP: {}'.format(angle_to_current_waypoint(vehicle)))
-	print('Vehicle heading: {}'.format(vehicle.heading))
-	if vehicle.mode == VehicleMode("AUTO"):
-		yaw = data.motor_speed[0] + 1000
-		history_queue.append(yaw)
-		#print(sum(history_queue)/float(len(history_queue)))
-
-
-# Temp function
-#   Remove when integrated into evo-ros
-def load_genome():
-	ind = {'id':0,
-		'genome':{
-			'physical':[
-				{'sensor':'sonar1', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, -20]},
-				{'sensor':'sonar2', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, 20]}
-			],
-			'behavioral':[
-			]
-			},
-		'fitness':-1.0,
-		'generation':0
-		}
-	
-	rospy.set_param('vehicle_genome', ind)
 
 
 # Get Sonar Angles
@@ -118,31 +89,6 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = ''):
 		nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
 		
 		
-		# Use hybrid of O.A. and W.P.F. if obstacles are further out in the detection range
-		if min(sonar_ranges.values()) > hybrid_zone_cutoff:
-			w_p_f_cmds = sum(history_queue)/len(history_queue)
-			
-			weight = min(sonar_ranges.values()) / range_max
-			
-			# W.P and object are on the right
-			if (w_p_f_cmds > 1500 and nav_cmds['yaw'] < 1500):
-				nav_cmds['yaw'] = (400 * weight) + 1500
-			
-			# W.P. and object are on the left
-			if (w_p_f_cmds < 1500 and nav_cmds['yaw'] > 1500):
-				nav_cmds['yaw'] = 1500 - (400 * weight)
-				
-				
-			
-			weight = min(sonar_ranges.values()) / range_max
-			
-			#nav_cmds['yaw'] = weight * w_p_f_cmds + (1 - weight) * nav_cmds['yaw']
-			
-			
-			#print('Use hybrid!')
-			#print('Yaw: {}'.format(nav_cmds['yaw']))			
-		
-		
 					
 		msg = OverrideRCIn()
 		msg.channels[0] = nav_cmds['yaw']
@@ -166,10 +112,8 @@ connection_string = '127.0.0.1:14551'
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_obstacle_avoidance',anonymous=False)
 obstacle_avoidance_cmds_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
+waypoint_pub = rospy.Publisher('/rover/waypoints', std_msgs.msg.Float64, queue_size=10)
 
-
-### Load test genome into ros param ###
-load_genome()
 
 ### Detect which sonars are on the rover ### 
 sonar_sub_list = []
@@ -218,9 +162,6 @@ print 'Create a new mission (for current location)'
 adds_square_mission(vehicle, vehicle.location.global_frame,5)
 time.sleep(1)
 
-#Subscribe to vehicle commands
-rover_commands_sub = rospy.Subscriber('/rover/command/motor_speed',  mav_msgs.CommandMotorSpeed, rover_commands_cb)
-
 print "Starting mission"
 # Reset mission set to first (0) waypoint
 vehicle.commands.next=0
@@ -236,6 +177,7 @@ vehicle.mode = VehicleMode("AUTO")
 
 while True:
 	nextwaypoint=vehicle.commands.next
+	waypoint_pub.publish(nextwaypoint)
 	if nextwaypoint==6:
 		vehicle.mode = VehicleMode("RTL")
 		break

@@ -26,6 +26,7 @@ import yaml
 import std_msgs.msg
 
 from add_sensor_functions import add_lidar_rover
+from add_sensor_functions import add_sonar_rover
 from add_sensor_functions import copy_base_rover_file
 from add_sensor_functions import add_lidar_copter
 from add_sensor_functions import copy_base_copter_file
@@ -129,6 +130,11 @@ def software_setup(data):
 				print("Adding a lidar sensor to the rover")
 				#Add sensors based off genome
 				add_lidar_rover(str_vehicle_file, genome_trait['pos'], genome_trait['orient'])
+				
+			elif 'sonar' in genome_trait['sensor']:
+				print("Adding a sonar sensor to the rover")
+				#Add sensors based off genome
+				add_sonar_rover(str_vehicle_file, genome_trait['pos'], genome_trait['orient'], genome_trait['sensor'])
 	elif 'copter' in VEHICLE:
 		#Create a copy of the base rover file for this instance
 		str_vehicle_file = copy_base_copter_file(str_host_name)
