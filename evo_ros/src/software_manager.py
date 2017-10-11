@@ -48,13 +48,14 @@ GENERATION = 0
 ### 	Collect received sim result data and store it in global var
 def sim_result_callback(data):
 	global last_physical_genome
+	global evaluation_result
 	print('Evaluation instance completed with result: {}'.format(data.data))
 	# Check when the simulation takes too long to complete and reset the software
 	#	For the next received genome
 	if data.data == -2:
 		print('Reseting stored genome due to sim timeout')
 		last_physical_genome = []
-	
+	evaluation_result = data.data
 
 ### Pick New Launch ###
 ###		Uses random number to select which launch file is used next 
@@ -188,10 +189,12 @@ def software_setup(data):
 	if SIM_MANAGER_SCRIPT is not '':
 		sim_manager_cmd_str = "rosrun {} {}".format(SIM_MANAGER_PACKAGE, SIM_MANAGER_SCRIPT)
 		if args.debug:
+			sim_manager_cmd_str = sim_manager_cmd_str + " -d"
 			os.system("xterm -hold -e '{}'&".format(sim_manager_cmd_str))
 		else:
 			sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
-		
+	
+	time.sleep(3)
 	#Start controller script
 	if CONTROLLER_SCRIPT is not '':
 		controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
@@ -201,6 +204,7 @@ def software_setup(data):
 			controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	#Give time for everything to start up
+	"""
 	if args.less_wait:
 		time.sleep(10)
 	else:
@@ -208,14 +212,19 @@ def software_setup(data):
 			time.sleep(45) #spawning a bunch of xterms for debugging takes longer than subprocesses
 		else:
 			time.sleep(30)
-	
-	
-### received_genome Callback ###
-###
-def received_genome_callback(recv_data):
+	"""
+
+### received_genome_multiple_world_eval_callback ###
+### 	Allows for the genome that is received to be evaluated in multiple enviroments
+###		A collection of fitnesses is then returned
+def received_genome_multiple_world_eval_callback(recv_data):
 	global LAUNCH_FILE
-	global last_physical_genome
+	global LAUNCH_FILES_STRING
+	global LAUNCH_FILE_PACKAGE
+	global NUMBER_OF_WORLDS
 	global GENERATION
+	global evaluation_result
+	
 	
 	#Get genome data
 	data = rospy.get_param('vehicle_genome')
@@ -231,11 +240,70 @@ def received_genome_callback(recv_data):
 	if GENERATION != data['generation']:
 		GENERATION = data['generation']
 		
-		# If want to spawn vehicle in a different world for each generation
-		#	change the launch file being used when we receive a new gen
-		if args.multiple_worlds:
-			last_physical_genome = []
-			LAUNCH_FILE = pick_new_launch()
+	print('Current generation: {}'.format(data['generation']))
+	
+	# Take the string of launch files and split it into a list
+	launch_file_list = LAUNCH_FILES_STRING.strip().split(',')
+	
+	# Initialize evaluation results list
+	eval_results = []
+	
+	for i in range(0, NUMBER_OF_WORLDS):
+		print('Starting Evaluation number: {}'.format(i))
+		evaluation_result = ''
+		LAUNCH_FILE = launch_file_list[i]
+		print('Using launch file: {}'.format(LAUNCH_FILE))
+		software_setup(data)
+		
+		# Notify the sim_manager that all evaluation software is set up
+		software_ready_pub.publish(std_msgs.msg.Empty())
+		
+		print('Done! Entering sleep onto sim evaluation is complete.')
+		
+		# Wait for the result for this world (instance is done)
+		while evaluation_result == '':
+			time.sleep(1)
+			
+		# Push the evalation result and percent complete into the eval_list
+		eval_results.append(evaluation_result)
+		eval_results.append(rospy.get_param('percent_complete'))
+		
+
+	print('{} of evaluations complete for this genome. \n Total results: {}'.format(NUMBER_OF_WORLDS, eval_results))
+	
+	
+	msg = std_msgs.msg.Float64MultiArray()
+	msg.data = eval_results
+	sim_result_pub.publish(msg)
+	
+
+	
+
+### received_genome Callback ###
+###		This is the callback that is used when we are evaluating the received genome in only one enviroment
+def received_genome_callback(recv_data):
+	global LAUNCH_FILE
+	global last_physical_genome
+	global GENERATION
+	global evaluation_result
+	
+	# Reset previous eval result
+	evaluation_result = ''
+	
+	#Get genome data
+	data = rospy.get_param('vehicle_genome')
+	print('Received genome data!')
+	
+	# Check for ending msg
+	if data['id'] == -1:
+		print('Received exit message')
+		rospy.signal_shutdown('Received exit message from GA')
+		return
+	
+	# Update Generation
+	if GENERATION != data['generation']:
+		GENERATION = data['generation']
+		
 	print('Current generation: {}'.format(data['generation']))
 	
 	#Check to see if received physical genome is different from last received
@@ -250,6 +318,19 @@ def received_genome_callback(recv_data):
 	software_ready_pub.publish(std_msgs.msg.Empty())
 	
 	print('Done! Entering sleep onto sim evaluation is complete.')
+	
+	while evaluation_result == '':
+		time.sleep(1)
+	
+	print('Simulation complete. Sending result to transporter')
+	
+	simulation_results = [evaluation_result, rospy.get_param('percent_complete')]
+	
+	msg = std_msgs.msg.Float64MultiArray()
+	msg.data = simulation_results
+	sim_result_pub.publish(msg)
+	
+	
 	
 
 ### Handle commandline arguments ###
@@ -319,8 +400,14 @@ MAVPROXY_CMD_STR = cfg['software_manager']['SCRIPTS'][VEHICLE]['MAVPROXY_CMD_STR
 ARDUPILOT_EXE = cfg['software_manager']['SCRIPTS'][VEHICLE]['ARDUPILOT_EXE']
 
 # Launch file being used
-LAUNCH_FILE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE']
-LAUNCH_FILE_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE_PACKAGE']
+if args.multiple_worlds:
+	NUMBER_OF_WORLDS = cfg['software_manager']['MULTIPLE_WORLDS']['NUMBER_OF_WORLDS']
+	LAUNCH_FILE_PACKAGE = cfg['software_manager']['MULTIPLE_WORLDS']['LAUNCH_FILE_PACKAGE']
+	LAUNCH_FILES_STRING = cfg['software_manager']['MULTIPLE_WORLDS']['LAUNCH_FILES']
+	LAUNCH_FILE = LAUNCH_FILES_STRING
+else:
+	LAUNCH_FILE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE']
+	LAUNCH_FILE_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['LAUNCH_FILE_PACKAGE']
 
 # Simulaton manager being used
 SIM_MANAGER_SCRIPT = cfg['software_manager']['SCRIPTS'][VEHICLE]['SIM_MANAGER_SCRIPT']
@@ -330,12 +417,6 @@ SIM_MANAGER_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['SIM_MANAGER_P
 CONTROLLER_SCRIPT = cfg['software_manager']['SCRIPTS'][VEHICLE]['CONTROLLER_SCRIPT']
 CONTROLLER_SCRIPT_PACKAGE = cfg['software_manager']['SCRIPTS'][VEHICLE]['CONTROLLER_SCRIPT_PACKAGE']
 
-# Option for randomly selecting which launch file is used
-#	Still under development!
-if args.multiple_worlds:
-	print("Multiple worlds option selected")
-	LAUNCH_FILE = pick_new_launch()
-	
 
 if args.debug:
 	print('Debugging option has been turned on!\n')
@@ -378,9 +459,17 @@ else:
 
 # Set up ROS subscribers and publishers
 rospy.init_node('software_manager',anonymous=False)
-software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=5)
-sim_result_sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
-sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, received_genome_callback)
+software_ready_pub = rospy.Publisher('software_ready', std_msgs.msg.Empty, queue_size=10)
+sim_result_sub = rospy.Subscriber('evaluation_instance_result', std_msgs.msg.Float64, sim_result_callback)
+sim_result_pub = rospy.Publisher('evaluation_result', std_msgs.msg.Float64MultiArray, queue_size=1)
+
+# Option for randomly selecting which launch file is used
+#	Still under development!
+if args.multiple_worlds:
+	print("Multiple worlds option selected")
+	sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, received_genome_multiple_world_eval_callback)
+else:
+	sim_start_sub = rospy.Subscriber('received_genome', std_msgs.msg.Empty, received_genome_callback)
 
 
 rospy.on_shutdown(shutdown_hook)

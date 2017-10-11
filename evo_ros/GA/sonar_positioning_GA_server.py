@@ -46,9 +46,9 @@ ind = {'id':0,
 genome_constraints = {
 	'physical': {
 		'sonar': {
-			# Position x:  0 = Middle of rover,  2.5 = front
-			# Position y:  -1.5 = Left,    1.5 = Right
-			'pos': {'x':[0,2.5], 'y':[-1.5,1.5]},
+			# Position x:  0 = Middle of rover,  0.25 = front
+			# Position y:  -0.15 = Left,    0.15 = Right
+			'pos': {'x':[0,0.25], 'y':[-0.15,0.15]},
 			# Orient z: -90 degrees = facing left,    90 = facing right
 			'orient': {'z':[-90,90]}
 		}
@@ -97,8 +97,9 @@ class GA(object):
 		self.pop_size = POP_SIZE
 		self.genomes = []
 		
-		# Seed the initial population with a rover with a single forward facing sonar
 		i = 0
+		
+		# Seed the initial population with a rover with a single forward facing sonar
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
@@ -106,10 +107,11 @@ class GA(object):
 		new_sonar = {'sensor':'sonar1', 'pos':[0.25,0,0.17], 'orient':[0,-14,0]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
+		i +=1
 		
 		
 		# Seed the initial population with a rover that has two sonars on the front corners facing slightly outward
-		i +=1
+		
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
@@ -120,6 +122,7 @@ class GA(object):
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
+		
 		
 		#Initialize rest of population with random genomes
 		while (i < self.pop_size):

@@ -12,7 +12,7 @@
   <arg name="gui" default="true"/>
   
   
- 	<arg name="world_name" default="$(find rover_ga)/worlds/field/field_with_boxes.sdf"/>
+ 	<arg name="world_name" default="$(find rover_ga)/worlds/field/medium_testing_maze.sdf"/>
 
   
   

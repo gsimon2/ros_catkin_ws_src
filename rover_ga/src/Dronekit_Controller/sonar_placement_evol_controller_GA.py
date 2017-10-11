@@ -8,6 +8,8 @@ import time
 import math
 import sys
 import rospy
+import tf
+import argparse
 from pymavlink import mavutil
 from dronekit_functions import get_location_metres, get_distance_metres, distance_to_current_waypoint, download_mission, adds_square_mission, is_vehicle_home, angle_to_current_waypoint
 from sensor_msgs.msg import LaserScan
@@ -19,10 +21,57 @@ import message_filters
 from obstacle_avoidance_functions import partition_vision, check_vision, parse_genome, findMiddle, ErleRover_Obstacle_Avoidance, sonar_avoidance
 import mav_msgs.msg as mav_msgs
 
+from gazebo_msgs.msg import LinkStates
+
 from rover_ga.msg import waypoint
 
 last_vehicle_mode = VehicleMode("AUTO")
+last_heading = 0
 
+# Temp function
+#   Remove when integrated into evo-ros
+def load_genome():
+	ind = {'id':0,
+		'genome':{
+			'physical':[
+				{'sensor':'sonar1', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, -20]},
+				{'sensor':'sonar2', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, 20]}
+			],
+			'behavioral':[
+			]
+			},
+		'fitness':-1.0,
+		'generation':0
+		}
+	
+	rospy.set_param('vehicle_genome', ind)
+
+# Link States Callbakc
+#	Get the orientation of the chassis of the rover from Gazebo Linked States topic and calculates its heading 
+def link_states_callback(data):
+	global last_heading
+	# Get the index of the base_link
+	# data.name contains all link names found in the URDF (or SDF) file
+	
+	base_link_index = data.name.index('rover::chassis')
+	base_link_position = data.pose[base_link_index].position
+	base_link_orientation = data.pose[base_link_index].orientation
+	
+	# Convert the quaternion data to roll, pitch, yaw
+	quat = (
+		base_link_orientation.x,
+		base_link_orientation.y,
+		base_link_orientation.z,
+		base_link_orientation.w)
+	roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat)
+	
+	# Convert heading to same notation that bearing is in
+	#	True east = 0 degrees, then count up clock wise so South = 90, West = 180, North = 270
+	if math.degrees(yaw) < 0:
+		last_heading = math.degrees(yaw) * -1
+	else:
+		last_heading = 360 - math.degrees(yaw)
+	#print 'heading           :' + str(math.degrees(yaw))
 
 
 # Get Sonar Angles
@@ -53,10 +102,14 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 	global vehicle
 	global last_vehicle_mode
 	global history_queue
+	global last_heading
 	
+	
+	ang = angle_to_current_waypoint(vehicle)
+	#print('Bearing: {} \t Heading: {}'.format(ang, last_heading))
 		
 	sonar_ranges = {}
-	range_max = 4
+	range_max = 2.5
 	hybrid_zone_cutoff = 2
 	
 	# Read any sonar data available and put it into a single dict called sonar_ranges
@@ -87,6 +140,8 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 		nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
 		
 		
+		
+		
 					
 		msg = OverrideRCIn()
 		msg.channels[0] = nav_cmds['yaw']
@@ -107,9 +162,12 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 connection_string = '127.0.0.1:14551'
 
 
+#load_genome()
+
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_obstacle_avoidance',anonymous=False)
 obstacle_avoidance_cmds_pub = rospy.Publisher('/mavros/rc/override', OverrideRCIn, queue_size=10)
+rospy.Subscriber('gazebo/link_states', LinkStates, link_states_callback)
 waypoint_pub = rospy.Publisher('/rover/waypoints', waypoint, queue_size=10)
 
 
@@ -122,16 +180,18 @@ topics_list = rospy.get_published_topics()
 
 for j in range(1,11):
 	sonar_topic = '/sonar' + str(j)
-	print('Sonar topic {}'.format(sonar_topic))
+	#print('Sonar topic {}'.format(sonar_topic))
 	if [sonar_topic, 'sensor_msgs/Range'] in topics_list:
-		print('Adding sonar {}'.format(j))
+		#print('Adding sonar {}'.format(j))
 		sonar_sub_list.append(message_filters.Subscriber(sonar_topic, Range))
 
-print('Detected sonars: {}'.format(sonar_sub_list))
+#print('Detected sonars: {}'.format(sonar_sub_list))
 
 ### Get angles of sonars on the vehicle ###
 sonar_angles = get_sonar_angles()
-print('Sonar angles: {}'.format(sonar_angles))
+#print('Sonar angles: {}'.format(sonar_angles))
+
+time.sleep(2)
 
 # Connect to the Vehicle
 print 'Connecting to vehicle on: %s' % connection_string
@@ -167,20 +227,19 @@ ts.registerCallback(sonar_callback)
 vehicle.mode = VehicleMode("AUTO")
 
 # carry out the mission and publish updates about what the last waypoint we visited was and how far we have until the next one
-while True:
+while vehicle.mode != VehicleMode("HOLD"):
 	msg = waypoint()
 	nextwaypoint=vehicle.commands.next
 	msg.last_visited_waypoint = nextwaypoint - 1
 	dist_to_current_waypoint = distance_to_current_waypoint(vehicle)
 	msg.distance_to_next_waypoint = dist_to_current_waypoint
 	waypoint_pub.publish(msg)
-	if nextwaypoint==5:
-		vehicle.mode = VehicleMode("RTL")
-		break
-	else:
-		print 'Distance to waypoint (%s): %s' % (nextwaypoint, dist_to_current_waypoint)
+	#print 'Distance to waypoint (%s): %s' % (nextwaypoint, dist_to_current_waypoint)
 	time.sleep(0.25)
 
+print 'Returning to launch'
+vehicle.mode = VehicleMode("RTL")
+time.sleep(1)
 
 # Return to launch location and publish update messages about how far away we are
 while vehicle.mode != VehicleMode("HOLD"):
@@ -189,7 +248,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 	dist_to_home = get_distance_metres(vehicle.location.global_frame, vehicle.home_location)
 	msg.distance_to_next_waypoint = dist_to_home
 	waypoint_pub.publish(msg)
-	print 'Returning to launch'
+	#print 'Returning to launch'
 	time.sleep(0.25)
 
 # Made it to launch (home) location. Publish a message saying so

@@ -23,6 +23,10 @@ software_manager:
    GA_RECV_PORT: 5010
    GA_IP_ADDR: '35.12.212.131'
    VEHICLE: 'rover' # The vehicle that is being used. Default is the erle-rover
+   MULTIPLE_WORLDS:
+      NUMBER_OF_WORLDS: 3
+      LAUNCH_FILE_PACKAGE: 'rover_ga'
+      LAUNCH_FILES: 'sonar_mission_1.launch,sonar_mission_2.launch,sonar_mission_3.launch'
    SCRIPTS:
       rover:
          MAVPROXY_CMD_STR: |
@@ -35,12 +39,14 @@ software_manager:
             echo " (For script control) - param set SYSID_MYGCS 1";
             ../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo
          ARDUPILOT_EXE: 'APMrover2.elf'
-         LAUNCH_FILE: 'sonar_mission.launch'
+         LAUNCH_FILE: 'sonar_mission_1.launch'
          LAUNCH_FILE_PACKAGE: 'rover_ga'
          SIM_MANAGER_SCRIPT: 'sonar_placement_evol_sim_manager.py'
          SIM_MANAGER_PACKAGE: 'evo_ros'
-         CONTROLLER_SCRIPT: 'sonar_placement_evol_controller_GA.py'
-         CONTROLLER_SCRIPT_PACKAGE: 'rover_ga'
+         #CONTROLLER_SCRIPT: 'sonar_placement_evol_controller_GA.py'
+         #CONTROLLER_SCRIPT_PACKAGE: 'rover_ga'
+         CONTROLLER_SCRIPT: ''
+         CONTROLLER_SCRIPT_PACKAGE: ''
          
       dronekit_rover:
          MAVPROXY_CMD_STR: |
@@ -81,5 +87,5 @@ tranporter: # Note: Software Manager is scripted to overwrite these values at ru
    GA_RECV_PORT: 5010
    GA_IP_ADDR: '127.0.0.1'
    
-rover_sim_manager:
-   MAX_SIM_TIME: 240 # simulation seconds a simulation is allowed to run before ending 
+sim_manager:
+   MAX_SIM_TIME: 300 # simulation seconds a simulation is allowed to run before ending 

@@ -20,6 +20,7 @@ import random
 import sys
 import yaml
 
+
 import std_msgs.msg
 
 from argparse import RawTextHelpFormatter
@@ -54,6 +55,13 @@ def software_ready_callback(data):
 	simulation_end = False
 	time_fitness = 0
 	
+	# Start the controller node for this simulation
+	controller_cmd_str = 'rosrun {} {}'.format('rover_ga', 'sonar_placement_evol_controller_GA.py')
+	if args.debug:
+		os.system("xterm -hold -e '{}'&".format(controller_cmd_str))
+	else:
+		controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
+
 	# Get the beginning time for the simulation
 	# Error handling for if a required process crashes
 	#	Mainly for Gazebo, which has a tendency to crash during
@@ -96,6 +104,11 @@ def software_ready_callback(data):
 	
 	rospy.set_param('simulation_running', False)
 	
+	
+	# Kill the controller node
+	cmd = 'rosnode kill sonar_obstacle_avoidance'
+	subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+	
 	# If the vehicle was able to finish successfully, give it a time bonus
 	#	Else send back a result of -1 indicating a collision
 	#	Or -2 indicating that the simulation took too long to finish sucessfully
@@ -108,6 +121,7 @@ def software_ready_callback(data):
 			time_fitness = -2
 		else:
 			time_fitness = -1
+			
 		
 
 	time.sleep(3)
@@ -150,20 +164,24 @@ def contact_test(contacts):
 def waypoint_callback(msg):
 	global waypoint_history
 	global percent_complete
+	global simulation_end
 	
-	if msg.last_visited_waypoint not in waypoint_history:
-		waypoint_history.append(msg.last_visited_waypoint)
-		print('Made it to waypoint {}'.format(msg.last_visited_waypoint))
-		percent_complete = 20 * msg.last_visited_waypoint
-	
-	if 	msg.last_visited_waypoint < 5:
-		print('Distance to nextwaypoint {}'.format(msg.distance_to_next_waypoint))
-		percent_complete = 20 * msg.last_visited_waypoint + 20 / (1 + msg.distance_to_next_waypoint - 2)
+	if rospy.get_param('simulation_running') is True:
+		if msg.last_visited_waypoint not in waypoint_history:
+			waypoint_history.append(msg.last_visited_waypoint)
+			print('Made it to waypoint {}'.format(msg.last_visited_waypoint))
+			percent_complete = 20 * msg.last_visited_waypoint
 		
-		if percent_complete > 99:
-			percent_complete = 99
-	
-	print('Percent Complete {}'.format(percent_complete))
+		if 	msg.last_visited_waypoint < 5:
+			print('Distance to nextwaypoint {}'.format(msg.distance_to_next_waypoint))
+			percent_complete = 20 * msg.last_visited_waypoint + abs(20 / (max(msg.distance_to_next_waypoint-1,1)))
+			
+			if percent_complete > 99:
+				percent_complete = 99
+		if percent_complete	>= 99:
+			rospy.set_param('mission_success', True)
+			print('Mission success!')
+		print('Percent Complete {}'.format(percent_complete))
 	
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""
@@ -187,7 +205,7 @@ if args.debug:
 with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
-MAX_SIM_TIME = cfg['rover_sim_manager']['MAX_SIM_TIME']
+MAX_SIM_TIME = cfg['sim_manager']['MAX_SIM_TIME']
 
 # If debugging print configuration settings to screen
 if args.debug:
@@ -200,11 +218,11 @@ if args.debug:
 
 ### Wait for Gazebo Services ###
 print('Waiting for gazebo services')
-rospy.wait_for_service('/gazebo/get_world_properties')
-rospy.wait_for_service('/gazebo/reset_world')
-rospy.wait_for_service('/gazebo/reset_simulation')
-rospy.wait_for_service('/gazebo/pause_physics')
-rospy.wait_for_service('/gazebo/unpause_physics')
+#rospy.wait_for_service('/gazebo/get_world_properties')
+#rospy.wait_for_service('/gazebo/reset_world')
+#rospy.wait_for_service('/gazebo/reset_simulation')
+#rospy.wait_for_service('/gazebo/pause_physics')
+#rospy.wait_for_service('/gazebo/unpause_physics')
 
 
 ### Set up ROS service Proxies ###
@@ -220,7 +238,7 @@ rospy.set_param('collison_detected', False)
 rospy.set_param('mission_success', False)
 rospy.set_param('percent_complete', 0)
 eval_start_pub = rospy.Publisher('evaluation_start', std_msgs.msg.Empty, queue_size=1)
-sim_result_pub = rospy.Publisher('evaluation_result', std_msgs.msg.Float64, queue_size=1)
+sim_result_pub = rospy.Publisher('evaluation_instance_result', std_msgs.msg.Float64, queue_size=1)
 sim_start_sub = rospy.Subscriber('software_ready', std_msgs.msg.Empty, software_ready_callback)
 contact_sensor_sub = rospy.Subscriber("/chassis_contact_sensor_state", ContactsState,contact_test)
 waypoint_sub = rospy.Subscriber('rover/waypoints', waypoint, waypoint_callback)
