@@ -114,10 +114,10 @@ poller.register(receiver, zmq.POLLIN)
 
 
 ### Setup the ROS topics for communicating with connected nodes. ###
-rospy.init_node('transporter',anonymous=False)
-pub = rospy.Publisher('received_genome', std_msgs.msg.Empty, queue_size=5)
-sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
-print("Ros transport node and simulation start/result topics have been initialized")
+#rospy.init_node('transporter',anonymous=False)
+#pub = rospy.Publisher('received_genome', std_msgs.msg.Empty, queue_size=5)
+#sub = rospy.Subscriber('evaluation_result', std_msgs.msg.Float64, sim_result_callback)
+#print("Ros transport node and simulation start/result topics have been initialized")
 
 
 
@@ -143,21 +143,21 @@ while True:
 	
 	print('Transporter: Received: {}'.format(data))
 
-	print('Genome data loaded into ROS param and sim start message sent! Entering sleep until sim evaluation is complete.')
 	
 	# Wait for simulation result
-	_ = raw_input()
+	#_ = raw_input()
 	print('Sening result...')
 	
 	# Get percent complete from rospy params and prep the simulation result msg for the GA
-	percent_complete = random.random()
-	evaluation_result = random.random()
-	msg = json.dumps({'id':data['id'],'fitness':(evaluation_result, percent_complete), 'ns':str_host_name, 'name':rospy.get_name()})
+	
+	return_fitness = []
+	for i in range(6):
+		return_fitness.append(random.random())
+		
+	msg = json.dumps({'id':data['id'],'fitness':return_fitness, 'ns':str_host_name, 'name':rospy.get_name()})
 	
 	# Send simulation result msg
 	sender.send(msg)
-	print ("""Sent result for ID: {}\n 
-		Evaluation Result: {}	Percent Complete: {}""".format(data['id'], evaluation_result, percent_complete))
 	evaluation_result = ''
 	
 
