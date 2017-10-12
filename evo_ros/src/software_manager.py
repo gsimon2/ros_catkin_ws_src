@@ -267,10 +267,11 @@ def received_genome_multiple_world_eval_callback(recv_data):
 		
 		# Wait for the result for this world (instance is done)
 		while evaluation_result == '':
-			if ((datetime.datetime.now() - begin_time) > MAX_REAL_TIME):
+			if ((datetime.datetime.now() - begin_time).total_seconds() > MAX_REAL_TIME):
 				evaluation_result = -2
+				break
 			time.sleep(1)
-			
+		print('Out of loop!')
 		# If gazebo crashes restart without appending the result
 		if evaluation_result == -2:
 			i -= 1
