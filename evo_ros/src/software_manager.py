@@ -204,15 +204,15 @@ def software_setup(data):
 			controller_script = subprocess.Popen(controller_cmd_str, stdout=subprocess.PIPE, shell=True)
 
 	#Give time for everything to start up
-	"""
+	
 	if args.less_wait:
 		time.sleep(10)
 	else:
 		if args.debug:
 			time.sleep(45) #spawning a bunch of xterms for debugging takes longer than subprocesses
 		else:
-			time.sleep(30)
-	"""
+			time.sleep(25)
+	
 
 ### received_genome_multiple_world_eval_callback ###
 ### 	Allows for the genome that is received to be evaluated in multiple enviroments
