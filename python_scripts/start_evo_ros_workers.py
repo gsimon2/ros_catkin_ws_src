@@ -24,23 +24,12 @@ while current_vm <= number_of_vms_on_machine:
 		source /opt/ros/indigo/setup.bash;
 		source ~/simulation/ros_catkin_ws/devel/setup.bash;
 		export PYTHONPATH=$PYTHONPATH:/home/simongle/simulation/ros_catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages;
-		rosrun evo-ros {} {};
+		rosrun evo_ros {} {};
 		exec bash
 		""".format(name_of_script, name_of_script, script_arguments)
 	cmd_str = """xterm -hold -title "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
 	os.system(cmd_str)
 	
-	#Start Transporter
-	cmds = """echo Transporter.py...;
-		cd;
-		source /opt/ros/indigo/setup.bash;
-		source ~/simulation/ros_catkin_ws/devel/setup.bash;
-		export PYTHONPATH=$PYTHONPATH:/home/simongle/simulation/ros_catkin_ws/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages;
-		rosrun evo-ros transporter.py {};
-		exec bash
-		""".format(script_arguments)
-	cmd_str = """xterm -hold -title "Connection to robo1vm{}" -e 'ssh -t -X robo1vm{}.cse.msu.edu "{}"'&""".format(current_vm,current_vm,cmds)
-	#os.system(cmd_str)
 	current_vm += 1
 
 print('Script finished! \n')
