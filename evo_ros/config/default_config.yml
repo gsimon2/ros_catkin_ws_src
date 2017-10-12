@@ -9,8 +9,8 @@ ga_server:
    GA_RECV_PORT: 5010
    LOG_FILE_NAME: log.dat
    MAX_WAIT_TIME: 420000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
-   POP_SIZE: 5 # How large the population size is for each generation
-   GEN_COUNT: 5 # How many generations is this experiment going to run for
+   POP_SIZE: 7 # How large the population size is for each generation
+   GEN_COUNT: 30 # How many generations is this experiment going to run for
    MUTATION_PROB: 0.2 #Probability that an individual will have a random gene mutated
    CROSS_OVER_PROB: 0.35 #Probability that two individuals will cross over and producing mixed offspring
    TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
@@ -23,6 +23,7 @@ software_manager:
    GA_RECV_PORT: 5010
    GA_IP_ADDR: '35.9.28.201'
    VEHICLE: 'rover' # The vehicle that is being used. Default is the erle-rover
+   MAX_REAL_TIME: 300
    MULTIPLE_WORLDS:
       NUMBER_OF_WORLDS: 3
       LAUNCH_FILE_PACKAGE: 'rover_ga'
@@ -88,4 +89,4 @@ tranporter: # Note: Software Manager is scripted to overwrite these values at ru
    GA_IP_ADDR: '127.0.0.1'
    
 sim_manager:
-   MAX_SIM_TIME: 300 # simulation seconds a simulation is allowed to run before ending 
+   MAX_SIM_TIME: 270 # simulation seconds a simulation is allowed to run before ending 

@@ -183,7 +183,7 @@ def software_setup(data):
 	else:
 		launch_file = subprocess.Popen(launch_file_cmd_str, stdout=subprocess.PIPE, shell=True)
 	print('Started launch file!')
-	time.sleep(1)
+	time.sleep(5)
 			
 	# Start Sim manager node
 	if SIM_MANAGER_SCRIPT is not '':
@@ -194,7 +194,7 @@ def software_setup(data):
 		else:
 			sim_manager = subprocess.Popen(sim_manager_cmd_str, stdout=subprocess.PIPE, shell=True)
 	
-	time.sleep(3)
+	time.sleep(1)
 	#Start controller script
 	if CONTROLLER_SCRIPT is not '':
 		controller_cmd_str = 'rosrun {} {}'.format(CONTROLLER_SCRIPT_PACKAGE, CONTROLLER_SCRIPT)
@@ -206,12 +206,12 @@ def software_setup(data):
 	#Give time for everything to start up
 	
 	if args.less_wait:
-		time.sleep(10)
+		time.sleep(0.5)
 	else:
 		if args.debug:
 			time.sleep(45) #spawning a bunch of xterms for debugging takes longer than subprocesses
 		else:
-			time.sleep(25)
+			time.sleep(30)
 	
 
 ### received_genome_multiple_world_eval_callback ###
@@ -224,6 +224,7 @@ def received_genome_multiple_world_eval_callback(recv_data):
 	global NUMBER_OF_WORLDS
 	global GENERATION
 	global evaluation_result
+	global MAX_REAL_TIME
 	
 	
 	#Get genome data
@@ -248,7 +249,9 @@ def received_genome_multiple_world_eval_callback(recv_data):
 	# Initialize evaluation results list
 	eval_results = []
 	
-	for i in range(0, NUMBER_OF_WORLDS):
+	#for i in range(0, NUMBER_OF_WORLDS):
+	i = 0
+	while i < NUMBER_OF_WORLDS:
 		print('Starting Evaluation number: {}'.format(i))
 		evaluation_result = ''
 		LAUNCH_FILE = launch_file_list[i]
@@ -260,14 +263,22 @@ def received_genome_multiple_world_eval_callback(recv_data):
 		
 		print('Done! Entering sleep onto sim evaluation is complete.')
 		
+		begin_time = datetime.datetime.now()
+		
 		# Wait for the result for this world (instance is done)
 		while evaluation_result == '':
+			if ((datetime.datetime.now() - begin_time) > MAX_REAL_TIME):
+				evaluation_result = -2
 			time.sleep(1)
 			
-		# Push the evalation result and percent complete into the eval_list
-		eval_results.append(evaluation_result)
-		eval_results.append(rospy.get_param('percent_complete'))
-		
+		# If gazebo crashes restart without appending the result
+		if evaluation_result == -2:
+			i -= 1
+		else:
+			# Push the evalation result and percent complete into the eval_list
+			eval_results.append(evaluation_result)
+			eval_results.append(rospy.get_param('percent_complete'))
+		i+=1
 
 	print('{} of evaluations complete for this genome. \n Total results: {}'.format(NUMBER_OF_WORLDS, eval_results))
 	
@@ -319,8 +330,13 @@ def received_genome_callback(recv_data):
 	
 	print('Done! Entering sleep onto sim evaluation is complete.')
 	
-	while evaluation_result == '':
+	
+	while evaluation_result == '' or evaluation_result == -2:
 		time.sleep(1)
+		
+		if evaluation_result == -2:
+			software_setup(data)
+			software_ready_pub.publish(std_msgs.msg.Empty())
 	
 	print('Simulation complete. Sending result to transporter')
 	
@@ -388,6 +404,9 @@ GA_SEND_PORT = cfg['software_manager']['GA_SEND_PORT']
 
 # The port number that the GA is collecting results on
 GA_RECV_PORT = cfg['software_manager']['GA_RECV_PORT']
+
+# Max real time seconds that any single evaluation is allowed to run for
+MAX_REAL_TIME = cfg['software_manager']['MAX_REAL_TIME']
 
 # The vehicle that is being used. Default is the erle-rover
 if args.vehicle is not None:

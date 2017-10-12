@@ -234,7 +234,7 @@ class GA(object):
 			log.write('{}, {}, {}, {}, '.format(CURRENT_GEN, ind['id'], ind['fitness'], ind['genome']['num_of_sensors']))
 			
 			for sensor in ind['genome']['physical']:
-				log.write('{}, {}, '.format(sensor['pos'], sensor['orient']))
+				log.write('{}, {}, {}, '.format(sensor['pos'][0], sensor['pos'][1], sensor['orient'][2]))
 			log.write('\n')
 		
 	def get_pop(self):
@@ -275,7 +275,7 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(co
 	cfg = yaml.load(ymlfile)
 
 # Seed rand num generator	
-rand_seed = datetime.datetime.now()
+rand_seed = random.randrange(1,19,1)
 random.seed(rand_seed)
 
 # Load in values from config file
@@ -290,6 +290,7 @@ MUTATION_PROB = cfg['ga_server']['MUTATION_PROB'] #Probability that an individua
 CROSS_OVER_PROB = cfg['ga_server']['CROSS_OVER_PROB'] #Probability that two individuals will cross over and producing mixed offspring
 TOURNAMENT_SIZE = cfg['ga_server']['TOURNAMENT_SIZE'] # Number of individuals that enter each selection tournament to create the next generation
 
+	
 # Allow for log file name to be provided at command line
 if args.log is not None:
 	LOG_FILE_NAME = args.log
@@ -338,7 +339,8 @@ log = open('logs/{}'.format(LOG_FILE_NAME), 'w+')
 
 #Write experiment parameters to log
 log.write('*****Sonar Placement GA Expirement*****\n')
-log.write('Date / rand_seed:{}\n'.format(rand_seed))
+log.write('Start Time: {}\n'.format(datetime.datetime.now()))
+log.write('Rand_seed:{}\n'.format(rand_seed))
 log.write('End Time: \n')
 log.write('Running Time: \n')
 log.write('Population size:{}\n'.format(POP_SIZE))
@@ -351,7 +353,14 @@ log.write('X Position: {}\n'.format(str(genome_constraints['physical']['sonar'][
 log.write('Y Position: {}\n'.format(str(genome_constraints['physical']['sonar']['pos']['y'])))
 log.write('Z Orient: {}\n'.format(str(genome_constraints['physical']['sonar']['orient']['z'])))
 log.write('*****************************\n')
-log.write('Generation, ID, Fitness, Number of Sonar, Repeated for each sensor (Position, Orient) \n')
+log.write('Generation, ID, Fitness, Number of Sonar, ')
+
+for i in range(1,MAX_NUMBER_OF_SONAR+1):
+	pos_x = 'S{}_P_X'.format(i)
+	pos_y = 'S{}_P_Y'.format(i)
+	ori_z = 'S{}_O'.format(i)
+	log.write('{}, {}, {}, '.format(pos_x, pos_y, ori_z))
+log.write('\n')
 
 
 #Initialize the socket for data
@@ -382,8 +391,8 @@ for i in range(GEN_COUNT):
 	
 	#genomes = ga.get_pop()
 	genomes = ga.get_unevaluated_pop()
-	#print('\n\nSending new generation!!!')
-	#print(genomes)
+	print('\n\nSending new generation!!!')
+	print('{} individuals need to be evaluated'.format(len(genomes)))
 	
 	#print('Sending out IDs:')
 	#for ind in genomes:
@@ -398,14 +407,14 @@ for i in range(GEN_COUNT):
 	# Wait for the send thread to complete.
 	sendThread.join()
 	
-	j = len(genomes)
-	while j > 0:
-		data = json.loads(receiver.recv())
-		return_data.append({'id':data['id'], 'fitness':data['fitness']})
-		j -= 1
-		print('{}/{} genomes recv\'d. Result: {} \n\t Tested on: {}'.format(len(genomes) - j, len(genomes), data['fitness'], data['ns']))
+	if len(genomes) > 0 :
+		j = len(genomes)
+		while j > 0:
+			data = json.loads(receiver.recv())
+			return_data.append({'id':data['id'], 'fitness':data['fitness']})
+			j -= 1
+			print('{}/{} genomes recv\'d. Result: {} \n\t Tested on: {}'.format(len(genomes) - j, len(genomes), data['fitness'], data['ns']))
 
-	
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
 	ga.ga_log(log)
@@ -424,8 +433,8 @@ end_time = datetime.datetime.now()
 running_time = end_time - start_time
 with open('logs/{}'.format(LOG_FILE_NAME), 'r') as file:
     data = file.readlines()
-data[2] = data[2].strip() + ' ' + str(end_time) + '\n' 
-data[3] = data[3].strip() + ' ' + str(running_time) + '\n' 
+data[3] = data[3].strip() + ' ' + str(end_time) + '\n' 
+data[4] = data[4].strip() + ' ' + str(running_time) + '\n' 
 with open('logs/{}'.format(LOG_FILE_NAME), 'w') as file:
     file.writelines( data )
 
