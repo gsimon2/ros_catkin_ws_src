@@ -11,7 +11,7 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-number_of_vms_on_machine = 8
+number_of_vms_on_machine = 10
 number_of_machines = 1
 
 current_vm = 1
