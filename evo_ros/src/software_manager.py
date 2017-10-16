@@ -272,8 +272,13 @@ def received_genome_multiple_world_eval_callback(recv_data):
 				break
 			time.sleep(1)
 		print('Out of loop!')
+		
 		# If gazebo crashes restart without appending the result
 		if evaluation_result == -2:
+			print('Crashed software. Killing everything and trying again')
+			cmd_str = "killall -9 gzserver gzclient mavproxy.py xterm"
+			os.system(cmd_str)
+			time.sleep(10)
 			i -= 1
 		else:
 			# Push the evalation result and percent complete into the eval_list

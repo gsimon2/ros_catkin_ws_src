@@ -8,7 +8,7 @@ ga_server:
    GA_SEND_PORT: 5000
    GA_RECV_PORT: 5010
    LOG_FILE_NAME: log.dat
-   MAX_WAIT_TIME: 420000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
+   MAX_WAIT_TIME: 300000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
    POP_SIZE: 7 # How large the population size is for each generation
    GEN_COUNT: 30 # How many generations is this experiment going to run for
    MUTATION_PROB: 0.2 #Probability that an individual will have a random gene mutated
