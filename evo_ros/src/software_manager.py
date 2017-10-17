@@ -106,6 +106,8 @@ def software_setup(data):
 	time.sleep(3)
 	cmd_str = "killall -9 gzserver gzclient mavproxy.py xterm"
 	os.system(cmd_str)
+	cmd_str = "pkill -9 -f mavros_node"
+	os.system(cmd_str)
 	if args.debug is False:
 		try:
 			mavproxy.kill()
