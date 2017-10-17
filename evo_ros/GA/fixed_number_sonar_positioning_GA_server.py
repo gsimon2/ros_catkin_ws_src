@@ -228,14 +228,17 @@ class GA(object):
 		self.genomes = child_pop
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		
-	def ga_log(self, log):
+	def ga_log(self, LOG_FILE_NAME):
 		global CURRENT_GEN
+		
+		log = open('logs/{}'.format(LOG_FILE_NAME), 'a')
 		for ind in self.genomes:
 			log.write('{}, {}, {}, {}, '.format(CURRENT_GEN, ind['id'], ind['fitness'], ind['genome']['num_of_sensors']))
 			
 			for sensor in ind['genome']['physical']:
 				log.write('{}, {}, {}, '.format(sensor['pos'][0], sensor['pos'][1], sensor['orient'][2]))
 			log.write('\n')
+		log.close()
 		
 	def get_pop(self):
 		return self.genomes
@@ -378,7 +381,7 @@ for i in range(1,MAX_NUMBER_OF_SONAR+1):
 	ori_z = 'S{}_O'.format(i)
 	log.write('{}, {}, {}, '.format(pos_x, pos_y, ori_z))
 log.write('\n')
-
+log.close()
 
 #Initialize the socket for data
 # Setup the socket to send data out on.
@@ -479,7 +482,7 @@ for i in range(GEN_COUNT):
 
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
-	ga.ga_log(log)
+	ga.ga_log(LOG_FILE_NAME)
 	ga.next_generation()
 	time.sleep(1)
 	

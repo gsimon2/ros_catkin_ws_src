@@ -28,23 +28,7 @@ from rover_ga.msg import waypoint
 last_vehicle_mode = VehicleMode("AUTO")
 last_heading = 0
 
-# Temp function
-#   Remove when integrated into evo-ros
-def load_genome():
-	ind = {'id':0,
-		'genome':{
-			'physical':[
-				{'sensor':'sonar1', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, -20]},
-				{'sensor':'sonar2', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, 20]}
-			],
-			'behavioral':[
-			]
-			},
-		'fitness':-1.0,
-		'generation':0
-		}
-	
-	rospy.set_param('vehicle_genome', ind)
+
 
 # Link States Callbakc
 #	Get the orientation of the chassis of the rover from Gazebo Linked States topic and calculates its heading 
@@ -162,7 +146,6 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 connection_string = '127.0.0.1:14551'
 
 
-#load_genome()
 
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_obstacle_avoidance',anonymous=False)
@@ -195,7 +178,7 @@ time.sleep(2)
 
 # Connect to the Vehicle
 print 'Connecting to vehicle on: %s' % connection_string
-vehicle = connect(connection_string, wait_ready=True)
+vehicle = connect(connection_string, wait_ready=True, heartbeat_timeout = 300)
 
 # Get Vehicle Home location - will be `None` until first set by autopilot
 while not vehicle.home_location:

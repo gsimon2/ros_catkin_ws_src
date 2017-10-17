@@ -111,14 +111,14 @@ def software_ready_callback(data):
 	
 	# If the vehicle was able to finish successfully, give it a time bonus
 	#	Else send back a result of -1 indicating a collision
-	#	Or -2 indicating that the simulation took too long to finish sucessfully
+	#	Or -3 indicating that the simulation took too long to finish sucessfully
 	if percent_complete == 100:
 		current_time = getWorldProp().sim_time 
 		total_sim_time = current_time - begin_time
 		time_fitness = (MAX_SIM_TIME - total_sim_time) / MAX_SIM_TIME
 	else:
 		if sim_timeout == True:
-			time_fitness = -2
+			time_fitness = -3
 		else:
 			time_fitness = -1
 			

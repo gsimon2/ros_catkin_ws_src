@@ -53,6 +53,9 @@ def sim_result_callback(data):
 	# Check when the simulation takes too long to complete and reset the software
 	#	For the next received genome
 	if data.data == -2:
+		print('Reseting stored genome due to software crash')
+		last_physical_genome = []
+	if data.data == -3:
 		print('Reseting stored genome due to sim timeout')
 		last_physical_genome = []
 	evaluation_result = data.data
