@@ -87,6 +87,8 @@ def shutdown_hook():
 	os.system(cmd_str)
 	cmd_str = "pkill -1 -f {}".format(SIM_MANAGER_SCRIPT)
 	os.system(cmd_str)
+	cmd_str = "pkill -9 -f mavros_node"
+	os.system(cmd_str)
 	time.sleep(2)
 	print('Tear down complete. Exiting...')
 
