@@ -101,6 +101,9 @@ def shutdown_hook():
 def software_setup(data):
 	
 	# Tear down this simulation instance
+	cmd_str = "pkill -1 -f {}".format(SIM_MANAGER_SCRIPT)
+	os.system(cmd_str)
+	time.sleep(3)
 	cmd_str = "killall -9 gzserver gzclient mavproxy.py xterm"
 	os.system(cmd_str)
 	if args.debug is False:

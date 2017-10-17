@@ -55,6 +55,11 @@ def software_ready_callback(data):
 	simulation_end = False
 	time_fitness = 0
 	
+	# Clear any old instances of the controller
+	cmd_str = 'pkill -9 -f sonar_placement_evol_controller_GA.py'
+	subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+	time.sleep(1)
+	
 	# Start the controller node for this simulation
 	controller_cmd_str = 'rosrun {} {}'.format('rover_ga', 'sonar_placement_evol_controller_GA.py')
 	if args.debug:
@@ -70,7 +75,10 @@ def software_ready_callback(data):
 		begin_time = getWorldProp().sim_time 
 	except:
 		print('Required processes has failed. Sending reset message to software manager')
+		cmd_str = 'pkill -9 -f sonar_placement_evol_controller_GA.py'
+		subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 		sim_result_pub.publish(-2)
+		exit()
 	
 	# Send a ready message on the evaluation start topic to let controller
 	#	know that the simulation enviroment is ready
@@ -135,6 +143,9 @@ def software_ready_callback(data):
 	rospy.set_param('percent_complete', percent_complete)
 	sim_result_pub.publish(time_fitness)
 	
+	cmd_str = 'pkill -9 -f sonar_placement_evol_controller_GA.py'
+	subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+	
 
 # Old lidar based method of detecting a collision
 def scan_callback(data):
@@ -182,7 +193,20 @@ def waypoint_callback(msg):
 			rospy.set_param('mission_success', True)
 			print('Mission success!')
 		print('Percent Complete {}'.format(percent_complete))
-	
+
+
+### Shutdown Hook ###
+### 	This is the last function executed before the script exits 
+###		Cleans up the controller node
+def shutdown_hook():
+	# Kill the controller node
+	cmd = 'rosnode kill sonar_obstacle_avoidance'
+	subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+	cmd_str = 'pkill -9 -f sonar_placement_evol_controller_GA.py'
+	subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+	print('Tear down complete. Exiting...')
+
+
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""
 Checks ending conditions of the simulation, gathers results, and publishes them on the sim_result topic
@@ -243,6 +267,7 @@ sim_start_sub = rospy.Subscriber('software_ready', std_msgs.msg.Empty, software_
 contact_sensor_sub = rospy.Subscriber("/chassis_contact_sensor_state", ContactsState,contact_test)
 waypoint_sub = rospy.Subscriber('rover/waypoints', waypoint, waypoint_callback)
 print("Done!")
+rospy.on_shutdown(shutdown_hook)
 rospy.spin()
 
 
