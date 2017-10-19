@@ -234,21 +234,21 @@ ts.registerCallback(sonar_callback)
 # Set mode to AUTO to start mission
 vehicle.mode = VehicleMode("AUTO")
 
-while True:
+# carry out the mission and publish updates about what the last waypoint we visited was and how far we have until the next one
+while vehicle.mode != VehicleMode("HOLD"):
 	nextwaypoint=vehicle.commands.next
-	if nextwaypoint==6:
-		vehicle.mode = VehicleMode("RTL")
-		break
-	else:
-		print 'Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint(vehicle))
-	time.sleep(1)
+	time.sleep(0.25)
 
+print 'Returning to launch'
+vehicle.mode = VehicleMode("RTL")
 time.sleep(1)
 
+# Return to launch location and publish update messages about how far away we are
 while vehicle.mode != VehicleMode("HOLD"):
 	print 'Returning to launch'
-	time.sleep(1)
+	time.sleep(0.25)
 
+# Made it to launch (home) location. Publish a message saying so
 
 print('mission complete!')
 rospy.spin()

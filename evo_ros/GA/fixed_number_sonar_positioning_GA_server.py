@@ -214,8 +214,8 @@ class GA(object):
 			winner_index = fitness_list.index(max(fitness_list))			
 			child_pop.append(copy.deepcopy(tourn[winner_index]))
 					
-			child_pop[-1]['id'] = self.child_id
-			self.child_id += 1
+			#child_pop[-1]['id'] = self.child_id
+			#self.child_id += 1
 		
 		
 		#Crossover
@@ -224,9 +224,17 @@ class GA(object):
 		# Mutate genes in the child genomes.
 		child_pop = sonar_random_value_mutation(child_pop, MUTATION_PROB, genome_constraints)
 		
+		
+		# Update the generation of all in child population
 		for child in child_pop:
 			child['generation'] = CURRENT_GEN + 1
-
+			
+			# If the individual is different from last generation (fitness = -1) give it a new ID
+			if child['fitness'] == -1:
+				child['id'] = self.child_id
+				self.child_id += 1
+			
+		
 		self.genomes = child_pop
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		
