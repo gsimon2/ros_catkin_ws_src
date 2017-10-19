@@ -9,7 +9,6 @@ project(rover_ga)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  smach
   std_msgs
   message_generation
 )
