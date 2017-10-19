@@ -40,6 +40,7 @@ ind = {'id':0,
 			]
 			},
 		'fitness':-1.0,
+		'raw_fitness':[],
 		'generation':0
 		}
 
@@ -188,6 +189,7 @@ class GA(object):
 			#print('returned result: {} \t Calc fitness: {}'.format(raw_fitness, rd['fitness']))
 
 			self.genomes[self.id_map[rd['id']]]['fitness'] = rd['fitness']
+			self.genomes[self.id_map[rd['id']]]['raw_fitness'] = raw_fitness
 			
 			if rd['fitness'] > max_fit:
 				max_fit = rd['fitness']
@@ -237,6 +239,10 @@ class GA(object):
 			
 			for sensor in ind['genome']['physical']:
 				log.write('{}, {}, {}, '.format(sensor['pos'][0], sensor['pos'][1], sensor['orient'][2]))
+				
+			
+			for element in ind['raw_fitness']:
+				log.write('{}, '.format(element))
 			log.write('\n')
 		log.close()
 		
@@ -380,6 +386,7 @@ for i in range(1,MAX_NUMBER_OF_SONAR+1):
 	pos_y = 'S{}_P_Y'.format(i)
 	ori_z = 'S{}_O'.format(i)
 	log.write('{}, {}, {}, '.format(pos_x, pos_y, ori_z))
+log.write('Raw Fitness')
 log.write('\n')
 log.close()
 
