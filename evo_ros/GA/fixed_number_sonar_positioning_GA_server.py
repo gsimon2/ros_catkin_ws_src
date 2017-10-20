@@ -1,9 +1,8 @@
 """
 Fixed Number Sonar positioning GA
-GAS 2017-10-11
+GAS 2018-10-20
 
-This GA will evolve the number of sonars on the rover as well as their positions.
-It will make use of a controller on the rover that is capable of handling a variable number of sonars (upto 10).
+Evolve positioning of a fixed number of sonars on the rover
 
 """
  
@@ -24,7 +23,7 @@ import yaml
 from GA_operators import sonar_random_value_mutation
 from GA_operators import sonar_single_point_crossover
 
-MAX_NUMBER_OF_SONAR = 1
+MAX_NUMBER_OF_SONAR = 2
 
 # Individual structure and default values
 ind = {'id':0,
@@ -98,10 +97,12 @@ class GA(object):
 		
 		self.pop_size = POP_SIZE
 		self.genomes = []
+		self.child_pop = []
 		
 		i = 0
 		
 		# Seed the initial population with a rover with a single forward facing sonar
+		"""
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
@@ -110,10 +111,10 @@ class GA(object):
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i +=1
-		
+		"""
 		
 		# Seed the initial population with a rover that has two sonars on the front corners facing slightly outward
-		"""
+		
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
@@ -124,7 +125,7 @@ class GA(object):
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
-		"""
+		
 		
 		#Initialize rest of population with random genomes
 		while (i < self.pop_size):
@@ -155,9 +156,11 @@ class GA(object):
 			i += 1
 		
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
+		self.child_id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		self.elite_ind = -1
 		self.child_id = self.pop_size
-		
+		self.child_pop = copy.deepcopy(self.genomes)
+		self.genomes = []
 		
 	# Fitness is based off of 3 factors
 	#	1 - Percent of course that the rover was able to complete
@@ -188,61 +191,73 @@ class GA(object):
 			
 			#print('returned result: {} \t Calc fitness: {}'.format(raw_fitness, rd['fitness']))
 
-			self.genomes[self.id_map[rd['id']]]['fitness'] = rd['fitness']
-			self.genomes[self.id_map[rd['id']]]['raw_fitness'] = raw_fitness
+			self.child_pop[self.child_id_map[rd['id']]]['fitness'] = rd['fitness']
+			self.child_pop[self.child_id_map[rd['id']]]['raw_fitness'] = raw_fitness
 			
 			if rd['fitness'] > max_fit:
 				max_fit = rd['fitness']
-				self.elite_ind = copy.deepcopy(self.genomes[self.id_map[rd['id']]])
+				self.elite_ind = copy.deepcopy(self.child_pop[self.child_id_map[rd['id']]])
 		
 		print('\n\n Winning Ind for generation {}:\n {}\n'.format(CURRENT_GEN,self.elite_ind))
 		return
 		
+		
+	# performs cross over and mutation to create children from the current population
+	def create_children_population(self):
+		self.child_pop = []
+		population_pool = copy.deepcopy(self.genomes)
+		
+		#Crossover
+		population_pool = sonar_single_point_crossover(population_pool, CROSS_OVER_PROB)
+
+		# Mutate genes in the population pool.
+		population_pool = sonar_random_value_mutation(population_pool, MUTATION_PROB, genome_constraints)
+		
+		# Filter out any children or mutated individuals by looking for a fitness of -1
+		child_pop = []
+		for ind in population_pool:
+			if ind['fitness'] == -1:
+				ind['id'] = self.child_id
+				self.child_id += 1
+				self.child_pop.append(ind)
+		
+		print('Size of child pop: {}'.format(len(self.child_pop)))
+		self.child_id_map = {k:v for k,v in zip([x['id'] for x in self.child_pop],[i for i in range(len(self.child_pop))])}
+		print('Child mapping: {}'.format(self.child_id_map))
+		#return self.child_pop
+		
+		
+		
 	def next_generation(self):
-		""" Modify the population for the next generation. """
-		child_pop = [copy.deepcopy(self.elite_ind)]
+		population_pool = self.genomes + self.child_pop
+		next_generation = []
+		next_generation.append(copy.deepcopy(self.elite_ind))
 		
 		# Perform tournament selection.
-		
-		for i in range(len(self.genomes)-1):
-			tourn = random.sample(self.genomes,TOURNAMENT_SIZE)
+		for i in range(self.pop_size-1):
+			tourn = random.sample(population_pool,TOURNAMENT_SIZE)
 						
 			fitness_list = []
 			for ind in tourn:
 				fitness_list.append(ind['fitness'])
 			
 			winner_index = fitness_list.index(max(fitness_list))			
-			child_pop.append(copy.deepcopy(tourn[winner_index]))
-					
-			#child_pop[-1]['id'] = self.child_id
-			#self.child_id += 1
+			next_generation.append(copy.deepcopy(tourn[winner_index]))
 		
+		self.genomes = next_generation
 		
-		#Crossover
-		child_pop = sonar_single_point_crossover(child_pop, CROSS_OVER_PROB)
-
-		# Mutate genes in the child genomes.
-		child_pop = sonar_random_value_mutation(child_pop, MUTATION_PROB, genome_constraints)
-		
-		
-		# Update the generation of all in child population
-		for child in child_pop:
-			child['generation'] = CURRENT_GEN + 1
-			
-			# If the individual is different from last generation (fitness = -1) give it a new ID
-			if child['fitness'] == -1:
-				child['id'] = self.child_id
-				self.child_id += 1
-			
-		
-		self.genomes = child_pop
-		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		
 	def ga_log(self, LOG_FILE_NAME):
 		global CURRENT_GEN
 		
+		# The initial population is only stored in the child_pop
+		if CURRENT_GEN == 0:
+			population = self.child_pop
+		else:
+			population = self.genomes
+			
 		log = open('logs/{}'.format(LOG_FILE_NAME), 'a')
-		for ind in self.genomes:
+		for ind in population:
 			log.write('{}, {}, {}, {}, '.format(CURRENT_GEN, ind['id'], ind['fitness'], ind['genome']['num_of_sensors']))
 			
 			for sensor in ind['genome']['physical']:
@@ -425,7 +440,7 @@ for i in range(GEN_COUNT):
 	CURRENT_GEN = i
 	
 	#genomes = ga.get_pop()
-	genomes = ga.get_unevaluated_pop()
+	genomes = ga.child_pop
 	print('\n\nSending new generation!!!')
 	print('{} individuals need to be evaluated'.format(len(genomes)))
 	
@@ -484,21 +499,12 @@ for i in range(GEN_COUNT):
 					#sendThread.start()
 					#sendThread.join()
 					sys.exit()
-		
-	
-	
-#	if len(genomes) > 0 :
-#		j = len(genomes)
-#		while j > 0:
-#			data = json.loads(receiver.recv())
-#			return_data.append({'id':data['id'], 'fitness':data['fitness']})
-#			j -= 1
-#			print('{}/{} genomes recv\'d. Result: {} \n\t Tested on: {}'.format(len(genomes) - j, len(genomes), data['fitness'], data['ns']))
-
+					
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
 	ga.ga_log(LOG_FILE_NAME)
 	ga.next_generation()
+	ga.create_children_population()
 	time.sleep(1)
 	
 #Tear down evo-ros framework
