@@ -45,7 +45,7 @@ def get_distance_metres(aLocation1, aLocation2):
     #print("Dlat: {} \t Dlong:{}".format(dlat, dlong))
     return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
     
-    
+
 def angle_to_current_waypoint(vehicle):
 	nextwaypoint = vehicle.commands.next
 	if nextwaypoint==0:

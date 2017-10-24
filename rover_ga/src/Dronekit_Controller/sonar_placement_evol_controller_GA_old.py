@@ -18,7 +18,7 @@ from mavros_msgs.msg import OverrideRCIn
 import std_msgs.msg
 import numpy as np
 import message_filters
-from obstacle_avoidance_functions import partition_vision, check_vision, parse_genome, findMiddle, ErleRover_Obstacle_Avoidance, sonar_avoidance, sonar_hybrid_avoidance
+from obstacle_avoidance_functions import partition_vision, check_vision, parse_genome, findMiddle, ErleRover_Obstacle_Avoidance, sonar_avoidance
 import mav_msgs.msg as mav_msgs
 
 from gazebo_msgs.msg import LinkStates
@@ -29,23 +29,6 @@ last_vehicle_mode = VehicleMode("AUTO")
 last_heading = 0
 
 
-# Temp function
-#   Remove when integrated into evo-ros
-def load_genome():
-	ind = {'id':0,
-		'genome':{
-			'physical':[
-				{'sensor':'sonar1', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, -20]},
-				{'sensor':'sonar2', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, 20]}
-			],
-			'behavioral':[
-			]
-			},
-		'fitness':-1.0,
-		'generation':0
-		}
-	
-	rospy.set_param('vehicle_genome', ind)
 
 # Link States Callbakc
 #	Get the orientation of the chassis of the rover from Gazebo Linked States topic and calculates its heading 
@@ -105,7 +88,9 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 	global history_queue
 	global last_heading
 	
+	
 	ang = angle_to_current_waypoint(vehicle)
+	#print('Bearing: {} \t Heading: {}'.format(ang, last_heading))
 		
 	sonar_ranges = {}
 	range_max = 2.5
@@ -132,21 +117,16 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 		if(vehicle.mode != VehicleMode("MANUAL")):
 			#print('Object detected! Obstacle avoidance engaged!')
 			last_vehicle_mode = vehicle.mode
-					
-		# Use obstacle avoidance algorithms
-		#	Hybrid method if we still have distance between the rover and the obstacle
-		#	If we are getting close to the obstacle, go into pure obstacle avoidance mode
-		if all(i >= hybrid_zone_cutoff for i in sonar_ranges.values()):
-			if last_vehicle_mode == VehicleMode('RTL'):
-				return
-			else:
-				nav_cmds = sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, ang, last_heading)
-				print('hybrid')
-		else:
-			nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
-			print('pure OA')
-		
 		vehicle.mode = VehicleMode("MANUAL")
+		
+		
+		# Use obstacle avoidance algorithm
+		nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
+		
+		
+		
+		
+					
 		msg = OverrideRCIn()
 		msg.channels[0] = nav_cmds['yaw']
 		msg.channels[1] = 0
@@ -164,7 +144,7 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 
 
 connection_string = '127.0.0.1:14551'
-load_genome()
+
 
 
 ### Set up ROS subscribers and publishers ###
@@ -228,8 +208,6 @@ ts.registerCallback(sonar_callback)
 
 # Set mode to AUTO to start mission
 vehicle.mode = VehicleMode("AUTO")
-while not vehicle.mode.name=='AUTO':
-	pass
 
 # carry out the mission and publish updates about what the last waypoint we visited was and how far we have until the next one
 while vehicle.mode != VehicleMode("HOLD"):
@@ -244,8 +222,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 
 print 'Returning to launch'
 vehicle.mode = VehicleMode("RTL")
-while not vehicle.mode.name=='RTL':
-	pass
+time.sleep(1)
 
 # Return to launch location and publish update messages about how far away we are
 while vehicle.mode != VehicleMode("HOLD"):
