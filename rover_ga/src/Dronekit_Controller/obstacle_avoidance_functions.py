@@ -364,8 +364,39 @@ def sonar_avoidance(sonar_ranges, sonar_angles, range_max):
 
 # Sonar Hybrid Obstacle Avoidance / Way point Following
 #	Tries to avoidance obstaces, but still takes into account the vechile heading and the bearing to the next waypoint
-def sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, bearing_to_waypoint, heading):
-	nav_cmds = drive_at_bearing(bearing_to_waypoint, heading)
+def sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, bearing, heading):
+	nav_cmds = {'throttle':1900,'yaw':1500}
+	
+	# Get the direction that we need to turn 
+	#	Positive = Right	Negative = Left
+	heading_diff = bearing - heading
+	
+	# Cap the heading diff at the max steering angle for the rover
+	#	Max steering angle found in apm_plugin_gazebo_side.cpp in the rover folder of the ardupilot/Gazebo plugin package
+	max_steering_ang = 88.544 / 2 # Divide by 2 becuase They measure the ang has wheel direction left to right, we want ang from center
+	if heading_diff > max_steering_ang:
+		heading_diff = max_steering_ang
+	if heading_diff < -1 * max_steering_ang:
+		heading_diff = -1 * max_steering_ang
+		
+	# Find the turn ratio
+	#	0 = straight	0.5 = turn right at half max strength	-1 = turn left at full max strength		etc
+	turn_ratio = heading_diff / max_steering_ang
+	
+	
+	# Scan the sonar to see if any are pointing in the direction of the heading
+	for sonar_id in sonar_ranges:
+		if sonar_angles[sonar_id] - 10 <= heading_diff <= sonar_angles[sonar_id] + 10:
+			# Detect if object within range
+			if sonar_ranges[sonar_id] < range_max:
+				#print('Object between me and waypoint')
+				
+	# Convert the turn ratio into a yaw command to head the rover to the next waypoint
+	nav_cmds['yaw'] = 1500 + ( 400 * turn_ratio)	
+	
+	
+	
+	
 	return nav_cmds
 	
 	

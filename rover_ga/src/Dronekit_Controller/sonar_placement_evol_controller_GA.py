@@ -141,10 +141,10 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 				return
 			else:
 				nav_cmds = sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, ang, last_heading)
-				print('hybrid')
+				#print('hybrid')
 		else:
 			nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
-			print('pure OA')
+			#print('pure OA')
 		
 		vehicle.mode = VehicleMode("MANUAL")
 		msg = OverrideRCIn()
