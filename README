@@ -1,6 +1,6 @@
 README
 
-
+----
 Region Events
 - Overview
 Provides a ros service that can be launched to listen to the Gazebo topic '~region' and echo the contents onto the ros topic 'ros_regions'
