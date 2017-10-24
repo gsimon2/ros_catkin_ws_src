@@ -136,15 +136,17 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 		# Use obstacle avoidance algorithms
 		#	Hybrid method if we still have distance between the rover and the obstacle
 		#	If we are getting close to the obstacle, go into pure obstacle avoidance mode
-		if all(i >= hybrid_zone_cutoff for i in sonar_ranges.values()):
-			if last_vehicle_mode == VehicleMode('RTL'):
-				return
-			else:
-				nav_cmds = sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, ang, last_heading)
-				#print('hybrid')
-		else:
-			nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
-			#print('pure OA')
+#		if all(i >= hybrid_zone_cutoff for i in sonar_ranges.values()):
+#			if last_vehicle_mode == VehicleMode('RTL'):
+#				return
+#			else:
+#				nav_cmds = sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, ang, last_heading)
+#				#print('hybrid')
+#		else:
+#			nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
+#			#print('pure OA')
+			
+		nav_cmds = sonar_avoidance(sonar_ranges, sonar_angles, range_max)
 		
 		vehicle.mode = VehicleMode("MANUAL")
 		msg = OverrideRCIn()
