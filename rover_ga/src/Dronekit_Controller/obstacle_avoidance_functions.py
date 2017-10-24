@@ -389,6 +389,7 @@ def sonar_hybrid_avoidance(sonar_ranges, sonar_angles, range_max, bearing, headi
 		if sonar_angles[sonar_id] - 10 <= heading_diff <= sonar_angles[sonar_id] + 10:
 			# Detect if object within range
 			if sonar_ranges[sonar_id] < range_max:
+				pass
 				#print('Object between me and waypoint')
 				
 	# Convert the turn ratio into a yaw command to head the rover to the next waypoint
