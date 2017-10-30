@@ -122,6 +122,11 @@ def software_setup(data):
 			pass
 	time.sleep(3)
 
+
+	# Clear the Gazebo logs 
+	cmd_str =  "rm -rf ~/.gazebo/log/*"
+	os.system(cmd_str)
+	
 	# Get host name of machine #
 	str_host_name = socket.gethostname()
 
