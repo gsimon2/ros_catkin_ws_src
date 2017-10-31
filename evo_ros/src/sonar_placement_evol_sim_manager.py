@@ -193,6 +193,7 @@ def waypoint_callback(msg):
 			rospy.set_param('mission_success', True)
 			print('Mission success!')
 		print('Percent Complete {}'.format(percent_complete))
+		rospy.set_param('percent_complete', percent_complete)
 
 
 ### Shutdown Hook ###
@@ -203,6 +204,12 @@ def shutdown_hook():
 	cmd = 'rosnode kill sonar_obstacle_avoidance'
 	subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
 	cmd_str = 'pkill -9 -f sonar_placement_evol_controller_GA.py'
+	subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
+	
+	# Kill the sonar filter node
+	cmd = 'rosnode kill sonar_filter'
+	subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+	cmd_str = 'pkill -9 -f sonar_filter.py'
 	subprocess.Popen(cmd_str, stdout=subprocess.PIPE, shell=True)
 	print('Tear down complete. Exiting...')
 

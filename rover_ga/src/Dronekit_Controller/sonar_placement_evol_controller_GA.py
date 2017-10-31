@@ -10,7 +10,6 @@ import sys
 import rospy
 import tf
 import argparse
-from pymavlink import mavutil
 from dronekit_functions import get_location_metres, get_distance_metres, distance_to_current_waypoint, download_mission, adds_square_mission, is_vehicle_home, angle_to_current_waypoint
 from sensor_msgs.msg import LaserScan
 from sensor_msgs.msg import Range
@@ -118,8 +117,9 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 	for j in range (1,11):
 		current_sonar = 'sonar' + str(j)
 		if eval(current_sonar) is not '':
-			range_max = eval(current_sonar).max_range  - 0.5
-			sonar_ranges[current_sonar] = eval(current_sonar).range
+			if eval(current_sonar).range > float(-1):
+				range_max = eval(current_sonar).max_range  - 0.5
+				sonar_ranges[current_sonar] = eval(current_sonar).range
 			
 			
 	# Check to see if an object is in the path of the rover
@@ -166,8 +166,6 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 
 
 connection_string = '127.0.0.1:14551'
-load_genome()
-
 
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_obstacle_avoidance',anonymous=False)
@@ -184,10 +182,10 @@ time.sleep(3)
 topics_list = rospy.get_published_topics()
 
 for j in range(1,11):
-	sonar_topic = '/sonar' + str(j)
+	sonar_topic = '/sonar_filtered' + str(j)
 	#print('Sonar topic {}'.format(sonar_topic))
 	if [sonar_topic, 'sensor_msgs/Range'] in topics_list:
-		#print('Adding sonar {}'.format(j))
+		print('Adding sonar {}'.format(j))
 		sonar_sub_list.append(message_filters.Subscriber(sonar_topic, Range))
 
 #print('Detected sonars: {}'.format(sonar_sub_list))
@@ -248,6 +246,7 @@ print 'Returning to launch'
 vehicle.mode = VehicleMode("RTL")
 while not vehicle.mode.name=='RTL':
 	pass
+time.sleep(1)
 
 # Return to launch location and publish update messages about how far away we are
 while vehicle.mode != VehicleMode("HOLD"):

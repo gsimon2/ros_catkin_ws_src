@@ -40,7 +40,7 @@ evaluation_result = ''
 random.seed(datetime.datetime.now())
 
 # The current generation of genomes that is being evaluated
-GENERATION = 0
+GENERATION = -1
 
 
 	
@@ -200,6 +200,17 @@ def software_setup(data):
 	print('Started launch file!')
 	time.sleep(5)
 			
+	# Start filter node
+	filter_cmd_str = 'rosrun evo_ros sonar_filter.py'
+	if SENSOR_KNOCKOUT:
+		filter_cmd_str += ' --knockout'
+	if args.debug:
+		filter_cmd_str += ' -d'
+		os.system("xterm -hold -e '{}'&".format(filter_cmd_str))
+	else:
+		subprocess.Popen(filter_cmd_str, stdout=subprocess.PIPE, shell=True)
+	time.sleep(2)
+	
 	# Start Sim manager node
 	if SIM_MANAGER_SCRIPT is not '':
 		sim_manager_cmd_str = "rosrun {} {}".format(SIM_MANAGER_PACKAGE, SIM_MANAGER_SCRIPT)
@@ -255,6 +266,8 @@ def received_genome_multiple_world_eval_callback(recv_data):
 	# Update Generation
 	if GENERATION != data['generation']:
 		GENERATION = data['generation']
+		rospy.set_param('generation', GENERATION)
+	
 		
 	print('Current generation: {}'.format(data['generation']))
 	
@@ -335,6 +348,7 @@ def received_genome_callback(recv_data):
 	# Update Generation
 	if GENERATION != data['generation']:
 		GENERATION = data['generation']
+		rospy.set_param('generation', GENERATION)
 		
 	print('Current generation: {}'.format(data['generation']))
 	
@@ -385,6 +399,7 @@ parser.add_argument('--less_wait',action='store_true',help='Minimize the sleep t
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
 parser.add_argument('-v', '--vehicle', type=str, help='Type of vehicle being used \n\t Accepts: \'rover\' and \'copter\'')
 parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
+parser.add_argument('-k','--knockout',action='store_true', help='Knocks out a sensor based off of generation and percent complete')
 args= parser.parse_args()
 
 
@@ -402,6 +417,12 @@ if args.debug:
 with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
+# Sensor knockout
+#	If sensors will fail during the run
+if args.knockout:
+	SENSOR_KNOCKOUT = True
+else:
+	SENSOR_KNOCKOUT = cfg['software_manager']['SENSOR_KNOCKOUT']
 
 # Default GUI state for running Gazebo
 #	Note: Headless and GUI should always be opposite of each other

@@ -12,7 +12,7 @@
   <arg name="gui" default="true"/>
   
   
- 	<arg name="world_name" default="$(find rover_ga)/worlds/field/field_with_boxes.sdf"/>
+ 	<arg name="world_name" default="$(find rover_ga)/worlds/field/field_with_labled_waypoints.sdf"/>
 
   
   
@@ -20,7 +20,7 @@
   <arg name="name" default="rover"/>
  
   
-  <arg name="model" default="$(find ardupilot_sitl_gazebo_plugin)/urdf/rover.urdf"/>
+  <arg name="model" default="$(find ardupilot_sitl_gazebo_plugin)/urdf/early_double_optimal_run1.urdf"/>
   
   
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
