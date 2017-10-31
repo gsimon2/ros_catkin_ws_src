@@ -212,8 +212,16 @@ while not vehicle.home_location:
 print "\n Home location: %s" % vehicle.home_location
 
 
-print 'Create a new mission (for current location)'
-adds_square_mission(vehicle, vehicle.location.global_frame,5)
+# Create a new mission (for current location)'
+result = int(rospy.get_param('vehicle_genome')['generation']) % 2
+print('\t\t result: {}'.format(result))
+if result == 0:
+	direction = 'clockwise'
+	print('Going clockwise')
+else:
+	direction = 'counter_clockwise'
+	print('Going counter_clockwise')
+adds_square_mission(vehicle, vehicle.location.global_frame,5, direction)
 time.sleep(1)
 
 print "Starting mission"

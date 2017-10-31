@@ -218,6 +218,7 @@ class GA(object):
 		for ind in population_pool:
 			if ind['fitness'] == -1:
 				ind['id'] = self.child_id
+				ind['generation'] = CURRENT_GEN + 1
 				self.child_id += 1
 				self.child_pop.append(ind)
 		
