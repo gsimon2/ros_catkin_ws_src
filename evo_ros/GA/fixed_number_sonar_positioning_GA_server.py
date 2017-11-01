@@ -270,6 +270,7 @@ class GA(object):
 			log.write('\n')
 		log.close()
 		
+		
 	def get_pop(self):
 		return self.genomes
 	
@@ -458,6 +459,7 @@ for i in range(GEN_COUNT):
 	# Wait for the send thread to complete.
 	sendThread.join()
 	
+	exit_loop = False
 	
 	if len(genomes) > 0 :
 		j = len(genomes)
@@ -499,8 +501,12 @@ for i in range(GEN_COUNT):
 					#sendThread.send_tear_down_msg()
 					#sendThread.start()
 					#sendThread.join()
-					sys.exit()
-					
+					#sys.exit()
+					exit_loop = True
+					break
+	if exit_loop:
+		break
+	
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
 	ga.ga_log(LOG_FILE_NAME)
