@@ -99,7 +99,9 @@ def software_ready_callback(data):
 		except:
 			print('Required processes has failed. Sending reset message to software manager')
 			sim_result_pub.publish(-2)
-		if (current_time - begin_time) > MAX_SIM_TIME:
+		running_time = current_time - begin_time
+		rospy.set_param('running_time', running_time)
+		if (running_time) > MAX_SIM_TIME:
 			print("Simulation timed out.")
 			simulation_end = True
 			sim_timeout = True

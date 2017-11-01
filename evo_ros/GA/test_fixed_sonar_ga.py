@@ -100,60 +100,48 @@ class GA(object):
 		self.child_pop = []
 		
 		i = 0
-		
-		
-		# Seed the initial population with a rover with a single forward facing sonar
-	# 95
-		
+
+
+		#34, 285, 17.010634203, 2, 0.224, -0.037, -21.0, 0.023, -0.131, 17.0, 0.389, 100.0, 0.164925925926, 100.0, 0.313111111111, 100.0, 
+	# Run 1 Winner
 		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
-		new_ind['generation'] = CURRENT_GEN
-		new_ind['genome']['num_of_sensors'] = 1
-		new_sonar = {'sensor':'sonar1', 'pos':[0.248,0.045,0.17], 'orient':[0,-14,-26]}
-		new_ind['genome']['physical'].append(new_sonar)
-		self.genomes.append(new_ind)
-		i +=1
-		
-		
-		
-		11, 95, 16.9510893277, 2, 0.224, -0.037, -7.0, 0.078, -0.039, 17.0, 0.371564814815, 100.0, 0.180546296296, 100.0, 0.294685185185, 100.0, 
-		6, 2, 12.5375588026, 2, 0.003, 0.101, -44.0, 0.059, 0.149, -5.0, 0.357342592593, 100.0, -1.0, 0.0, 0.301990740741, 100.0, 
-		
-		
-		# Seed the initial population with a rover that has two sonars on the front corners facing slightly outward
-	# 95
-		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
+		new_ind['id'] = 285
 		new_ind['generation'] = CURRENT_GEN
 		new_ind['genome']['num_of_sensors'] = 2
-		new_sonar = {'sensor':'sonar1', 'pos':[0.224,-0.037,0.17], 'orient':[0,-14,-7]}
+		new_sonar = {'sensor':'sonar1', 'pos':[0.224,-0.037,0.17], 'orient':[0,-14,-21]}
 		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar2', 'pos':[0.078,-0.039,0.17], 'orient':[0,-14,17]}
+		new_sonar = {'sensor':'sonar2', 'pos':[0.023,-0.131,0.17], 'orient':[0,-14,17]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
-	# 2
+		
+				
+		#34, 485, 17.5623269182, 2, 0.021, -0.1, -20, 0.223, 0.144, -1.0, 0.388287037037, 100.0, 0.280231481481, 100.0, 0.412796296296, 100.0, 
+	# Run 2 winner
 		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
+		new_ind['id'] = 485
 		new_ind['generation'] = CURRENT_GEN
 		new_ind['genome']['num_of_sensors'] = 2
-		new_sonar = {'sensor':'sonar1', 'pos':[0.003,0.101,0.17], 'orient':[0,-14,-44]}
+		new_sonar = {'sensor':'sonar1', 'pos':[0.021,-0.1,0.17], 'orient':[0,-14,-20]}
 		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar2', 'pos':[0.059,0.149,0.17], 'orient':[0,-14,-5]}
+		new_sonar = {'sensor':'sonar2', 'pos':[0.223,0.144,0.17], 'orient':[0,-14,-1]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
-	# 0
+				
+		# 39, 146, 17.5541551305, 2, 0.039, 0.076, -28.0, 0.093, -0.094, 7.0, 0.396027777778, 100.0, 0.276342592593, 100.0, 0.405777777778, 100.0, 
+	# Run 3 winner
 		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
+		new_ind['id'] = 146
 		new_ind['generation'] = CURRENT_GEN
 		new_ind['genome']['num_of_sensors'] = 2
-		new_sonar = {'sensor':'sonar1', 'pos':[0.25,-0.1,0.17], 'orient':[0,-14,-20]}
+		new_sonar = {'sensor':'sonar1', 'pos':[0.039,0.076,0.17], 'orient':[0,-14,-28]}
 		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar2', 'pos':[0.25,0.1,0.17], 'orient':[0,-14,20]}
+		new_sonar = {'sensor':'sonar2', 'pos':[0.093,-0.094,0.17], 'orient':[0,-14,7]}
 		new_ind['genome']['physical'].append(new_sonar)
 		self.genomes.append(new_ind)
 		i += 1
+	
 		
 		#Initialize rest of population with random genomes
 		while (i < self.pop_size):

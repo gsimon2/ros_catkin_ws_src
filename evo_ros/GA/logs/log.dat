@@ -1,11 +1,11 @@
 *****Sonar Placement GA Expirement*****
-Start Time: 2017-10-31 14:17:32.870344
-Rand_seed:16
-End Time: 2017-10-31 14:26:10.846375
-Running Time: 0:08:32.984159
-Population size:1
-Generation Count:4
-Mutation Probability:1.0
+Start Time: 2017-11-01 14:30:07.134763
+Rand_seed:8
+End Time: 
+Running Time: 
+Population size:3
+Generation Count:1
+Mutation Probability:0.15
 Cross Over Probability:0.25
 ***** Constraints *****
 Max Number of Sensors: 2
@@ -14,7 +14,3 @@ Y Position: [-0.15, 0.15]
 Z Orient: [-90, 90]
 *****************************
 Generation, ID, Fitness, Number of Sonar, S1_P_X, S1_P_Y, S1_O, S2_P_X, S2_P_Y, S2_O, Raw Fitness
-0, 0, 1.20291449864, 2, 0.25, -0.1, -20, 0.25, 0.1, 20, -1.0, 9.67745888027, 
-1, 0, 1.20291449864, 2, 0.25, -0.1, -20, 0.25, 0.1, 20, -1.0, 9.67745888027, 
-2, 1, 2.00538024636, 2, 0.25, -0.016, -20, 0.25, 0.1, 20, -1.0, 41.6114489143, 
-3, 2, 5.88861396099, 2, 0.25, 0.04, -20, 0.25, 0.1, 20, 0.374268518519, 100.0, 

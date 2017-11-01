@@ -9,6 +9,7 @@ import os
 import rospy
 import sys
 import argparse
+import random
 
 from sensor_msgs.msg import Range
 import message_filters
@@ -20,9 +21,12 @@ SENSOR_STATUS = 'ON'
 KNOCKOUT_SENSOR = ''
 GENERATION = -1
 
-# Takes the data present on unfiltered topics and forwards it on filtered
-#	Can interject noise or completely clear the range data before forwarding it
-def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = '', sonar6 = '', sonar7 = '', sonar8 = '', sonar9 = '', sonar10 = ''):
+KNOCKOUT_TIME = 0
+
+
+# Percent complete knockout
+#	Starting at KNOCKOUT_POINT one sensor fails and then will toggle between working and failing states every KNOCKOUT_INTERVAL
+def percent_complete_knockout(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = '', sonar6 = '', sonar7 = '', sonar8 = '', sonar9 = '', sonar10 = ''):
 	global KNOCKOUT_POINT
 	global SENSOR_STATUS
 	
@@ -61,7 +65,34 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 					eval(current_sonar).range = float(-1)
 					
 			eval(current_sonar_pub).publish(eval(current_sonar))
+
+
+# Single complete knockout
+#	Starting at a simulated time  a sensor will be knocked out and remain off for the rest of the run
+def single_complete_knockout(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = '', sonar6 = '', sonar7 = '', sonar8 = '', sonar9 = '', sonar10 = ''):
+	global SENSOR_STATUS
+	running_time = rospy.get_param('running_time') 
+	for j in range (1,11):
+		current_sonar = 'sonar' + str(j)
+		current_sonar_pub = current_sonar + '_pub'
+		
+		if eval(current_sonar) is not '':
 			
+			# Update the knock out status if the vehicle is past the knockout point
+			if running_time >= KNOCKOUT_TIME:
+				# Toggle whether this sensor is working or not
+				if SENSOR_STATUS == 'ON':
+					SENSOR_STATUS = 'OFF'
+					
+					if args.debug:
+						print('Turning off: {}'.format(KNOCKOUT_SENSOR))
+				
+			# If the sensor is knocked out, clear the range data before publishing
+			if current_sonar == KNOCKOUT_SENSOR:
+				if SENSOR_STATUS == 'OFF':
+					eval(current_sonar).range = float(-1)
+					
+			eval(current_sonar_pub).publish(eval(current_sonar))		
 
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""Bypass for sonar topics so noise can be added or sonar signals can be cutout during the run""")
@@ -76,6 +107,7 @@ if args.knockout:
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_filter',anonymous=False)
 rospy.set_param('percent_complete', 0)
+rospy.set_param('running_time', 0)
 
 sonar1_pub = rospy.Publisher('/sonar_filtered1', Range, queue_size=10)
 sonar2_pub = rospy.Publisher('/sonar_filtered2', Range, queue_size=10)
@@ -105,16 +137,19 @@ for j in range(1,11):
 
 ### Set up a single callback function for all sonars ###
 ts = message_filters.TimeSynchronizer(sonar_sub_list, 10)
-ts.registerCallback(sonar_callback)
+ts.registerCallback(single_complete_knockout)
 
 ### If Knockout, Determine which sensor we are knocking out ###
 if KNOCKOUT:
 	GENERATION = rospy.get_param('generation')
+	random.seed(GENERATION)
+	KNOCKOUT_TIME = random.randrange(40,80,1)
 	number_of_sensors = rospy.get_param('vehicle_genome')['genome']['num_of_sensors']
 	knockout_number = (GENERATION % number_of_sensors) + 1
 	KNOCKOUT_SENSOR = 'sonar' + str(knockout_number)
 	
 	if args.debug:
 		print('Gen: {} \t Num sensors: {} \t knockout num: {}'.format(GENERATION, number_of_sensors, knockout_number))
+		print('knockout time: {} '.format(KNOCKOUT_TIME))
 	
 rospy.spin()
