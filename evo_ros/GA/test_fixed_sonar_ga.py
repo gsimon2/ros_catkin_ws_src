@@ -475,6 +475,7 @@ for i in range(GEN_COUNT):
 	# Wait for the send thread to complete.
 	sendThread.join()
 	
+	exit_loop = False
 	
 	if len(genomes) > 0 :
 		j = len(genomes)
@@ -511,12 +512,10 @@ for i in range(GEN_COUNT):
 				if user_input is 'r':
 					resend(genomes, socket, return_data)
 				else:
-					#Tear down evo-ros framework
-					#sendThread = SenderThread(1, socket, '')
-					#sendThread.send_tear_down_msg()
-					#sendThread.start()
-					#sendThread.join()
-					sys.exit()
+					exit_loop = True
+					break
+	if exit_loop:
+		break
 					
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
