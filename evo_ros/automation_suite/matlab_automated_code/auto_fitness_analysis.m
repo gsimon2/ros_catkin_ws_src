@@ -1,16 +1,20 @@
 %% Creates a scatter plot of the fitnesses for each generation and overlays a plot of average and best fitness
 %
-% Must be in the evo_ros directory
 %
-% GAS 10-30-17
+% GAS 11-8-17
+
+%% Automation set up
+fig = figure;
+save_dir = strcat('~/simulation/ros_catkin_ws/src/evo_ros', plot_dir);
+title_string = file_name(1:end-4);
+title_string = strcat(title_string,' Generation vs Fitness');
+title(title_string, 'Interpreter', 'none');
+save_file_name = strcat(file_name(1:end-4),'_generation_vs_fitness.png')
 
 %% Read in table and set up plotting arrays
-cd('./GA/logs');
-file_name = 'single_sonar_evolution_40pop_60gen_run1.dat';
-file_name = 'double_sonar_with_knockout_run1.dat';
-title('Fitness vs Generation')
+cd('~/simulation/ros_catkin_ws/src/evo_ros/GA/logs');
 table = readtable(file_name);
-cd('../../')
+cd(save_dir)
 hold on
 avg = [];
 best = [];
@@ -42,7 +46,10 @@ end
 %% Plot average line in red and best in blue
 plot(generation,avg,'r')
 plot(generation,best,'b')
-legend('Average Fitness','Best Fitness')
+legend('Average Fitness','Best Fitness', 'location', 'best')
 xlabel('Generation')
 ylabel('Fitness')
 hold off
+
+saveas(fig,save_file_name);
+close(fig)
