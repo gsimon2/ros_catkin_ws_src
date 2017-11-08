@@ -4,10 +4,12 @@
 %
 % GAS 10-30-17
 
+fig = figure;
+
 %% Read in table and set up plotting arrays
 cd('./GA/logs');
 %file_name = 'single_sonar_evolution_40pop_60gen_run1.dat';
-file_name = 'double_sonar_evolution_40pop_60gen_run1.dat';
+file_name = 'double_sonar_with_knockout_run2.dat';
 title('Fitness vs Angle')
 table = readtable(file_name);
 cd('../../')
@@ -17,6 +19,7 @@ fitness = [];
 avg = [];
 best = [];
 generation = [];
+
 
  %% Dynamically figure out population size and generation count
  A = table(table.Generation == 0, :);

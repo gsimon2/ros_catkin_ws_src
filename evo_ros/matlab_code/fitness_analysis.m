@@ -7,7 +7,7 @@
 %% Read in table and set up plotting arrays
 cd('./GA/logs');
 file_name = 'single_sonar_evolution_40pop_60gen_run1.dat';
-file_name = 'double_sonar_evolution_40pop_60gen_run2.dat';
+file_name = 'double_sonar_with_knockout_run1.dat';
 title('Fitness vs Generation')
 table = readtable(file_name);
 cd('../../')
