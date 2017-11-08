@@ -1,6 +1,14 @@
 import argparse
 import subprocess
 import os
+# Generate Plots
+# 	Runs all of the matlab plotting scripts in the matlab_automated_scripts directory for the set experiment and run number
+#	Then stores all of the plots in the analysis_plots directory sorted by experiment and run
+#
+# GAS 11-8-17
+import argparse
+import subprocess
+import os
 from os import listdir
 from os.path import isfile, join
 
@@ -29,7 +37,7 @@ if not os.path.isdir(run_directory):
 	os.makedirs(run_directory)
 plot_dir = run_directory[4:] # path to run_directory from the evo_ros directory (how matlab code wants it)
 
-
+# Run all of the plotting scripts
 for current_plotting_script in plotting_scripts:
 	print(current_plotting_script)
 	cmd_str = """/usr/local/MATLAB/R2017b/bin/matlab -nodisplay -nosplash -nodesktop -r \"file_name='{}';plot_dir='{}';run('./matlab_automated_code/{}');exit;\"""".format(data_log_name,plot_dir,current_plotting_script)
