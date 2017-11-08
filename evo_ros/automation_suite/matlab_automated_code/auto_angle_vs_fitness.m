@@ -1,17 +1,20 @@
 %% Studying the fitness effect of the angle of the sonar
 %
-% Must be in the evo_ros directory
 %
-% GAS 10-30-17
+% GAS 11-8-17
 
+%% Automation set up
 fig = figure;
+save_dir = strcat('~/simulation/ros_catkin_ws/src/evo_ros', plot_dir);
+title_string = file_name(1:end-4);
+title_string = strcat(title_string,' Fitness vs Angle');
+title(title_string, 'Interpreter', 'none');
+save_file_name = strcat(file_name(1:end-4),'_angle_vs_fitness.png')
 
 %% Read in table and set up plotting arrays
-cd('./GA/logs');
-file_name = 'double_sonar_with_knockout_run2.dat';
-title('Fitness vs Angle');
+cd('~/simulation/ros_catkin_ws/src/evo_ros/GA/logs');
 table = readtable(file_name);
-cd('../../')
+cd(save_dir)
 ang1 = [];
 ang2 = [];
 fitness = [];
@@ -59,4 +62,6 @@ xlabel('Angle')
 ylabel('Fitness')
 hold off
 
+saveas(fig,save_file_name);
+close(fig)
 
