@@ -253,5 +253,50 @@ def convert_genome_to_binary(ind):
 		print('gene: {} \t value:{} \t binary:{}'.format(gene.keys(),gene.values(),bin(gene.values()[0])[2:]))
 	
 	return
-		
-	
+'''		
+	{'id':0,
+		'genome':{
+			'num_of_sensors':0,
+			'physical':[
+				# Variable number of sonar sensors (1 - 10)
+				# 	Can modify x and y position within bounds of rover frame
+				#	Can modify the z coordinate of orient to can direction that sonar is facing
+				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+			],
+			'behavioral':[
+			],
+			'position_encoding':[
+                            {'sensor':'sonar1', 'region':1, 'pos':[.99,.99,0.17],'orient': [0,0,0]}
+			},
+		'fitness':-1.0,
+		'raw_fitness':[],
+		'generation':0
+		} '''
+def region_calc(region,x,y,z):
+    new_x =0
+    new_y =0
+    new_z =z
+    if region ==1:
+        new_x = round(0.0 + x*.20,3)
+        new_y = round(-.15 +y*.05,3)
+    if region ==2:
+        new_x = round(.2 + x* .05,3)
+        new_y = round(-.15+y*.25,3)
+    if region ==3:
+        new_x = round(0.0 +x*.2,3)
+        new_y = round(.10 +y*.05,3)
+    if region ==4:
+        new_x = round(.20 +x *.05,3)
+        new_y = round( -.15+y*.05,3)
+    if region ==5:
+        new_x = round(.20+x*.05,3)
+        new_y = round(.10+y*.05,3)
+    return [new_x,new_y,new_z]
+
+def pos_from_region(population):
+    for ind in population:
+        encoding = ind['genome']['position_encoding']
+        ind['genome']['physical'].clear()
+        for sensor in encoding:
+            pyhysical_sensor = {'sensor': sensor['sensor'],'pos': region_calc(sensor['region'],sensor['pos'][0],sensor['pos'][1],sensor['pos'][2]), 'orient' : sensor['orient'] }
+            ind['genome']['physical'].append(copy.deepcopy(physical_sensor))
