@@ -427,4 +427,53 @@ def add_remove_random_mutation(population, mutation_prob, constraints,max_sensor
             #print('\nAfter \n \t {}'.format(ind))
 		
     return population
+# copy of crossover for  CSE848 project
+def multiple_sensor_crossover(population, cross_over_prob, max_sensors,constraints):
+    for i in range(int(len(population)/2)):
+        couple = random.sample(population,2)
+        
+        if random.random() < cross_over_prob:
+            child1 = copy.deepcopy(couple[0])
+            child2 = copy.deepcopy(couple[1])
+            min_number_of_sensors = min(couple[0]['genome']['num_of_sensors'], couple[1]['genome']['num_of_sensors'])
+            if(min_number_of_sensors >1):
+                split = random.randrange(1,min_number_of_sensors,1)
+                encoding1 = couple[0]['genome']['position_encoding'][:split] + couple[1]['genome']['position_encoding'][split:]
+                encoding2 = couple[1]['genome']['position_encoding'][:split] + couple[0]['genome']['position_encoding'][split:]
+                child1['genome']['position_encoding'] = copy.deepcopy(encoding1)
+                child1['genome']['num_of_sensors'] = len(child1['genome']['position_encoding'])
+                child2['genome']['position_encoding'] = copy.deepcopy(encoding2)
+                child2['genome']['num_of_sensors'] = len(child2['genome']['position_encoding'])
+            else:
+                #one of the rovers has 1 sensor
+                sensor1 = random.randrange(0,len(couple[0]['genome']['position_encoding']),1)
+                sensor2 = random.randrange(0,len(couple[0]['genome']['position_encoding']),1)
+                cross_num = random.randrange(1,4,1)
+                if(cross_num==1):
+                    #swap x
+                    temp =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['pos'][0])
+                    child1['genome']['position_encoding'][sensor1]['pos'][0] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['pos'][0])
+                    child2['genome']['position_encoding'][sensor2]['pos'][0] = temp
+                elif(cross_num==2):
+                    #swap y
+                    temp =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['pos'][1])
+                    child1['genome']['position_encoding'][sensor1]['pos'][1] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['pos'][1])
+                    child2['genome']['position_encoding'][sensor2]['pos'][1] = temp
+                    pass
+                elif(cross_num==3):
+                    #swap region and orient
+                    temp_region =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['region'])
+                    temp_orient =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['orient'])
+                    child1['genome']['position_encoding'][sensor1]['region'] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['region'])
+                    child1['genome']['position_encoding'][sensor1]['orient'] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['orient'])
+                    child2['genome']['position_encoding'][sensor2]['region']= temp_region
+                    child2['genome']['position_encoding'][sensor2]['orient'] = temp_orient
+                    pass
+                
+            child1['fitness'] = -1
+            child2['fitness'] = -1
+            population.append(child1)
+            population.append(child2)
+    return population
+
                 
