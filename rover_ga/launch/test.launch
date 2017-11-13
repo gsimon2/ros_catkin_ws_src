@@ -20,7 +20,7 @@
   
   
   <arg name="name" default="rover"/>
-  <arg name="model" default="$(find ardupilot_sitl_gazebo_plugin)/urdf/rover.urdf"/>
+  <arg name="model" default="$(find ardupilot_sitl_gazebo_plugin)/urdf/rover_sonar.urdf"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="debug" default="true"/>
   <arg name="verbose" default="true"/>
