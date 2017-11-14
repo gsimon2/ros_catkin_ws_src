@@ -196,9 +196,12 @@ class GA(object):
 				rd['fitness'] += calc_fitness
 				i += 2
 			
-			
-			#print('returned result: {} \t Calc fitness: {}'.format(raw_fitness, rd['fitness']))
 
+			#added discounting for number of sensors does not drop below 0
+			if(rd['fitness'] -float(rd['number_of_sensors'])<0):
+				rd['fitness']=0.0
+			else:
+				rd['fitness'] -= float(rd['number_of_sensors'])
 			self.child_pop[self.child_id_map[rd['id']]]['fitness'] = rd['fitness']
 			self.child_pop[self.child_id_map[rd['id']]]['raw_fitness'] = raw_fitness
 			
@@ -219,8 +222,8 @@ class GA(object):
 		population_pool = multiple_sensor_crossover(population_pool,CROSS_OVER_PROB,MAX_NUMBER_OF_SONAR,genome_constraints)
 
 		# Mutate genes in the population pool.
-		#population_pool = sonar_random_value_mutation(population_pool, MUTATION_PROB, genome_constraints)
 		population_pool = add_remove_random_mutation(population_pool,MUTATION_PROB,genome_constraints,MAX_NUMBER_OF_SONAR)
+		pos_from_region(population_pool)
 		
 		# Filter out any children or mutated individuals by looking for a fitness of -1
 		child_pop = []
@@ -255,6 +258,7 @@ class GA(object):
 			next_generation.append(copy.deepcopy(tourn[winner_index]))
 		
 		self.genomes = next_generation
+		pos_from_region(self.genomes)
 		
 		
 	def ga_log(self, LOG_FILE_NAME):
