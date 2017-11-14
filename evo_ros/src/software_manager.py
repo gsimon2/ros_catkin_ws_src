@@ -202,8 +202,6 @@ def software_setup(data):
 			
 	# Start filter node
 	filter_cmd_str = 'rosrun evo_ros sonar_filter.py'
-	if SENSOR_KNOCKOUT:
-		filter_cmd_str += ' --knockout'
 	if args.debug:
 		filter_cmd_str += ' -d'
 		os.system("xterm -hold -e '{}'&".format(filter_cmd_str))
@@ -399,7 +397,6 @@ parser.add_argument('--less_wait',action='store_true',help='Minimize the sleep t
 parser.add_argument('-ip' , '--ga_ip_addr', type=str, help='IP address that the GA is running on')
 parser.add_argument('-v', '--vehicle', type=str, help='Type of vehicle being used \n\t Accepts: \'rover\' and \'copter\'')
 parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
-parser.add_argument('-k','--knockout',action='store_true', help='Knocks out a sensor based off of generation and percent complete')
 args= parser.parse_args()
 
 
@@ -417,12 +414,6 @@ if args.debug:
 with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
-# Sensor knockout
-#	If sensors will fail during the run
-if args.knockout:
-	SENSOR_KNOCKOUT = True
-else:
-	SENSOR_KNOCKOUT = cfg['software_manager']['SENSOR_KNOCKOUT']
 
 # Default GUI state for running Gazebo
 #	Note: Headless and GUI should always be opposite of each other

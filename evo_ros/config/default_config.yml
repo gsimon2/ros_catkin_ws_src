@@ -1,5 +1,5 @@
 # Default configuration settings for Evo-Ros
-# GAS 8-29-2017
+# GAS 11-14-2017
 
 
 # GA Server Script
@@ -16,7 +16,11 @@ ga_server:
    TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
    NUM_EVAL_WORKS: 9 # Number of workers (ROS instances) being used to run evaluations of indiviuals
 
-
+# Sonar Filter Script
+sonar_filter:
+   SENSOR_KNOCKOUT: !!bool 'true'
+   KNOCKOUT_TYPE: 'complete' # transient or complete
+   
 # Software Manager Script
 software_manager:
    GA_SEND_PORT: 5000
@@ -24,7 +28,6 @@ software_manager:
    GA_IP_ADDR: '35.9.28.201'
    VEHICLE: 'rover' # The vehicle that is being used. Default is the erle-rover
    MAX_REAL_TIME: 300
-   SENSOR_KNOCKOUT: !!bool 'true'
    MULTIPLE_WORLDS:
       NUMBER_OF_WORLDS: 3
       LAUNCH_FILE_PACKAGE: 'rover_ga'
@@ -89,5 +92,6 @@ tranporter: # Note: Software Manager is scripted to overwrite these values at ru
    GA_RECV_PORT: 5010
    GA_IP_ADDR: '127.0.0.1'
    
+ # Simulation Manager Script
 sim_manager:
    MAX_SIM_TIME: 270 # simulation seconds a simulation is allowed to run before ending 

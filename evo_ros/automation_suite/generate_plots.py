@@ -1,5 +1,5 @@
 # Generate Plots
-# 	Runs all of the matlab plotting scripts in the matlab_automated_scripts directory for the set experiment and run number
+# 	Runs all of the matlab plotting scripts in the matlab_automated_plotting_code directory for the set experiment and run number
 #	Then stores all of the plots in the analysis_plots directory sorted by experiment and run
 #
 # GAS 11-8-17
@@ -32,7 +32,7 @@ for run_number in range(1,number_of_runs+1):
 	print('Plotting for data file: {}'.format(data_log_name))
 	
 	# Load in the names of all of the plotting scripts available
-	path_to_plotting_scripts = './matlab_automated_code/'
+	path_to_plotting_scripts = './matlab_automated_plotting_code/'
 	plotting_scripts = [f for f in listdir(path_to_plotting_scripts) if isfile(join(path_to_plotting_scripts, f))]
 	
 	# Make sure that a directory for this experiment has been made
@@ -52,7 +52,7 @@ for run_number in range(1,number_of_runs+1):
 	# Run all of the plotting scripts
 	for current_plotting_script in plotting_scripts:
 		print(current_plotting_script)
-		cmd_str = """/usr/local/MATLAB/R2017b/bin/matlab -nodisplay -nosplash -nodesktop -r \"file_name='{}';plot_dir='{}';run('./matlab_automated_code/{}');exit;\"""".format(data_log_name,plot_dir,current_plotting_script)
+		cmd_str = """/usr/local/MATLAB/R2017b/bin/matlab -nodisplay -nosplash -nodesktop -r \"file_name='{}';plot_dir='{}';run('./matlab_automated_plotting_code/{}');exit;\"""".format(data_log_name,plot_dir,current_plotting_script)
 		os.system(cmd_str)
 print('\n\n Done with plotting!\n\n')
 

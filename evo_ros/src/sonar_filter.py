@@ -11,17 +11,20 @@ import sys
 import argparse
 import random
 import datetime
+import yaml
 
 from sensor_msgs.msg import Range
 import message_filters
 
-KNOCKOUT = False
+SENSOR_KNOCKOUT = False
+KNOCKOUT_TYPE = 'complete'
+
+
 KNOCKOUT_POINT = 20
 KNOCKOUT_INTERVAL = 15
 SENSOR_STATUS = 'ON'
 KNOCKOUT_SENSOR = ''
 GENERATION = -1
-
 KNOCKOUT_TIME = 0
 
 
@@ -140,12 +143,34 @@ def transient_knockout(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar
 ### Handle commandline arguments ###
 parser = argparse.ArgumentParser(description="""Bypass for sonar topics so noise can be added or sonar signals can be cutout during the run""")
 parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal')
-parser.add_argument('-k','--knockout',action='store_true', help='Knocks out a sensor based off of generation and percent complete')
+parser.add_argument('-k','--knockout',action='store_true', help='Knocks out a sensor partial through a simulation')
+parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
 args= parser.parse_args()
 
+
+# Use default config file unless one is provided at command line
+config_file_name = 'default_config.yml'
+if args.config is not None:
+	config_file_name = args.config
+
+if args.debug:
+	print('Configuration file being used: \n\t {}'.format(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name)))
+
+# Open Config File
+with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(config_file_name), 'r') as ymlfile:
+	cfg = yaml.load(ymlfile)
+
+
+# Sensor knockout
+#	If sensors will fail during the run
 if args.knockout:
-	KNOCKOUT = True
-	print('Knocking out sensors')
+	SENSOR_KNOCKOUT = True
+else:
+	SENSOR_KNOCKOUT = cfg['sonar_filter']['SENSOR_KNOCKOUT']	
+	
+# Type of failure
+KNOCKOUT_TYPE = cfg['sonar_filter']['KNOCKOUT_TYPE']	
+
 
 ### Set up ROS subscribers and publishers ###
 rospy.init_node('sonar_filter',anonymous=False)
@@ -180,21 +205,25 @@ for j in range(1,11):
 
 ### Set up a single callback function for all sonars ###
 ts = message_filters.TimeSynchronizer(sonar_sub_list, 10)
-ts.registerCallback(transient_knockout)
+
+if KNOCKOUT_TYPE == 'complete':
+	ts.registerCallback(single_complete_knockout)
+elif KNOCKOUT_TYPE == 'transient':
+	ts.registerCallback(transient_knockout)
 
 ### If Knockout, Determine which sensor we are knocking out ###
-if KNOCKOUT:
+if SENSOR_KNOCKOUT:
 	GENERATION = rospy.get_param('generation')
 	#today = datetime.date.today().day # Was thinking about seeding with generation * the day number
 	random.seed(GENERATION)
 	KNOCKOUT_TIME = rospy.get_param('running_time') + random.randrange(40,80,1)
 	number_of_sensors = rospy.get_param('vehicle_genome')['genome']['num_of_sensors']
-	number_of_sensors = 2	
 	knockout_number = (GENERATION % number_of_sensors) + 1
 	KNOCKOUT_SENSOR = 'sonar' + str(knockout_number)
 	
 	if args.debug:
 		print('Gen: {} \t Num sensors: {} \t knockout num: {}'.format(GENERATION, number_of_sensors, knockout_number))
 		print('knockout time: {} '.format(KNOCKOUT_TIME))
+		print('Type of failure: {}'.format(KNOCKOUT_TYPE))
 	
 rospy.spin()

@@ -1,8 +1,0 @@
-dt: &now
-   - !!python/object/apply:apply
-      - !!python/object/apply:getattr
-         - !!python/name:datetime.datetime
-         - now
-      - []
-
-test: \today
