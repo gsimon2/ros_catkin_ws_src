@@ -1,0 +1,13 @@
+Fitness,ID,NumberOfSonar,S1_O,S1_P_X,S1_P_Y,S2_O,S2_P_X,S2_P_Y
+16.6078499189,double_sonar_with_transient_failure_run1_1,2,22,0.016,0.027,-9,0.243,-0.119
+14.6329042936,double_sonar_with_transient_failure_run1_2,2,22,0.063,0.027,-9,0.243,-0.119
+14.5923706152,double_sonar_with_transient_failure_run1_3,2,29,0.118,-0.034,-9,0.159,-0.119
+14.39311398,double_sonar_with_transient_failure_run2_1,2,35,0.11,-0.056,-15,0.051,-0.066
+14.3114123242,double_sonar_with_transient_failure_run2_2,2,35,0.219,-0.056,-15,0.216,-0.066
+14.3098948376,double_sonar_with_transient_failure_run2_3,2,35,0.219,-0.056,-15,0.216,-0.066
+14.2425062489,double_sonar_with_transient_failure_run3_1,2,49,0.231,-0.122,-17,0.144,0.047
+14.192617981,double_sonar_with_transient_failure_run3_2,2,49,0.231,-0.122,-17,0.082,0.047
+14.1871614878,double_sonar_with_transient_failure_run3_3,2,49,0.231,-0.122,-17,0.092,0.047
+15.1895725998,single_sonar_position_run1_1,1,-26,0.248,0.045,NaN,NaN,NaN
+15.1752888795,single_sonar_position_run1_2,1,-26,0.114,0.045,NaN,NaN,NaN
+14.9313350099,single_sonar_position_run1_3,1,-26,0.067,0.045,NaN,NaN,NaN

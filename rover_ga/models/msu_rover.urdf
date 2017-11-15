@@ -1,0 +1,269 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rover">
+   
+  <joint name="front_left_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_left_wheel_steering_block"/>
+    <origin rpy="-1.52 0 0" xyz="0.240444 0.1 0.07103"/>
+    <axis xyz="0  -1  0"/>
+    <limit effort="20.0" lower="-0.7727" upper="0.7727" velocity="0.0"/>
+  </joint>
+  <joint name="front_right_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_right_wheel_steering_block"/>
+    <origin rpy="1.52 0 0" xyz="0.240444 -0.1 0.07103"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="20.0" lower="-0.7727" upper="0.7727" velocity="0.0"/>
+  </joint>
+  <joint name="front_left_wheel_joint" type="revolute">
+    <parent link="front_left_wheel_steering_block"/>
+    <child link="front_left_wheel"/>
+    <origin rpy="0 0 0" xyz="0.0 0.0 0.043124"/>
+    <axis xyz="0.00000000e+00 8.30000000e-04 1.00000000e+00"/>
+    <limit effort="20.0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="front_right_wheel_joint" type="revolute">
+    <parent link="front_right_wheel_steering_block"/>
+    <child link="front_right_wheel"/>
+    <origin rpy="0 0 0" xyz="0.0 0.0 0.043124"/>
+    <axis xyz="0.00000000e+00 8.30000000e-04 -1.00000000e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rear_left_wheel_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="rear_left_wheel"/>
+    <origin rpy="-1.52 0 0" xyz="-0.15 0.15 0.069394"/>
+    <axis xyz="0.00000000e+00 8.30000000e-04 1.00000000e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rear_right_wheel_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="rear_right_wheel"/>
+    <origin rpy="1.52 0 0" xyz="-0.15 -0.15 0.069394"/>
+    <axis xyz="0.00000000e+00 8.30000000e-04 -1.00000000e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+
+  <link name="chassis">
+    <inertial>
+      <mass value="800.0"/>
+      <origin rpy="0 0 0" xyz="0.02 0.0 0.08"/>
+      <inertia ixx="140" ixy="0.0" ixz="0.0" iyy="550" iyz="0.0" izz="550"/>
+    </inertial>
+    <collision name="chassis_collision">
+		
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
+      <geometry>
+        <box size="0.65 0.2 0.02"/>
+      </geometry>
+    </collision>
+    <visual name="visual">
+		
+      
+      <!-- Use this for visual of the collision area of the chasis -->
+      <!--
+      <origin rpy="0 0 0" xyz=" 0.05 0.0 0.067"/> 
+      <geometry>
+        <box size="0.65 0.2 0.02"/>
+      </geometry>
+      -->
+      
+      <!-- Erle Rover Chassis -->
+      <origin rpy="-1.5708 0 3.1416" xyz="0.04 0.392 0.052"/>
+      <geometry>
+        <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_chassis.STL" scale="0.0011 0.0011 0.0011"/>
+      </geometry>
+      
+      
+    </visual>
+  </link>
+  <link name="front_left_wheel">
+    <inertial>
+      <mass value="20"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="front_left_wheel_collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05588" radius="0.0635"/>
+      </geometry>
+    </collision>
+    <visual name="tire_visual">
+      <origin rpy="3.1416 0 0" xyz="-0.24 -0.02 0.334"/>
+      <geometry>
+        <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_wheel4.STL" scale="0.0014 0.0014 0.0014"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="front_right_wheel">
+    <inertial>
+      <mass value="20"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05588" radius="0.0635"/>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <origin rpy="3.1416 0 0" xyz="0.25 -0.020000 0.334"/>
+      <geometry>
+        <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_wheel2.STL" scale="0.0014 0.0014 0.0014"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="rear_left_wheel">
+    <inertial>
+      <mass value="20"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05588" radius="0.0635"/>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <origin rpy="0 0 0" xyz=" 0.25 0.02 -0.666"/>
+      <geometry>
+        <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_wheel3.STL" scale="0.0014 0.0014 0.0014"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="rear_right_wheel">
+    <inertial>
+      <mass value="20"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05588" radius="0.0635"/>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <origin rpy="0 0 0" xyz="0.25 0.02 -0.666"/>
+      <geometry>
+        <mesh filename="package://ardupilot_sitl_gazebo_plugin/meshes/meshes_rover/ErleRover_wheel1.STL" scale="0.0014 0.0014 0.0014"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <gazebo reference="rear_left_wheel">
+    <mu1>10.0</mu1>
+    <mu2>10.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <kp>1e6</kp>
+  </gazebo>
+  <gazebo reference="rear_right_wheel">
+    <mu1>10.0</mu1>
+    <mu2>10.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <kp>1e6</kp>
+  </gazebo>
+
+  <gazebo reference="front_left_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <kp>1e7</kp>
+  </gazebo>
+
+  <gazebo reference="front_right_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <kp>1e7</kp>
+  </gazebo>
+
+  <link name="front_right_wheel_steering_block">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_left_wheel_steering_block">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!--*********************
+  *************************
+  *********PLUGINS*********
+  *************************
+  **********************-->
+
+  <xacro:property name="namespace" value="rover" />
+  
+<!-- Front facing camera -->
+ <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/generic_camera.urdf.xacro" />
+ <xacro:generic_camera
+   name="${namespace}/front"
+   parent="chassis"
+   ros_topic="image_front_raw"
+   cam_info_topic="camera_front_info"
+   update_rate="60"
+   res_x="640"
+   res_y="480"
+   image_format="R8G8B8"
+   hfov="110"
+   framename="${namespace}_frontcam">
+   <origin xyz="0.2 0 0.15" rpy="0 0 0"/>
+ </xacro:generic_camera>
+
+
+
+<xacro:include filename="$(find rover_ga)/models/sensors/lidar_sensor.urdf.xacro" />
+ <xacro:lidar_sensor
+   name="sonar2"
+   parent="chassis"
+   ros_topic="sonar_front"
+   update_rate="10"
+   min_range="0.06"
+   max_range="20.0"
+   field_of_view_horizontal="${270*M_PI/180}"
+   field_of_view_vertical="${1*M_PI/180}"
+   ray_count_horizontal="542" 
+   ray_count_vertical="1"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="0 0 0.4" rpy="0 0 0"/>
+ </xacro:lidar_sensor><!-- 542 -->
+ 
+<gazebo reference="chassis">
+    <sensor name="chassis_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>chassis_collision_collision</collision>
+      </contact>
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_contact_sensor_state</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+</robot>

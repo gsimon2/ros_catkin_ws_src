@@ -4,7 +4,7 @@
 % GAS 11-14-17
 
 %% Automation set up
-clear all;
+clear all
 num_of_ind = 3;
 elite = table; 
 %save_file_name = strcat(file_name(1:end-4),'_generation_vs_fitness.png');
@@ -30,9 +30,16 @@ for j=1:length(files)
 
      %% Look at individuals in the last gen and find best
      for i=1:num_of_ind
-        [max_val, index] = max(A.Fitness);
+        % Pick out best and change the ID
+         [max_val, index] = max(A.Fitness);
         elite_ind = A(index,:);
         elite_ind.ID = strcat(file_name(1:end-4),'_',string(i));
+        
+        
+        elite_indcolmissing = setdiff(elite.Properties.VariableNames, elite_ind.Properties.VariableNames);
+        elitecolmissing = setdiff(elite_ind.Properties.VariableNames, elite.Properties.VariableNames);
+        elite_ind = [elite_ind array2table(nan(height(elite_ind), numel(elite_indcolmissing)), 'VariableNames', elite_indcolmissing)];
+        elite = [elite array2table(nan(height(elite), numel(elitecolmissing)), 'VariableNames', elitecolmissing)];
         elite = [elite; elite_ind];
 
 
@@ -41,10 +48,25 @@ for j=1:length(files)
         A(indices,:) = [];
      end
 end
- cd('../')
+% Get rid of generation column
+elite.Generation = [];
+
+% Get rid of raw fitness column
+elite.RawFitness = [];
+
+% Get rid of any columns that have 'Var' in it. Comes from how Matlab
+% imports RawFitness
+for k=length(elite.Properties.VariableNames):-1:1
+   if contains(elite.Properties.VariableNames(k), 'Var')
+       elite.(k) = [];
+   end
+end
+
+writetable(elite, 'best_individuals.txt');
+head(elite)
+cd('../')
  
- % Get rid of generation column
- elite = elite(:,2:end);
+
 
  
  
