@@ -254,4 +254,254 @@ def convert_genome_to_binary(ind):
 	
 	return
 		
-	
+{'id':0,
+		'genome':{
+			'num_of_sensors':1,
+			'physical':[
+				# Variable number of sonar sensors (1 - 10)
+				# 	Can modify x and y position within bounds of rover frame
+				#	Can modify the z coordinate of orient to can direction that sonar is facing
+				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+			],
+			'behavioral':[
+			],
+			'position_encoding':[
+                            {'sensor':'sonar1', 'region':2, 'pos':[99,99,0.17],'orient': [0,0,0]}]
+			},
+		'fitness':-1.0,
+		'raw_fitness':[],
+		'generation':0
+		}
+        
+        
+
+  
+def region_calc(region,x,y,z):
+    new_x =0
+    new_y =0
+    new_z =z
+    x =  float(x)/ 100.0
+    y = float(y)/100.0
+    if region ==3:
+        new_x = round(0.0 + x*.20,3)
+        new_y = round(-.15 +y*.05,3)
+    if region ==2:
+        new_x = round(.2 + x* .05,3)
+        new_y = round(-.15+y*.25,3)
+    if region ==1:
+        new_x = round(0.0 +x*.2,3)
+        new_y = round(.10 +y*.05,3)
+    if region ==5:
+        new_x = round(.20 +x *.05,3)
+        new_y = round( -.15+y*.05,3)
+    if region ==4:
+        new_x = round(.20+x*.05,3)
+        new_y = round(.10+y*.05,3)
+    return [new_x,new_y,new_z]
+
+def pos_from_region(population):
+    for ind in population:
+        encoding = ind['genome']['position_encoding']
+        ind['genome']['physical'] = []
+        counter =0
+        ind['genome']['num_of_sensors'] = len(encoding)
+        for sensor in encoding:
+            physical_sensor = {'sensor': '/sonar'+str(counter+1),'pos': region_calc(sensor['region'],sensor['pos'][0],sensor['pos'][1],sensor['pos'][2]), 'orient' : sensor['orient'] }
+            ind['genome']['physical'].append(copy.deepcopy(physical_sensor))
+            counter+=1
+            
+genome_constraints = {
+	'physical': {
+		'sonar': {
+			# Position x:  0 = Middle of rover,  0.25 = front
+			# Position y:  -0.15 = Left,    0.15 = Right
+			'pos': {'x':[0,100], 'y':[0,100], 'z': .17},
+            'regions': [1,5],
+            'region_orient': {1: [-90,-40],2:[-30,30],3:[40,90],4:[-100,0],5:[0,100]},
+			# Orient z: -90 degrees = facing left,    90 = facing right
+			'orient': {'z':[-90,90]}
+            }
+        }
+        }
+def generate_pop(pop_size,max_sensors,constraints):
+    start_ind = {'id':0,
+    		'genome':{
+    			'num_of_sensors':1,
+    			'physical':[
+    				# Variable number of sonar sensors (1 - 10)
+    				# 	Can modify x and y position within bounds of rover frame
+    				#	Can modify the z coordinate of orient to can direction that sonar is facing
+    				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+    			],
+    			'behavioral':[
+    			],
+    			'position_encoding':[
+    {'sensor':'sonar1', 'region':2, 'pos':[.99,.99,0.17],'orient': [0,0,0]}]
+    			},
+    		'fitness':-1.0,
+    		'raw_fitness':[],
+    		'generation':0
+    }
+        
+    population = list()
+    for number in range(pop_size):
+        new_ind = copy.deepcopy(start_ind)
+        new_ind['genome']['position_encoding'] =list()
+        new_ind['id'] = number
+        number_sensors = random.randint(1,max_sensors)
+        new_ind['genome']['num_of_sensors'] = number_sensors
+        for sensor in range(number_sensors):
+            region = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+            x = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+            y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+            z = constraints['physical']['sonar']['pos']['z']
+            orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+            new_sensor = {'sensor':'sonar'+str(sensor+1),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
+            new_ind['genome']['position_encoding'].append(new_sensor)
+        population.append(new_ind)
+    pos_from_region(population)
+    return population
+
+def add_remove_random_mutation(population, mutation_prob, constraints,max_sensors):
+    for ind in population:
+        if random.random() < mutation_prob:
+            mut_option = random.randrange(1,7,1)
+            if(mut_option==1):
+                #change x
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['pos'][0] = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+            elif(mut_option==2):
+                #change y
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['pos'][1] = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+            elif(mut_option==3):
+                #change orient
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                region = ind['genome']['position_encoding'][sensor_to_change]['region']
+                ind['genome']['position_encoding'][sensor_to_change]['orient'][2] = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+            elif(mut_option==4):
+                #change region and fix orient
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['region'] = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+                region = ind['genome']['position_encoding'][sensor_to_change]['region']
+                ind['genome']['position_encoding'][sensor_to_change]['orient'][2] = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+            elif(mut_option==5):
+                # add a sensor
+                num_sensors = ind['genome']['num_of_sensors']
+                if(num_sensors <max_sensors):
+                    #if not maxed on sensors add otherwise delete
+                    region = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+                    x = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+                    y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+                    z = constraints['physical']['sonar']['pos']['z']
+                    orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+                    new_sensor = {'sensor':'sonar'+str(num_sensors),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
+                    ind['genome']['position_encoding'].append(new_sensor)
+                    ind['genome']['num_of_sensors'] = ind['genome']['num_of_sensors'] +1
+                else:
+                    #otherwise delete one
+                    sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                    ind['genome']['position_encoding'].pop(sensor_to_change)
+                    ind['genome']['num_of_sensors'] = ind['genome']['num_of_sensors'] -1
+            elif(mut_option==6):
+                #delete snesor otherwise add
+                num_sensors = ind['genome']['num_of_sensors']
+                if(num_sensors >1):
+                    sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                    ind['genome']['position_encoding'].pop(sensor_to_change)
+                    ind['genome']['num_of_sensors'] = ind['genome']['num_of_sensors'] -1
+                else:
+                    #add sensor
+                    region = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+                    x = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+                    y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+                    z = constraints['physical']['sonar']['pos']['z']
+                    orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+                    new_sensor = {'sensor':'sonar'+str(num_sensors),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
+                    ind['genome']['position_encoding'].append(new_sensor)
+                    ind['genome']['num_of_sensors'] = ind['genome']['num_of_sensors'] +1
+                
+                
+			
+            ind['fitness'] = -1
+            #print('\nAfter \n \t {}'.format(ind))
+		
+    return population
+# copy of crossover for  CSE848 project
+def multiple_sensor_crossover(population, cross_over_prob, max_sensors,constraints):
+    for i in range(int(len(population)/2)):
+        couple = random.sample(population,2)
+        
+        if random.random() < cross_over_prob:
+            child1 = copy.deepcopy(couple[0])
+            child2 = copy.deepcopy(couple[1])
+            min_number_of_sensors = min(couple[0]['genome']['num_of_sensors'], couple[1]['genome']['num_of_sensors'])
+           # if(min_number_of_sensors >1):
+            if True:
+                #print('GAHHHHHH')
+                #print('child 1:{}\t{} \n\n '.format(child1['genome']['num_of_sensors'],child1['genome']['physical']))
+                #print('child 1 Encoding: {} \n '.format(child1['genome']['position_encoding']))
+                #print('child 2: {}\t{}\n '.format(child2['genome']['num_of_sensors'],child2['genome']['physical']))
+                #print('child 2 Encoding: {}\n '.format(child2['genome']['position_encoding']))
+                
+                if min_number_of_sensors == 1:
+                    split = 1
+                else:
+                   split = random.randrange(1,min_number_of_sensors,1)
+                
+                #print('split at: {}'.format(split))
+                encoding1 = copy.deepcopy(couple[0]['genome']['position_encoding'][:split]) + copy.deepcopy(couple[1]['genome']['position_encoding'][split:])
+                encoding2 = copy.deepcopy(couple[1]['genome']['position_encoding'][:split]) + copy.deepcopy(couple[0]['genome']['position_encoding'][split:])
+                child1['genome']['position_encoding'] = copy.deepcopy(encoding1)
+                child1['genome']['num_of_sensors'] = len(child1['genome']['position_encoding'])
+                child2['genome']['position_encoding'] = copy.deepcopy(encoding2)
+                child2['genome']['num_of_sensors'] = len(child2['genome']['position_encoding'])
+                
+                pos_from_region([child1])
+                pos_from_region([child2])
+                #print('child 1:{}\t{} \n\n '.format(child1['genome']['num_of_sensors'],child1['genome']['physical']))
+                #print('child 1 Encoding: {} \n '.format(child1['genome']['position_encoding']))
+                #print('child 2: {}\t{}\n '.format(child2['genome']['num_of_sensors'],child2['genome']['physical']))
+                #print('child 2 Encoding: {}\n n\n\n'.format(child2['genome']['position_encoding']))
+                
+                
+            else:
+                print('This is happening with more than one sensor')
+                print('child 1: \n {}'.format(child1))
+                print('child 2: \n {}'.format(child2))
+                #one of the rovers has 1 sensor
+                sensor1 = random.randrange(0,len(couple[0]['genome']['position_encoding']),1)
+                sensor2 = random.randrange(0,len(couple[0]['genome']['position_encoding']),1)
+                cross_num = random.randrange(1,4,1)
+                
+                print('Sensor 1: {}'.format(sensor1))
+                print('Sensor 2: {}'.format(sensor2))
+                print('Cross num: {}'.format(cross_num))
+                if(cross_num==1):
+                    #swap x
+                    temp =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['pos'][0])
+                    child1['genome']['position_encoding'][sensor1]['pos'][0] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['pos'][0])
+                    child2['genome']['position_encoding'][sensor2]['pos'][0] = temp
+                elif(cross_num==2):
+                    #swap y
+                    temp =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['pos'][1])
+                    child1['genome']['position_encoding'][sensor1]['pos'][1] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['pos'][1])
+                    child2['genome']['position_encoding'][sensor2]['pos'][1] = temp
+                    pass
+                elif(cross_num==3):
+                    #swap region and orient
+                    temp_region =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['region'])
+                    temp_orient =copy.deepcopy(child1['genome']['position_encoding'][sensor1]['orient'])
+                    child1['genome']['position_encoding'][sensor1]['region'] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['region'])
+                    child1['genome']['position_encoding'][sensor1]['orient'] = copy.deepcopy(child2['genome']['position_encoding'][sensor2]['orient'])
+                    child2['genome']['position_encoding'][sensor2]['region']= temp_region
+                    child2['genome']['position_encoding'][sensor2]['orient'] = temp_orient
+                    pass
+                
+            child1['fitness'] = -1
+            child2['fitness'] = -1
+            population.append(child1)
+            population.append(child2)
+    return population
+
+                

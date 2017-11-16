@@ -1,13 +1,4 @@
-Fitness,ID,NumberOfSonar,S1_O,S1_P_X,S1_P_Y,S2_O,S2_P_X,S2_P_Y
-16.6078499189,double_sonar_with_transient_failure_run1_1,2,22,0.016,0.027,-9,0.243,-0.119
-14.6329042936,double_sonar_with_transient_failure_run1_2,2,22,0.063,0.027,-9,0.243,-0.119
-14.5923706152,double_sonar_with_transient_failure_run1_3,2,29,0.118,-0.034,-9,0.159,-0.119
-14.39311398,double_sonar_with_transient_failure_run2_1,2,35,0.11,-0.056,-15,0.051,-0.066
-14.3114123242,double_sonar_with_transient_failure_run2_2,2,35,0.219,-0.056,-15,0.216,-0.066
-14.3098948376,double_sonar_with_transient_failure_run2_3,2,35,0.219,-0.056,-15,0.216,-0.066
-14.2425062489,double_sonar_with_transient_failure_run3_1,2,49,0.231,-0.122,-17,0.144,0.047
-14.192617981,double_sonar_with_transient_failure_run3_2,2,49,0.231,-0.122,-17,0.082,0.047
-14.1871614878,double_sonar_with_transient_failure_run3_3,2,49,0.231,-0.122,-17,0.092,0.047
-15.1895725998,single_sonar_position_run1_1,1,-26,0.248,0.045,NaN,NaN,NaN
-15.1752888795,single_sonar_position_run1_2,1,-26,0.114,0.045,NaN,NaN,NaN
-14.9313350099,single_sonar_position_run1_3,1,-26,0.067,0.045,NaN,NaN,NaN
+Fitness,ID,NumberOfSonar,S10_O,S10_P_X,S10_P_Y,S1_O,S1_P_X,S1_P_Y,S2_O,S2_P_X,S2_P_Y,S3_O,S3_P_X,S3_P_Y,S4_O,S4_P_X,S4_P_Y,S5_O,S5_P_X,S5_P_Y,S6_O,S6_P_X,S6_P_Y,S7_O,S7_P_X,S7_P_Y,S8_O,S8_P_X,S8_P_Y,S9_O,S9_P_X,S9_P_Y
+12.7564723061,log_1,2,NaN,NaN,NaN,48,0.164,-0.104,-4,0.25,0.01,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+11.3487571777,log_2,4,NaN,NaN,NaN,-68,0.184,0.138,-53,0.231,0.12,68,0.154,-0.104,39,0.248,-0.109,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+11.2302739658,log_3,4,NaN,NaN,NaN,59,0.216,-0.104,-81,0.052,0.14,27,0.229,-0.131,50,0.07,-0.12,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN

@@ -10,7 +10,7 @@ ga_server:
    LOG_FILE_NAME: log.dat
    MAX_WAIT_TIME: 900000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
    POP_SIZE: 40 # How large the population size is for each generation
-   GEN_COUNT: 60 # How many generations is this experiment going to run for
+   GEN_COUNT: 25 # How many generations is this experiment going to run for
    MUTATION_PROB: 0.15 #Probability that an individual will have a random gene mutated
    CROSS_OVER_PROB: 0.25 #Probability that two individuals will cross over and producing mixed offspring
    TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
@@ -18,7 +18,7 @@ ga_server:
 
 # Sonar Filter Script
 sonar_filter:
-   SENSOR_KNOCKOUT: !!bool 'true'
+   SENSOR_KNOCKOUT: !!bool 'false'
    KNOCKOUT_TYPE: 'complete' # transient or complete
    
 # Software Manager Script
