@@ -306,7 +306,7 @@ def pos_from_region(population):
         counter =0
         ind['genome']['num_of_sensors'] = len(encoding)
         for sensor in encoding:
-            physical_sensor = {'sensor': '/sonar'+str(counter+1),'pos': region_calc(sensor['region'],sensor['pos'][0],sensor['pos'][1],sensor['pos'][2]), 'orient' : sensor['orient'] }
+            physical_sensor = {'sensor': 'sonar'+str(counter+1),'pos': region_calc(sensor['region'],sensor['pos'][0],sensor['pos'][1],sensor['pos'][2]), 'orient' : sensor['orient'] }
             ind['genome']['physical'].append(copy.deepcopy(physical_sensor))
             counter+=1
             
@@ -355,7 +355,7 @@ def generate_pop(pop_size,max_sensors,constraints):
             x = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
             y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
             z = constraints['physical']['sonar']['pos']['z']
-            orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+            orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1]) * -1
             new_sensor = {'sensor':'sonar'+str(sensor+1),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
             new_ind['genome']['position_encoding'].append(new_sensor)
         population.append(new_ind)

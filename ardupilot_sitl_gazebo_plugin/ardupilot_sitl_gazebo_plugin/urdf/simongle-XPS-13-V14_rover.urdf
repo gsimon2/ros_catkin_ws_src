@@ -371,6 +371,51 @@
 	
 	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
  <xacro:sonar_sensor
+   name="sonar5"
+   parent="chassis"
+   ros_topic="sonar5"
+   update_rate="15"
+   min_range="0.06"
+   max_range="4.5"
+   field_of_view="${30*M_PI/180}"
+   ray_count="5"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="0.204 0.013 0.17" rpy="0 ${-14*M_PI/180} ${-3*M_PI/180}"/>
+ </xacro:sonar_sensor>
+	
+	
+	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
+ <xacro:sonar_sensor
+   name="sonar4"
+   parent="chassis"
+   ros_topic="sonar4"
+   update_rate="15"
+   min_range="0.06"
+   max_range="4.5"
+   field_of_view="${30*M_PI/180}"
+   ray_count="5"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="0.05 0.148 0.17" rpy="0 ${-14*M_PI/180} ${85*M_PI/180}"/>
+ </xacro:sonar_sensor>
+	
+	
+	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
+ <xacro:sonar_sensor
+   name="sonar3"
+   parent="chassis"
+   ros_topic="sonar3"
+   update_rate="15"
+   min_range="0.06"
+   max_range="4.5"
+   field_of_view="${30*M_PI/180}"
+   ray_count="5"
+   sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+   <origin xyz="0.018 -0.148 0.17" rpy="0 ${-14*M_PI/180} ${-49*M_PI/180}"/>
+ </xacro:sonar_sensor>
+	
+	
+	<xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/sonar_sensor.urdf.xacro" />
+ <xacro:sonar_sensor
    name="sonar2"
    parent="chassis"
    ros_topic="sonar2"
@@ -380,7 +425,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.072 0.08 0.17" rpy="0 ${-14*M_PI/180} ${37.0*M_PI/180}"/>
+   <origin xyz="0.166 -0.135 0.17" rpy="0 ${-14*M_PI/180} ${-76*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 	
@@ -395,7 +440,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.13 0.092 0.17" rpy="0 ${-14*M_PI/180} ${83.0*M_PI/180}"/>
+   <origin xyz="0.217 -0.101 0.17" rpy="0 ${-14*M_PI/180} ${-33*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 

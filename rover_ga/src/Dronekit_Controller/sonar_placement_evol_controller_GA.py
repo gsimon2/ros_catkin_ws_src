@@ -28,23 +28,6 @@ last_vehicle_mode = VehicleMode("AUTO")
 last_heading = 0
 
 
-# Temp function
-#   Remove when integrated into evo-ros
-def load_genome():
-	ind = {'id':0,
-		'genome':{
-			'physical':[
-				{'sensor':'sonar1', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, -20]},
-				{'sensor':'sonar2', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, 20]}
-			],
-			'behavioral':[
-			]
-			},
-		'fitness':-1.0,
-		'generation':0
-		}
-	
-	rospy.set_param('vehicle_genome', ind)
 
 # Link States Callbakc
 #	Get the orientation of the chassis of the rover from Gazebo Linked States topic and calculates its heading 
