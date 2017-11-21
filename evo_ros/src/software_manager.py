@@ -357,6 +357,7 @@ def received_genome_callback(recv_data):
 		software_setup(data)
 	else:
 		print("	 	Same pyhsical genome!")
+		software_setup(data)
 
 	# Notify the sim_manager that all evaluation software is set up
 	software_ready_pub.publish(std_msgs.msg.Empty())
