@@ -44,7 +44,7 @@ software_manager:
             echo " (For script control) - param set SYSID_MYGCS 1";
             ../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo
          ARDUPILOT_EXE: 'APMrover2.elf'
-         LAUNCH_FILE: 'sonar_mission_1.launch'
+         LAUNCH_FILE: 'sonar_mission_4.launch'
          LAUNCH_FILE_PACKAGE: 'rover_ga'
          SIM_MANAGER_SCRIPT: 'sonar_placement_evol_sim_manager.py'
          SIM_MANAGER_PACKAGE: 'evo_ros'

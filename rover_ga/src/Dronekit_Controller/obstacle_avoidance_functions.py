@@ -303,8 +303,8 @@ def sonar_avoidance(sonar_ranges, sonar_angles, range_max):
 	turn_voting = {'left':0.0, 'right':0.0}
 	angle_limit = 3 # degrees from center that define which sonars are to be considered to be pointing forward
 	#print('range max: {}'.format(range_max))
-	print(sonar_ranges)
-	print(sonar_angles)
+	#print(sonar_ranges)
+	#print(sonar_angles)
 	
 	# Let each sonar that detects an object cast a vote if they should turn right or left
 	for sonar_id in sonar_ranges:
@@ -426,5 +426,5 @@ def drive_at_bearing(bearing, heading):
 	# Convert the turn ratio into a yaw command to head the rover to the next waypoint
 	nav_cmds['yaw'] = 1500 + ( 400 * turn_ratio)
 	
-	print('Bearing: {} \t Heading: {} \t Nav Cmds: {}'.format(bearing, heading, nav_cmds))
+	#print('Bearing: {} \t Heading: {} \t Nav Cmds: {}'.format(bearing, heading, nav_cmds))
 	return nav_cmds
