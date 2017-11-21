@@ -101,7 +101,7 @@ def sonar_callback(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = 
 		current_sonar = 'sonar' + str(j)
 		if eval(current_sonar) is not '':
 			if eval(current_sonar).range > float(-1):
-				range_max = eval(current_sonar).max_range  - 0.5
+				range_max = eval(current_sonar).max_range  - 2.5
 				sonar_ranges[current_sonar] = eval(current_sonar).range
 			
 			

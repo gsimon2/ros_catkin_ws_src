@@ -9,8 +9,8 @@ ga_server:
    GA_RECV_PORT: 5010
    LOG_FILE_NAME: log.dat
    MAX_WAIT_TIME: 900000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
-   POP_SIZE: 40 # How large the population size is for each generation
-   GEN_COUNT: 25 # How many generations is this experiment going to run for
+   POP_SIZE: 5 # How large the population size is for each generation
+   GEN_COUNT: 10 # How many generations is this experiment going to run for
    MUTATION_PROB: 0.15 #Probability that an individual will have a random gene mutated
    CROSS_OVER_PROB: 0.25 #Probability that two individuals will cross over and producing mixed offspring
    TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
@@ -44,7 +44,7 @@ software_manager:
             echo " (For script control) - param set SYSID_MYGCS 1";
             ../Tools/autotest/sim_vehicle.sh -j 4 -f Gazebo
          ARDUPILOT_EXE: 'APMrover2.elf'
-         LAUNCH_FILE: 'sonar_mission_1.launch'
+         LAUNCH_FILE: 'sonar_mission_4.launch'
          LAUNCH_FILE_PACKAGE: 'rover_ga'
          SIM_MANAGER_SCRIPT: 'sonar_placement_evol_sim_manager.py'
          SIM_MANAGER_PACKAGE: 'evo_ros'

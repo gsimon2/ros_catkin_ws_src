@@ -182,18 +182,21 @@ def waypoint_callback(msg):
 	if rospy.get_param('simulation_running') is True:
 		if msg.last_visited_waypoint not in waypoint_history:
 			waypoint_history.append(msg.last_visited_waypoint)
-			print('Made it to waypoint {}'.format(msg.last_visited_waypoint))
+			if args.debug:
+				print('Made it to waypoint {}'.format(msg.last_visited_waypoint))
 			percent_complete = 20 * msg.last_visited_waypoint
 		
 		if 	msg.last_visited_waypoint < 5:
-			print('Distance to nextwaypoint {}'.format(msg.distance_to_next_waypoint))
+			if args.debug:
+				print('Distance to nextwaypoint {}'.format(msg.distance_to_next_waypoint))
 			percent_complete = 20 * msg.last_visited_waypoint + abs(20 / (max(msg.distance_to_next_waypoint-1,1)))
 			
 			if percent_complete > 99:
 				percent_complete = 99
 		if percent_complete	>= 99:
 			rospy.set_param('mission_success', True)
-			print('Mission success!')
+			if args.debug:
+				print('Mission success!')
 		print('Percent Complete {}'.format(percent_complete))
 		rospy.set_param('percent_complete', percent_complete)
 

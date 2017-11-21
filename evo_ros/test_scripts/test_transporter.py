@@ -151,7 +151,7 @@ while True:
 	# Get percent complete from rospy params and prep the simulation result msg for the GA
 	
 	return_fitness = []
-	for i in range(6):
+	for i in range(2):
 		return_fitness.append(random.random())
 		
 	msg = json.dumps({'id':data['id'],'fitness':return_fitness, 'ns':str_host_name, 'name':rospy.get_name()})
