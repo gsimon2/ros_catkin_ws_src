@@ -1,0 +1,20 @@
+*****Sonar Placement GA Expirement*****
+Start Time: 2017-11-15 23:26:17.048694
+Rand_seed:2
+End Time: 
+Running Time: 
+Population size:40
+Generation Count:25
+Mutation Probability:0.15
+Cross Over Probability:0.25
+***** Constraints *****
+Max Number of Sensors: 10
+X Position: [0, 100]
+Y Position: [0, 100]
+Z Orient: [-90, 90]
+***** Enviroment Factors *****
+Sensor Knockout: False
+Sensor Knockout Type: complete
+Max Sim Time: 270
+*****************************
+Generation, ID, Fitness, Number of Sonar, S1_P_X, S1_P_Y, S1_O, S2_P_X, S2_P_Y, S2_O, S3_P_X, S3_P_Y, S3_O, S4_P_X, S4_P_Y, S4_O, S5_P_X, S5_P_Y, S5_O, S6_P_X, S6_P_Y, S6_O, S7_P_X, S7_P_Y, S7_O, S8_P_X, S8_P_Y, S8_O, S9_P_X, S9_P_Y, S9_O, S10_P_X, S10_P_Y, S10_O, Raw Fitness

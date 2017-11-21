@@ -196,7 +196,7 @@ class GA(object):
 				rd['fitness'] += calc_fitness
 				i += 2
 			
-			weight = 0.1
+			weight = 0.3
 			#added discounting for number of sensors does not drop below 0
 			if(rd['fitness'] -float(self.child_pop[self.child_id_map[rd['id']]]['genome']['num_of_sensors'] * weight)<0):
 				rd['fitness']=0.0
