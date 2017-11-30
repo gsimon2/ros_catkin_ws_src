@@ -17,11 +17,11 @@ args= parser.parse_args()
 
 # Set up variables that determine the file name of the data log
 if args.experiment is None:
-	experiment_name = 'double_sonar_with_transient_failure'
+	experiment_name = 'variable_sonar_placement_with_failure'
 else:
 	experiment_name = args.experiment
 if args.runs is None:
-	number_of_runs = 3
+	number_of_runs = 2
 else:
 	number_of_runs = args.runs
 
@@ -54,6 +54,7 @@ for run_number in range(1,number_of_runs+1):
 		print(current_plotting_script)
 		cmd_str = """/usr/local/MATLAB/R2017b/bin/matlab -nodisplay -nosplash -nodesktop -r \"file_name='{}';plot_dir='{}';run('./matlab_automated_plotting_code/{}');exit;\"""".format(data_log_name,plot_dir,current_plotting_script)
 		os.system(cmd_str)
+os.system('reset')
 print('\n\n Done with plotting!\n\n')
 
 
