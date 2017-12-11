@@ -18,6 +18,8 @@ current_vm = 1
 while current_vm <= number_of_vms_on_machine:
 	cmds = """echo 'Cleaning gazebo logs from vms';
 		rm -rf ~/.gazebo/log/*;
+		rm ~/simulation/ardupilot/APMrover2/logs/*;
+		rosclean purge;
 		df;
 		exec bash
 		"""
