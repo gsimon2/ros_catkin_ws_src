@@ -19,7 +19,7 @@ ga_server:
 # Sonar Filter Script
 sonar_filter:
    SENSOR_KNOCKOUT: !!bool 'true'
-   KNOCKOUT_TYPE: 'complete' # transient or complete
+   KNOCKOUT_TYPE: 'transient' # transient or complete
    
 # Software Manager Script
 software_manager:
