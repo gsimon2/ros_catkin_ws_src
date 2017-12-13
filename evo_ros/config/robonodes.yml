@@ -1,0 +1,68 @@
+# List of all available VMs for use
+
+worker_list:
+   robo1vm1:
+      ip: '35.00.00.1'
+   robo1vm2:
+      ip: '35.00.00.2'
+   robo1vm3:
+      ip: '35.00.00.2'
+   robo1vm4:
+      ip: '35.00.00.2'
+   robo1vm5:
+      ip: '35.00.00.2'
+   robo1vm6:
+      ip: '35.00.00.2'
+   robo1vm7:
+      ip: '35.00.00.2'
+   robo2vm1:
+      ip: '35.00.00.2'
+   robo2vm2:
+      ip: '35.00.00.2'
+   robo2vm3:
+      ip: '35.00.00.2'
+   robo3vm1:
+      ip: '35.00.00.2'
+   robo3vm2:
+      ip: '35.00.00.2'
+   robo3vm3:
+      ip: '35.00.00.2'
+   robo3vm4:
+      ip: '35.00.00.2'
+   robo3vm5:
+      ip: '35.00.00.2'
+   robo3vm6:
+      ip: '35.00.00.2'
+   robo3vm7:
+      ip: '35.00.00.2'
+   robo4vm1:
+      ip: '35.00.00.2'
+   robo4vm2:
+       ip: '35.00.00.2'
+   robo4vm3:
+      ip: '35.00.00.2'
+   robo4vm4:
+      ip: '35.00.00.2'
+   robo4vm5:
+      ip: '35.00.00.2'
+   robo4vm6:
+      ip: '35.00.00.2'
+   robo4vm7:
+      ip: '35.00.00.2'
+   robo5vm1:
+      ip: '35.00.00.2'
+   robo5vm2:
+      ip: '35.00.00.2'
+   robo5vm3:
+      ip: '35.00.00.2'
+   robo5vm4:
+      ip: '35.00.00.2'
+   robo5vm5:
+      ip: '35.00.00.2'
+   robo5vm6:
+      ip: '35.00.00.2'
+   robo5vm7:
+      ip: '35.00.00.2'
+      
+      
+ 
