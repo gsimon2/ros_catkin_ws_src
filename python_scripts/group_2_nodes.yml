@@ -1,31 +1,35 @@
 # List of nodes to be connected
 
 worker_list:
-   robo1vm1:
-      ip: '35.00.00.1'
-   robo1vm2:
+  
+   robo4vm1:
       ip: '35.00.00.2'
-   robo1vm3:
+   robo4vm2:
+       ip: '35.00.00.2'
+   robo4vm3:
       ip: '35.00.00.2'
-   robo1vm4:
+   robo4vm4:
       ip: '35.00.00.2'
-   robo1vm5:
+   robo4vm5:
       ip: '35.00.00.2'
-   robo1vm6:
+   robo4vm6:
       ip: '35.00.00.2'
-   robo1vm7:
+   robo4vm7:
       ip: '35.00.00.2'
-   robo3vm1:
+#
+# These are actually running on robo 5
+#	Different hostnames because these were already registered with the DNS and not being used
+   robo1vm8:
       ip: '35.00.00.2'
-   robo3vm2:
+   robo1vm9:
       ip: '35.00.00.2'
-   robo3vm3:
+   robo1vm10:
       ip: '35.00.00.2'
-   robo3vm4:
+   robo3vm8:
       ip: '35.00.00.2'
-   robo3vm5:
+   robo3vm9:
       ip: '35.00.00.2'
-   robo3vm6:
+   robo3vm10:
       ip: '35.00.00.2'
-   robo3vm7:
+   robo4vm8:
       ip: '35.00.00.2'
