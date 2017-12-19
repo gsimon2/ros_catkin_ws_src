@@ -13,9 +13,9 @@ args= parser.parse_args()
 print('Starting software_manager.py scripts on Group 2 robo nodes...')
 
 name_of_script = "software_manager.py"
-GA_IP_ADDR = '35.9.28.221'
+GA_IP_ADDR = '35.9.28.231'
 script_arguments = "-ip {} -mw".format(GA_IP_ADDR)
-ga_hostname = 'robo3vm1'
+ga_hostname = 'robo4vm1'
 
 work_nodes_file_name = 'group_2_nodes.yml'
 
