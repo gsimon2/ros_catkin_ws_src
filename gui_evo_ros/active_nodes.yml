@@ -49,24 +49,6 @@ worker_list:
       ip: '35.00.00.2'
    robo4vm7:
       ip: '35.00.00.2'
-#
-# These are actually running on robo 5
-#	Different hostnames because these were already registered with the DNS and not being used
-   robo1vm8:
-      ip: '35.00.00.2'
-   robo1vm9:
-      ip: '35.00.00.2'
-   robo1vm10:
-      ip: '35.00.00.2'
-   robo3vm8:
-      ip: '35.00.00.2'
-   robo3vm9:
-      ip: '35.00.00.2'
-   robo3vm10:
-      ip: '35.00.00.2'
-   robo4vm8:
-      ip: '35.00.00.2'
-
 #   robo5vm1:
 #      ip: '35.00.00.2'
 #   robo5vm2:

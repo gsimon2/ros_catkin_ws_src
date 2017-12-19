@@ -1,0 +1,31 @@
+# List of nodes to be connected
+
+worker_list:
+   robo1vm1:
+      ip: '35.00.00.1'
+   robo1vm2:
+      ip: '35.00.00.2'
+   robo1vm3:
+      ip: '35.00.00.2'
+   robo1vm4:
+      ip: '35.00.00.2'
+   robo1vm5:
+      ip: '35.00.00.2'
+   robo1vm6:
+      ip: '35.00.00.2'
+   robo1vm7:
+      ip: '35.00.00.2'
+   robo3vm1:
+      ip: '35.00.00.2'
+   robo3vm2:
+      ip: '35.00.00.2'
+   robo3vm3:
+      ip: '35.00.00.2'
+   robo3vm4:
+      ip: '35.00.00.2'
+   robo3vm5:
+      ip: '35.00.00.2'
+   robo3vm6:
+      ip: '35.00.00.2'
+   robo3vm7:
+      ip: '35.00.00.2'

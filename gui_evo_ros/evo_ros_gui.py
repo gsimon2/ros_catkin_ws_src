@@ -2,7 +2,10 @@
 
 import wx
 import sys
-from subprocess import Popen, PIPE
+import time
+import os
+from subprocess import Popen, PIPE, STDOUT
+
 
 class RedirectText:
 	def __init__(self,aWxTextCtrl):
@@ -17,6 +20,8 @@ class HelloFrame(wx.Frame):
 	"""
 	
 	def __init__(self, *args, **kw):
+		self.running = True
+		
 		# ensure the parent's __init__ is called
 		super(HelloFrame, self).__init__(*args, **kw)
 		
@@ -34,14 +39,18 @@ class HelloFrame(wx.Frame):
 		test_button = wx.Button(pnl, id=wx.ID_ANY, label="Test Button", pos=(25,75))
 		test_button.Bind(wx.EVT_BUTTON, self.onTestButton)
 		
+		# add a button
+		test2_button = wx.Button(pnl, id=wx.ID_ANY, label="Test 2 Button", pos=(175,75))
+		test2_button.Bind(wx.EVT_BUTTON, self.onTest2Button)
+		
 		
 		# Test output box
 		self.log = wx.TextCtrl(pnl, -1, size=(500,400),
 					pos=(25,125),
 					style = wx.TE_MULTILINE|
 					wx.HSCROLL)
-		redir=RedirectText(self.log)
-		sys.stdout=redir
+		self.redir=RedirectText(self.log)
+		sys.stdout=self.redir
 		
 		
 		# create a menu bar
@@ -53,10 +62,30 @@ class HelloFrame(wx.Frame):
 
 	def onTestButton(self, event):
 		print("Button Pressed")
-		p = Popen(['echo test; echo test2'], stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True)
-		print(p.stdout.read())
-		p.stdin.write(input)
 		
+		
+		#proc = Popen(['ping 4.2.2.2'], stdout=PIPE, stdin=open(os.devnull), stderr=STDOUT, shell=True)
+		#proc = Popen(['rosrun evo_ros software_manager.py'], stdout=PIPE, stdin=open(os.devnull), stderr=STDOUT, shell=True)
+		proc = Popen(['python test_transporter.py'], stdout=PIPE, stdin=open(os.devnull), shell=True)
+
+		while self.running:
+			try: line = proc.stdout.readline()
+			except:
+				wx.Yield()
+				time.sleep(0.5)
+				continue                       
+			wx.Yield()
+			if line.strip() == "":
+				pass
+			else:
+				print line.strip()
+		proc.terminate()
+		proc.wait()
+		
+		
+	def onTest2Button(self, event):
+		print('Button 2 pressed')
+		self.running = not self.running	
 	
 	def makeMenuBar(self):
 		"""
