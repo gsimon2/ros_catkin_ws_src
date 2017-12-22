@@ -2,8 +2,8 @@
 
 worker_list:
   
-   robo4vm1:
-      ip: '35.00.00.2'
+#   robo4vm1:
+#      ip: '35.00.00.2'
    robo4vm2:
        ip: '35.00.00.2'
    robo4vm3:
