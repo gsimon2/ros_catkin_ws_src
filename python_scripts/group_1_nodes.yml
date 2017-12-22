@@ -1,8 +1,8 @@
 # List of nodes to be connected
 
 worker_list:
-   robo1vm1:
-      ip: '35.00.00.1'
+#   robo1vm1:
+#      ip: '35.00.00.1'
    robo1vm2:
       ip: '35.00.00.2'
    robo1vm3:
