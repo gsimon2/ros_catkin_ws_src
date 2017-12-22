@@ -14,12 +14,12 @@ ga_server:
    MUTATION_PROB: 0.15 #Probability that an individual will have a random gene mutated
    CROSS_OVER_PROB: 0.25 #Probability that two individuals will cross over and producing mixed offspring
    TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
-   NUM_EVAL_WORKS: 20 # Number of workers (ROS instances) being used to run evaluations of indiviuals
+   NUM_EVAL_WORKS: 14 # Number of workers (ROS instances) being used to run evaluations of indiviuals
 
 # Sonar Filter Script
 sonar_filter:
    SENSOR_KNOCKOUT: !!bool 'true'
-   KNOCKOUT_TYPE: 'complete' # transient or complete
+   KNOCKOUT_TYPE: 'transient' # transient or complete
    
 # Software Manager Script
 software_manager:
