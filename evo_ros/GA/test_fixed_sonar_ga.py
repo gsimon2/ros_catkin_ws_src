@@ -101,7 +101,39 @@ class GA(object):
 		
 		i = 0
 		
+		# Failure run 1 winner
+		new_ind = copy.deepcopy(ind)
+		new_ind['id'] = i
+		new_ind['generation'] = CURRENT_GEN
+		new_ind['genome']['num_of_sensors'] = 4
+		new_sonar = {'sensor':'sonar1', 'pos':[0.223,0.065,0.17], 'orient':[0,-14,0]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar2', 'pos':[0.228,0.005,0.17], 'orient':[0,-14,28]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar3', 'pos':[0.205,-0.14,0.17], 'orient':[0,-14,-12]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar4', 'pos':[0.246,0.07,0.17], 'orient':[0,-14,-20]}
+		new_ind['genome']['physical'].append(new_sonar)
+		self.genomes.append(new_ind)
+		i += 1
+		
 		# Failure run 2 winner
+		new_ind = copy.deepcopy(ind)
+		new_ind['id'] = i
+		new_ind['generation'] = CURRENT_GEN
+		new_ind['genome']['num_of_sensors'] = 4
+		new_sonar = {'sensor':'sonar1', 'pos':[0.08,0.118,0.17], 'orient':[0,-14,-76]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar2', 'pos':[0.203,0.118,0.17], 'orient':[0,-14,23]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar3', 'pos':[0.245,0.103,0.17], 'orient':[0,-14,18]}
+		new_ind['genome']['physical'].append(new_sonar)
+		new_sonar = {'sensor':'sonar4', 'pos':[0.046,0.142,0.17], 'orient':[0,-14,-68]}
+		new_ind['genome']['physical'].append(new_sonar)
+		self.genomes.append(new_ind)
+		i += 1
+		
+		# Failure run 2 winner - wrong?
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
 		new_ind['generation'] = CURRENT_GEN
@@ -117,21 +149,7 @@ class GA(object):
 		self.genomes.append(new_ind)
 		i += 1
 		
-		# Failure run 1 winner
-		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
-		new_ind['generation'] = CURRENT_GEN
-		new_ind['genome']['num_of_sensors'] = 4
-		new_sonar = {'sensor':'sonar1', 'pos':[0.223,0.065,0.17], 'orient':[0,-14,0]}
-		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar2', 'pos':[0.228,0.005,0.17], 'orient':[0,-14,28]}
-		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar3', 'pos':[0.205,-0.14,0.17], 'orient':[0,-14,-12]}
-		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar4', 'pos':[0.246,0.246,0.17], 'orient':[0,-14,-20]}
-		new_ind['genome']['physical'].append(new_sonar)
-		self.genomes.append(new_ind)
-		i += 1
+		
 
 		
 		

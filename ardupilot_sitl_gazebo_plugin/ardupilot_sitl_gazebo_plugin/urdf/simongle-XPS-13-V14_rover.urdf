@@ -380,7 +380,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.046 -0.142 0.17" rpy="0 ${-14*M_PI/180} ${-68*M_PI/180}"/>
+   <origin xyz="0.246 0.07 0.17" rpy="0 ${-14*M_PI/180} ${-20*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 	
@@ -395,7 +395,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.245 0.103 0.17" rpy="0 ${-14*M_PI/180} ${18*M_PI/180}"/>
+   <origin xyz="0.205 -0.14 0.17" rpy="0 ${-14*M_PI/180} ${-12*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 	
@@ -410,7 +410,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.203 0.118 0.17" rpy="0 ${-14*M_PI/180} ${23*M_PI/180}"/>
+   <origin xyz="0.228 0.005 0.17" rpy="0 ${-14*M_PI/180} ${28*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 	
@@ -425,7 +425,7 @@
    field_of_view="${30*M_PI/180}"
    ray_count="5"
    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-   <origin xyz="0.08 -0.118 0.17" rpy="0 ${-14*M_PI/180} ${-76*M_PI/180}"/>
+   <origin xyz="0.223 0.065 0.17" rpy="0 ${-14*M_PI/180} ${0*M_PI/180}"/>
  </xacro:sonar_sensor>
 	
 

@@ -17,11 +17,11 @@ args= parser.parse_args()
 
 # Set up variables that determine the file name of the data log
 if args.experiment is None:
-	experiment_name = 'variable_sonar_placement_with_transient_failure'
+	experiment_name = 'variable_sonar_placement_with_failure'
 else:
 	experiment_name = args.experiment
 if args.runs is None:
-	number_of_runs = 5
+	number_of_runs = 9
 else:
 	number_of_runs = args.runs
 
