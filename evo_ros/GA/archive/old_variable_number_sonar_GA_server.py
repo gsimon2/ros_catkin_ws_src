@@ -22,13 +22,8 @@ import yaml
 
 from GA_operators import sonar_random_value_mutation
 from GA_operators import sonar_single_point_crossover
-from GA_operators import region_calc
-from GA_operators import pos_from_region
-from GA_operators import generate_pop
-from GA_operators import add_remove_random_mutation
-from GA_operators import multiple_sensor_crossover
 
-MAX_NUMBER_OF_SONAR = 10
+MAX_NUMBER_OF_SONAR = 2
 
 # Individual structure and default values
 ind = {'id':0,
@@ -41,7 +36,9 @@ ind = {'id':0,
 				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
 			],
 			'behavioral':[
-			]
+			],
+			'position_encoding':[
+				{'sensor':'sonar1', 'region':1, 'pos':[.99,.99]}
 			},
 		'fitness':-1.0,
 		'raw_fitness':[],
@@ -54,14 +51,12 @@ genome_constraints = {
 		'sonar': {
 			# Position x:  0 = Middle of rover,  0.25 = front
 			# Position y:  -0.15 = Left,    0.15 = Right
-			'pos': {'x':[0,100], 'y':[0,100], 'z': .17},
-            'regions': [1,5],
-            'region_orient': {1: [-90,-40],2:[-30,30],3:[40,90],4:[-100,0],5:[0,100]},
+			'pos': {'x':[0,0.25], 'y':[-0.15,0.15]},
 			# Orient z: -90 degrees = facing left,    90 = facing right
 			'orient': {'z':[-90,90]}
-            }
-        }
-}
+		}
+	}
+} 
 
 # Creates a thread which is responsible for sending out of individuals on the push socket
 class SenderThread(threading.Thread):
@@ -161,7 +156,6 @@ class GA(object):
 				
 			self.genomes.append(new_ind)
 			i += 1
-			self.genomes = generate_pop(self.pop_size,MAX_NUMBER_OF_SONAR, genome_constraints)
 		
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		self.child_id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
@@ -196,12 +190,9 @@ class GA(object):
 				rd['fitness'] += calc_fitness
 				i += 2
 			
-			weight = 0.3
-			#added discounting for number of sensors does not drop below 0
-			if(rd['fitness'] -float(self.child_pop[self.child_id_map[rd['id']]]['genome']['num_of_sensors'] * weight)<0):
-				rd['fitness']=0.0
-			else:
-				rd['fitness'] -= float(self.child_pop[self.child_id_map[rd['id']]]['genome']['num_of_sensors'] * weight)
+			
+			#print('returned result: {} \t Calc fitness: {}'.format(raw_fitness, rd['fitness']))
+
 			self.child_pop[self.child_id_map[rd['id']]]['fitness'] = rd['fitness']
 			self.child_pop[self.child_id_map[rd['id']]]['raw_fitness'] = raw_fitness
 			
@@ -219,25 +210,25 @@ class GA(object):
 		population_pool = copy.deepcopy(self.genomes)
 		
 		#Crossover
-		population_pool = multiple_sensor_crossover(population_pool,CROSS_OVER_PROB,MAX_NUMBER_OF_SONAR,genome_constraints)
-		
-		
-		# Mutate genes in the population pool.
-		population_pool = add_remove_random_mutation(population_pool,MUTATION_PROB,genome_constraints,MAX_NUMBER_OF_SONAR)
-		pos_from_region(population_pool)
+		population_pool = sonar_single_point_crossover(population_pool, CROSS_OVER_PROB)
 
+		# Mutate genes in the population pool.
+		population_pool = sonar_random_value_mutation(population_pool, MUTATION_PROB, genome_constraints)
 		
 		# Filter out any children or mutated individuals by looking for a fitness of -1
-		self.child_pop = []
+		child_pop = []
 		for ind in population_pool:
 			if ind['fitness'] == -1:
 				ind['id'] = self.child_id
-				ind['generation'] = CURRENT_GEN + 1
 				self.child_id += 1
 				self.child_pop.append(ind)
 		
+		print('Size of child pop: {}'.format(len(self.child_pop)))
 		self.child_id_map = {k:v for k,v in zip([x['id'] for x in self.child_pop],[i for i in range(len(self.child_pop))])}
+		print('Child mapping: {}'.format(self.child_id_map))
 		#return self.child_pop
+		
+		
 		
 	def next_generation(self):
 		population_pool = self.genomes + self.child_pop
@@ -256,7 +247,6 @@ class GA(object):
 			next_generation.append(copy.deepcopy(tourn[winner_index]))
 		
 		self.genomes = next_generation
-		pos_from_region(self.genomes)
 		
 		
 	def ga_log(self, LOG_FILE_NAME):
@@ -275,15 +265,11 @@ class GA(object):
 			for sensor in ind['genome']['physical']:
 				log.write('{}, {}, {}, '.format(sensor['pos'][0], sensor['pos'][1], sensor['orient'][2]))
 				
-			for i in range(MAX_NUMBER_OF_SONAR - ind['genome']['num_of_sensors']):
-				log.write(' , , , ')
-				
 			
 			for element in ind['raw_fitness']:
 				log.write('{}, '.format(element))
 			log.write('\n')
 		log.close()
-		
 		
 	def get_pop(self):
 		return self.genomes
@@ -417,10 +403,6 @@ log.write('Max Number of Sensors: {}\n'.format(MAX_NUMBER_OF_SONAR))
 log.write('X Position: {}\n'.format(str(genome_constraints['physical']['sonar']['pos']['x'])))
 log.write('Y Position: {}\n'.format(str(genome_constraints['physical']['sonar']['pos']['y'])))
 log.write('Z Orient: {}\n'.format(str(genome_constraints['physical']['sonar']['orient']['z'])))
-log.write('***** Enviroment Factors *****\n')
-log.write('Sensor Knockout: {}\n'.format(cfg['sonar_filter']['SENSOR_KNOCKOUT']))
-log.write('Sensor Knockout Type: {}\n'.format(cfg['sonar_filter']['KNOCKOUT_TYPE']))
-log.write('Max Sim Time: {}\n'.format(cfg['sim_manager']['MAX_SIM_TIME']))
 log.write('*****************************\n')
 log.write('Generation, ID, Fitness, Number of Sonar, ')
 
@@ -464,7 +446,6 @@ for i in range(GEN_COUNT):
 	print('\n\nSending new generation!!!')
 	print('{} individuals need to be evaluated'.format(len(genomes)))
 	
-
 	#print('Sending out IDs:')
 	#for ind in genomes:
 	#	print('\t {}'.format(ind['id']))
@@ -478,7 +459,6 @@ for i in range(GEN_COUNT):
 	# Wait for the send thread to complete.
 	sendThread.join()
 	
-	exit_loop = False
 	
 	if len(genomes) > 0 :
 		j = len(genomes)
@@ -520,12 +500,8 @@ for i in range(GEN_COUNT):
 					#sendThread.send_tear_down_msg()
 					#sendThread.start()
 					#sendThread.join()
-					#sys.exit()
-					exit_loop = True
-					break
-	if exit_loop:
-		break
-	
+					sys.exit()
+					
 	# Calcuate fitnes for this generation, log it, and prepare the next generation
 	ga.calculate_fitness(return_data)
 	ga.ga_log(LOG_FILE_NAME)

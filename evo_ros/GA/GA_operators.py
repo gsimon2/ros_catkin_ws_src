@@ -287,7 +287,7 @@ def region_calc(region,x,y,z):
         new_y = round(-.15 +y*.05,3)
     if region ==2:
         new_x = round(.2 + x* .05,3)
-        new_y = round(-.15+y*.25,3)
+        new_y = round(-.10+y*.20,3)
     if region ==1:
         new_x = round(0.0 +x*.2,3)
         new_y = round(.10 +y*.05,3)
@@ -323,6 +323,67 @@ genome_constraints = {
             }
         }
         }
+
+
+def delete_mirrored_sonars(population):
+	for ind in population:
+		#a = [item for item in a if ...]
+		ind['genome']['position_encoding'] = [sensor for sensor in ind['genome']['position_encoding'] if sensor['type'] == 'original']
+		ind['genome']['num_of_sensors'] /= 2
+	pos_from_region(population)
+	return population
+				
+			
+			
+def create_mirrored_sonars(population):
+	for ind in population:
+		for sensor in ind['genome']['position_encoding']:
+			
+			# Create a copy of the sensor that we are mirroring
+			new_sensor = copy.deepcopy(sensor)
+			new_sensor['type'] = 'mirrored'
+			
+			# Add one to the count of sensors on this individual
+			ind['genome']['num_of_sensors'] += 1
+			
+			# Change the name of the new sensor
+			new_sensor['sensor'] = 'sensor' + str(ind['genome']['num_of_sensors'])
+			
+			# Mirror the new sensor
+			if sensor['type'] == 'original':
+				
+				# Switch the region that it is in, unless in it is the front middle region
+				if sensor['region'] == 1:
+					new_sensor['region'] = 3
+				elif sensor['region'] == 3:
+					new_sensor['region'] = 1
+				elif sensor['region'] == 4:
+					new_sensor['region'] = 5
+				elif sensor['region'] == 5:
+					new_sensor['region'] = 4
+				
+				# Front middle region stays in the same region
+				elif sensor['region'] == 2:
+					pass
+				else:
+					print('Error unknown region found in create_mirrored_sonars function!')
+					exit()
+				
+				# Flip the sonar angle
+				new_sensor['orient'][2] = sensor['orient'][2] * -1
+				# Flip the y positioning
+				new_sensor['pos'][1] = 100 - sensor['pos'][1]
+				
+				# Add the sensor to the list
+				ind['genome']['position_encoding'].append(new_sensor)
+				
+			else:
+				pass
+	pos_from_region(population)
+	return population
+		
+		
+		
 def generate_pop(pop_size,max_sensors,constraints):
     start_ind = {'id':0,
     		'genome':{
@@ -336,7 +397,7 @@ def generate_pop(pop_size,max_sensors,constraints):
     			'behavioral':[
     			],
     			'position_encoding':[
-    {'sensor':'sonar1', 'region':2, 'pos':[.99,.99,0.17],'orient': [0,0,0]}]
+					{'sensor':'sonar1', 'region':2, 'pos':[.99,.99,0.17],'orient': [0,0,0]}]
     			},
     		'fitness':-1.0,
     		'raw_fitness':[],
@@ -395,7 +456,7 @@ def add_remove_random_mutation(population, mutation_prob, constraints,max_sensor
                     y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
                     z = constraints['physical']['sonar']['pos']['z']
                     orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
-                    new_sensor = {'sensor':'sonar'+str(num_sensors),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
+                    new_sensor = {'sensor':'sonar'+str(num_sensors+1),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
                     ind['genome']['position_encoding'].append(new_sensor)
                     ind['genome']['num_of_sensors'] = ind['genome']['num_of_sensors'] +1
                 else:

@@ -5,7 +5,7 @@
 
 %% Automation set up
 clear all
-num_of_ind = 3;
+num_of_ind = 10;
 elite = table; 
 %save_file_name = strcat(file_name(1:end-4),'_generation_vs_fitness.png');
 

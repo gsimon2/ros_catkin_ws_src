@@ -1,8 +1,9 @@
 """
-Fixed Number Sonar positioning GA
-GAS 2018-10-20
+Symmetric Variable Number Sonar positioning GA
+GAS 2017-12-28
 
-Evolve positioning of a fixed number of sonars on the rover
+Evolve positioning of a variable number of sonars on the rover
+Sonars must be symmetric over the y axis of the rover (left and right)
 
 """
  
@@ -27,6 +28,8 @@ from GA_operators import pos_from_region
 from GA_operators import generate_pop
 from GA_operators import add_remove_random_mutation
 from GA_operators import multiple_sensor_crossover
+from GA_operators import create_mirrored_sonars
+from GA_operators import delete_mirrored_sonars
 
 MAX_NUMBER_OF_SONAR = 10
 
@@ -38,7 +41,8 @@ ind = {'id':0,
 				# Variable number of sonar sensors (1 - 10)
 				# 	Can modify x and y position within bounds of rover frame
 				#	Can modify the z coordinate of orient to can direction that sonar is facing
-				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+				# 	Type of sonar can be original or mirrored (mirrored are forced to be symmetric to the original even after mutation
+				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0], 'type':'original'}
 			],
 			'behavioral':[
 			]
@@ -106,62 +110,19 @@ class GA(object):
 		self.genomes = []
 		self.child_pop = []
 		
-		i = 0
-		
-		# Seed the initial population with a rover with a single forward facing sonar
-		"""
-		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
-		new_ind['generation'] = CURRENT_GEN
-		new_ind['genome']['num_of_sensors'] = 1
-		new_sonar = {'sensor':'sonar1', 'pos':[0.25,0,0.17], 'orient':[0,-14,0]}
-		new_ind['genome']['physical'].append(new_sonar)
-		self.genomes.append(new_ind)
-		i +=1
-		"""
-		
-		# Seed the initial population with a rover that has two sonars on the front corners facing slightly outward
-		
-		new_ind = copy.deepcopy(ind)
-		new_ind['id'] = i
-		new_ind['generation'] = CURRENT_GEN
-		new_ind['genome']['num_of_sensors'] = 2
-		new_sonar = {'sensor':'sonar1', 'pos':[0.25,-0.1,0.17], 'orient':[0,-14,-20]}
-		new_ind['genome']['physical'].append(new_sonar)
-		new_sonar = {'sensor':'sonar2', 'pos':[0.25,0.1,0.17], 'orient':[0,-14,20]}
-		new_ind['genome']['physical'].append(new_sonar)
-		self.genomes.append(new_ind)
-		i += 1
+	
+		self.genomes = generate_pop(self.pop_size,MAX_NUMBER_OF_SONAR / 2, genome_constraints)
 		
 		
-		#Initialize rest of population with random genomes
-		while (i < self.pop_size):
-			new_ind = copy.deepcopy(ind)
-			new_ind['id'] = i
-			new_ind['generation'] = CURRENT_GEN
-			
-			#Add between 1 and 10 sonars positioned randomly
-			#number_of_sonars = random.randint(1,MAX_NUMBER_OF_SONAR)
-			number_of_sonars = MAX_NUMBER_OF_SONAR
-			new_ind['genome']['num_of_sensors'] = number_of_sonars
-			
-			j = 1
-			while (j <= number_of_sonars):
-				
-				name_of_sensor = 'sonar' + str(j)
-				new_sonar = {'sensor':name_of_sensor, 'pos':[0,0,0.17], 'orient':[0,-14,0]}
-				
-				# Pick new position (3 decimal places) and orient (int degrees)
-				new_sonar['pos'][0] = round(random.uniform(genome_constraints['physical']['sonar']['pos']['x'][0], genome_constraints['physical']['sonar']['pos']['x'][1]), 3)
-				new_sonar['pos'][1] = round(random.uniform(genome_constraints['physical']['sonar']['pos']['y'][0], genome_constraints['physical']['sonar']['pos']['y'][1]), 3)
-				new_sonar['orient'][2]  = round(random.randint(genome_constraints['physical']['sonar']['orient']['z'][0], genome_constraints['physical']['sonar']['orient']['z'][1]))
-				
-				new_ind['genome']['physical'].append(new_sonar)
-				j += 1
-				
-			self.genomes.append(new_ind)
-			i += 1
-			self.genomes = generate_pop(self.pop_size,MAX_NUMBER_OF_SONAR, genome_constraints)
+		for ind in self.genomes:
+			for sensor in ind['genome']['position_encoding']:
+				sensor['type'] = 'original'
+		
+		# Mirror the sensors for symmetry
+		self.genomes = create_mirrored_sonars(self.genomes)
+		
+	
+		
 		
 		self.id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
 		self.child_id_map = {k:v for k,v in zip([x['id'] for x in self.genomes],[i for i in range(self.pop_size)])}
@@ -218,13 +179,23 @@ class GA(object):
 		self.child_pop = []
 		population_pool = copy.deepcopy(self.genomes)
 		
+		
+		# Delete any mirrored sensors being crossover and mutation
+		population_pool = delete_mirrored_sonars(population_pool)
+		
+		
 		#Crossover
 		population_pool = multiple_sensor_crossover(population_pool,CROSS_OVER_PROB,MAX_NUMBER_OF_SONAR,genome_constraints)
 		
 		
 		# Mutate genes in the population pool.
 		population_pool = add_remove_random_mutation(population_pool,MUTATION_PROB,genome_constraints,MAX_NUMBER_OF_SONAR)
-		pos_from_region(population_pool)
+		
+		for ind in population_pool:
+			for sensor in ind['genome']['position_encoding']:
+				sensor['type'] = 'original'
+				
+		population_pool = create_mirrored_sonars(population_pool)
 
 		
 		# Filter out any children or mutated individuals by looking for a fitness of -1
@@ -262,11 +233,14 @@ class GA(object):
 	def ga_log(self, LOG_FILE_NAME):
 		global CURRENT_GEN
 		
+		
 		# The initial population is only stored in the child_pop
 		if CURRENT_GEN == 0:
 			population = self.child_pop
 		else:
 			population = self.genomes
+		
+		
 			
 		log = open('logs/{}'.format(LOG_FILE_NAME), 'a')
 		for ind in population:
@@ -279,8 +253,8 @@ class GA(object):
 				log.write(' , , , ')
 				
 			
-			for element in ind['raw_fitness']:
-				log.write('{}, '.format(element))
+			#for element in ind['raw_fitness']:
+			#	log.write('{}, '.format(element))
 			log.write('\n')
 		log.close()
 		
