@@ -21,7 +21,7 @@ if args.experiment is None:
 else:
 	experiment_name = args.experiment
 if args.runs is None:
-	number_of_runs = 9
+	number_of_runs = 10
 else:
 	number_of_runs = args.runs
 
