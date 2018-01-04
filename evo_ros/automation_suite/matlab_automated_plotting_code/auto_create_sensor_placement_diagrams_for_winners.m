@@ -5,8 +5,8 @@
 %
 % GAS 2017-12-26
 
-%file_name = 'variable_sonar_placement_with_failure_run3.dat';
-%plot_dir = '';
+%file_name = 'symmetric_variable_sonar_placement_with_failure_run1.dat';
+%plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
 
 %% Automation set up
 save_dir = strcat('~/simulation/ros_catkin_ws/src/evo_ros', plot_dir);
@@ -22,7 +22,7 @@ elite = table;
 %% Dynamically figure out population size and generation count
  A = log_data(log_data.Generation == 0, :);
  population_size = height(A);
- gen_count = height(log_data) / population_size;
+ gen_count = round(height(log_data) / population_size);
 
  % Only interested in last gen
  A = log_data(log_data.Generation == gen_count-1, :);

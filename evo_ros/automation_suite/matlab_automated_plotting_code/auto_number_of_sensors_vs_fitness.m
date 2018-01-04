@@ -3,6 +3,9 @@
 %
 % GAS 11-28-17
 
+file_name = 'symmetric_variable_sonar_placement_with_failure_run1.dat';
+plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
+
 %% Automation set up
 fig = figure(1);
 save_dir = strcat('~/simulation/ros_catkin_ws/src/evo_ros', plot_dir);
@@ -22,7 +25,7 @@ best = [];
 generation = [];
 
 %% Set up sensor tracking
-for i=1:10
+for i=1:12
     sensor(i) = {0};
 end
 
@@ -31,7 +34,7 @@ end
  %% Dynamically figure out population size and generation count
  A = table(table.Generation == 0, :);
  population_size = height(A);
- gen_count = height(table) / population_size;
+ gen_count = round(height(table) / population_size);
  
 %% loop through each generation creating a scattor plot
 for i=0:gen_count-1

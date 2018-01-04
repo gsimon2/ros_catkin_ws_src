@@ -253,8 +253,8 @@ class GA(object):
 				log.write(' , , , ')
 				
 			
-			#for element in ind['raw_fitness']:
-			#	log.write('{}, '.format(element))
+			for element in ind['raw_fitness']:
+				log.write('{}, '.format(element))
 			log.write('\n')
 		log.close()
 		

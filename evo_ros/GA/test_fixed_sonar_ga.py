@@ -101,6 +101,28 @@ class GA(object):
 		
 		i = 0
 		
+		failure_test_ind = {'id':i,
+		'genome':{
+			'num_of_sensors':7,
+			'physical':[
+				{'sensor':'sonar1', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, -20]},
+				{'sensor':'sonar2', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, 20]},
+				{'sensor':'sonar3', 'pos':[0.25, 0.11, 0.17], 'orient':[0, 0, 20]},
+				{'sensor':'sonar4', 'pos':[0.25, 0.13, 0.17], 'orient':[0, 0, 20]},
+				{'sensor':'sonar5', 'pos':[0.25, 0.15, 0.17], 'orient':[0, 0, 20]},
+				{'sensor':'sonar6', 'pos':[0.25, 0.18, 0.17], 'orient':[0, 0, 20]},
+				{'sensor':'sonar7', 'pos':[0.25, 0.21, 0.17], 'orient':[0, 0, 20]}
+			],
+			'behavioral':[
+			]
+			},
+		'fitness':-1.0,
+		'raw_fitness':[],
+		'generation':0
+		}
+		self.genomes.append(failure_test_ind)
+		i += 1
+		
 		# Failure run 1 winner
 		new_ind = copy.deepcopy(ind)
 		new_ind['id'] = i
