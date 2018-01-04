@@ -23,7 +23,7 @@ generation = [];
  %% Dynamically figure out population size and generation count
  A = table(table.Generation == 0, :);
  population_size = height(A);
- gen_count = height(table) / population_size;
+ gen_count = round(height(table) / population_size);
  
 %% loop through each generation creating a scattor plot
 for i=0:gen_count-1
@@ -46,7 +46,7 @@ end
 %% Plot average line in red and best in blue
 plot(generation,avg,'r')
 plot(generation,best,'b')
-legend('Average Fitness','Best Fitness', 'location', 'best')
+legend('Best Fitness', 'Average Fitness', 'location', 'best')
 xlabel('Generation')
 ylabel('Fitness')
 hold off

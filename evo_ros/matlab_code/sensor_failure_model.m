@@ -45,7 +45,7 @@ end
 function c = overlay_failure_zones(pos_x, pos_y)
 
     high_failure_zone_radius = 0.03 * 100;
-    medium_failure_zone_radius = high_failure_zone_radius + 2;
+    medium_failure_zone_radius = high_failure_zone_radius + 3;
     low_failure_zone_radius = medium_failure_zone_radius + 3;
     
     theta = linspace(0,2*pi);
