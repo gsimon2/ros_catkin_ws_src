@@ -16,7 +16,7 @@ save_file_name = strcat(file_name(1:end-4),'_sensor_diagram_winner_')
 cd('~/simulation/ros_catkin_ws/src/evo_ros/GA/logs');
 log_data = readtable(file_name);
 cd(save_dir)
-num_of_ind = 3;
+num_of_ind = 1;
 elite = table; 
 
 %% Dynamically figure out population size and generation count

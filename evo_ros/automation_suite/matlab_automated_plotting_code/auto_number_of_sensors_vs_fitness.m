@@ -3,8 +3,8 @@
 %
 % GAS 11-28-17
 
-file_name = 'symmetric_variable_sonar_placement_with_failure_run1.dat';
-plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
+%file_name = 'symmetric_variable_sonar_placement_with_failure_run1.dat';
+%plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
 
 %% Automation set up
 fig = figure(1);

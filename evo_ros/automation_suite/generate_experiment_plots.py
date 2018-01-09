@@ -17,7 +17,7 @@ args= parser.parse_args()
 
 # Set up variables that determine the file name of the data log
 if args.experiment is None:
-	experiment_name = 'symmetric_variable_sonar_placement_with_failure'
+	experiment_name = 'variable_sonar_placement_with_aoe_failure'
 else:
 	experiment_name = args.experiment
 if args.runs is None:
