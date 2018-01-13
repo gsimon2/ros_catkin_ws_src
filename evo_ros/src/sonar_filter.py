@@ -30,31 +30,13 @@ GENERATION = -1
 KNOCKOUT_TIME = 0
 
 
-# Temp function
-#   Remove when integrated into evo-ros
-def load_genome():
-	ind = {'id':0,
-			'genome':{
-				'num_of_sensors':7,
-				'physical':[
-					{'sensor':'sonar1', 'pos':[0.25, 0.1, 0.17], 'orient':[0, 0, -20]},
-					{'sensor':'sonar2', 'pos':[0.25, -0.1, 0.17], 'orient':[0, 0, 20]},
-					{'sensor':'sonar3', 'pos':[0.25, 0.11, 0.17], 'orient':[0, 0, 20]},
-					{'sensor':'sonar4', 'pos':[0.25, 0.13, 0.17], 'orient':[0, 0, 20]},
-					{'sensor':'sonar5', 'pos':[0.25, 0.15, 0.17], 'orient':[0, 0, 20]},
-					{'sensor':'sonar6', 'pos':[0.25, 0.18, 0.17], 'orient':[0, 0, 20]},
-					{'sensor':'sonar7', 'pos':[0.25, 0.21, 0.17], 'orient':[0, 0, 20]}
-				],
-				'behavioral':[
-				]
-				},
-			'fitness':-1.0,
-			'raw_fitness':[],
-			'generation':0
-			}
+def no_failure(sonar1 = '', sonar2 = '', sonar3 = '', sonar4 = '', sonar5 = '', sonar6 = '', sonar7 = '', sonar8 = '', sonar9 = '', sonar10 = ''):
+	for j in range (1,11):
+		current_sonar = 'sonar' + str(j)
+		current_sonar_pub = current_sonar + '_pub'
 	
-	rospy.set_param('vehicle_genome', ind)
-	rospy.set_param('generation', ind['generation'])
+		if eval(current_sonar) is not '':
+			eval(current_sonar_pub).publish(eval(current_sonar))	
 
 # Percent complete knockout
 #	Starting at KNOCKOUT_POINT one sensor fails and then will toggle between working and failing states every KNOCKOUT_INTERVAL
@@ -198,11 +180,6 @@ parser.add_argument('-k','--knockout',action='store_true', help='Knocks out a se
 parser.add_argument('-c', '--config', type=str, help='The configuration file that is to be used')
 args= parser.parse_args()
 
-#################################################################
-################# DEBUGGING ONLY!!!! ############################
-#load_genome()
-#################################################################
-#################################################################
 
 
 # Use default config file unless one is provided at command line
@@ -279,84 +256,96 @@ if SENSOR_KNOCKOUT:
 		print('Type of failure: {}'.format(KNOCKOUT_TYPE))
 
 
+
+
+
+
+
+
 ### Set up a single callback function for all sonars ###
 ts = message_filters.TimeSynchronizer(sonar_sub_list, 10)
 
-if KNOCKOUT_TYPE == 'complete':
-	ts.registerCallback(single_complete_knockout)
-elif KNOCKOUT_TYPE == 'transient':
-	ts.registerCallback(transient_knockout)
 
-# if AoE Damage occured determine which sensors are all hit
-elif KNOCKOUT_TYPE == 'aoe':
-	
-	FAILED_SENSOR_LIST = list()
-	random.seed(datetime.datetime.now())
-	
-	damaged_zone_size = cfg['sonar_filter']['MAIN_DAMAGE_ZONE_SIZE']
-	damage_zone_step_size = cfg['sonar_filter']['DAMAGE_ZONE_STEP_SIZE']
-	
-	if args.debug:
-		print('aoe damage selected')
-		print('\tMain damage zone size: {} \n\tDamage Zone Step Size: {}'.format( damaged_zone_size, damage_zone_step_size))
-	
-	# Get location of damage. We are currently assuming that it happened at the picked failed sensor
-	genome = rospy.get_param('vehicle_genome')['genome']['physical']
-	for sensor in  genome:
-		if sensor['sensor'] == KNOCKOUT_SENSOR:
-			failed_location = [sensor['pos'][0],sensor['pos'][1]]
-			FAILED_SENSOR_LIST.append(KNOCKOUT_SENSOR)
-	
-	if args.debug:
-		print('Failed sensor: {}    at location: {}'.format(KNOCKOUT_SENSOR, failed_location))
-	
-	# Go through all other sensors and apply the failure model to them
-	for sensor in genome:
-		if sensor['sensor'] != KNOCKOUT_SENSOR:
-			sensor_location = [sensor['pos'][0],sensor['pos'][1]]
-			dist = math.hypot(failed_location[0] - sensor_location[0], failed_location[1] - sensor_location[1])
-			
-			if args.debug:
-				print('\n \t {} Distance: {}'.format(sensor['sensor'],dist))
-			
-			# Check for high damage zone
-			#	Sensors here will automatically fail
-			if dist <= damaged_zone_size:
-				if args.debug:
-					print('Sensor in high damage zone!')
-					print('Sensor damaged')
-				FAILED_SENSOR_LIST.append(sensor['sensor'])
-			
-			# Check for medium damage zone
-			#	 Sensors here will have a 66.66% chance of failing
-			elif dist <= damaged_zone_size + damage_zone_step_size:
-				if args.debug:
-					print('Sensor in medium damage zone.')
-				if random.random() <= 0.6666:
-					if args.debug:
-						print('Sensor damaged')
-					FAILED_SENSOR_LIST.append(sensor['sensor'])
-					
-			# Check for low damage zone
-			#	 Sensors here will have a 33.33% chance of failing
-			elif dist <= damaged_zone_size + 2 * damage_zone_step_size:
-				if args.debug:
-					print('Sensor in low damage zone.')
-				if random.random() <= 0.3333:
-					if args.debug:
-						print('Sensor damaged')
-					FAILED_SENSOR_LIST.append(sensor['sensor'])
-			
-			# Else the sensor is far enough away to be left undamaged
-			else:
-				if args.debug:
-					print('Sensor is undamaged')
 
-	if args.debug:
-		print('Failed sensors: {}'.format(FAILED_SENSOR_LIST))
-		time.sleep(8)
+if not SENSOR_KNOCKOUT:
+	ts.registerCallback(no_failure)
+else:
+	
+	if KNOCKOUT_TYPE == 'complete':
+		ts.registerCallback(single_complete_knockout)
+	elif KNOCKOUT_TYPE == 'transient':
+		ts.registerCallback(transient_knockout)
+	
+	# if AoE Damage occured determine which sensors are all hit
+	elif KNOCKOUT_TYPE == 'aoe':
 		
-	ts.registerCallback(multiple_aoe_complete_knockout)
+		FAILED_SENSOR_LIST = list()
+		random.seed(datetime.datetime.now())
+		
+		damaged_zone_size = cfg['sonar_filter']['MAIN_DAMAGE_ZONE_SIZE']
+		damage_zone_step_size = cfg['sonar_filter']['DAMAGE_ZONE_STEP_SIZE']
+		
+		if args.debug:
+			print('aoe damage selected')
+			print('\tMain damage zone size: {} \n\tDamage Zone Step Size: {}'.format( damaged_zone_size, damage_zone_step_size))
+		
+		# Get location of damage. We are currently assuming that it happened at the picked failed sensor
+		genome = rospy.get_param('vehicle_genome')['genome']['physical']
+		for sensor in  genome:
+			if sensor['sensor'] == KNOCKOUT_SENSOR:
+				failed_location = [sensor['pos'][0],sensor['pos'][1]]
+				FAILED_SENSOR_LIST.append(KNOCKOUT_SENSOR)
+		
+		if args.debug:
+			print('Failed sensor: {}    at location: {}'.format(KNOCKOUT_SENSOR, failed_location))
+		
+		# Go through all other sensors and apply the failure model to them
+		for sensor in genome:
+			if sensor['sensor'] != KNOCKOUT_SENSOR:
+				sensor_location = [sensor['pos'][0],sensor['pos'][1]]
+				dist = math.hypot(failed_location[0] - sensor_location[0], failed_location[1] - sensor_location[1])
+				
+				if args.debug:
+					print('\n \t {} Distance: {}'.format(sensor['sensor'],dist))
+				
+				# Check for high damage zone
+				#	Sensors here will automatically fail
+				if dist <= damaged_zone_size:
+					if args.debug:
+						print('Sensor in high damage zone!')
+						print('Sensor damaged')
+					FAILED_SENSOR_LIST.append(sensor['sensor'])
+				
+				# Check for medium damage zone
+				#	 Sensors here will have a 66.66% chance of failing
+				elif dist <= damaged_zone_size + damage_zone_step_size:
+					if args.debug:
+						print('Sensor in medium damage zone.')
+					if random.random() <= 0.6666:
+						if args.debug:
+							print('Sensor damaged')
+						FAILED_SENSOR_LIST.append(sensor['sensor'])
+						
+				# Check for low damage zone
+				#	 Sensors here will have a 33.33% chance of failing
+				elif dist <= damaged_zone_size + 2 * damage_zone_step_size:
+					if args.debug:
+						print('Sensor in low damage zone.')
+					if random.random() <= 0.3333:
+						if args.debug:
+							print('Sensor damaged')
+						FAILED_SENSOR_LIST.append(sensor['sensor'])
+				
+				# Else the sensor is far enough away to be left undamaged
+				else:
+					if args.debug:
+						print('Sensor is undamaged')
+	
+		if args.debug:
+			print('Failed sensors: {}'.format(FAILED_SENSOR_LIST))
+			time.sleep(8)
+			
+		ts.registerCallback(multiple_aoe_complete_knockout)
 
 
 rospy.spin()

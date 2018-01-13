@@ -381,7 +381,45 @@ def create_mirrored_sonars(population):
 				pass
 	pos_from_region(population)
 	return population
-		
+
+def generate_fixed_number_sensors_pop(pop_size,max_sensors,constraints):
+    start_ind = {'id':0,
+    		'genome':{
+    			'num_of_sensors':1,
+    			'physical':[
+    				# Variable number of sonar sensors (1 - 10)
+    				# 	Can modify x and y position within bounds of rover frame
+    				#	Can modify the z coordinate of orient to can direction that sonar is facing
+    				#{'sensor':'sonar', 'pos':[0,0,0.17], 'orient':[0,0,0]}
+    			],
+    			'behavioral':[
+    			],
+    			'position_encoding':[
+					{'sensor':'sonar1', 'region':2, 'pos':[.99,.99,0.17],'orient': [0,0,0]}]
+    			},
+    		'fitness':-1.0,
+    		'raw_fitness':[],
+    		'generation':0
+    }
+        
+    population = list()
+    for number in range(pop_size):
+        new_ind = copy.deepcopy(start_ind)
+        new_ind['genome']['position_encoding'] =list()
+        new_ind['id'] = number
+        number_sensors = max_sensors
+        new_ind['genome']['num_of_sensors'] = number_sensors
+        for sensor in range(number_sensors):
+            region = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+            x = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+            y = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+            z = constraints['physical']['sonar']['pos']['z']
+            orient = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1]) * -1
+            new_sensor = {'sensor':'sonar'+str(sensor+1),'region':region,'pos':[x,y,z], 'orient': [0,-14,orient]}
+            new_ind['genome']['position_encoding'].append(new_sensor)
+        population.append(new_ind)
+    pos_from_region(population)
+    return population	
 		
 		
 def generate_pop(pop_size,max_sensors,constraints):
@@ -423,6 +461,32 @@ def generate_pop(pop_size,max_sensors,constraints):
     pos_from_region(population)
     return population
 
+def fixed_number_mutations(population, mutation_prob, constraints,max_sensors):
+    for ind in population:
+        if random.random() < mutation_prob:
+            mut_option = random.randrange(1,5,1)
+            if(mut_option==1):
+                #change x
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['pos'][0] = random.randint(constraints['physical']['sonar']['pos']['x'][0],constraints['physical']['sonar']['pos']['x'][1])
+            elif(mut_option==2):
+                #change y
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['pos'][1] = random.randint(constraints['physical']['sonar']['pos']['y'][0],constraints['physical']['sonar']['pos']['y'][1])
+            elif(mut_option==3):
+                #change orient
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                region = ind['genome']['position_encoding'][sensor_to_change]['region']
+                ind['genome']['position_encoding'][sensor_to_change]['orient'][2] = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+            elif(mut_option==4):
+                #change region and fix orient
+                sensor_to_change = random.randrange(0,ind['genome']['num_of_sensors'],1)
+                ind['genome']['position_encoding'][sensor_to_change]['region'] = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
+                region = ind['genome']['position_encoding'][sensor_to_change]['region']
+                ind['genome']['position_encoding'][sensor_to_change]['orient'][2] = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
+
+      
+            
 def add_remove_random_mutation(population, mutation_prob, constraints,max_sensors):
     for ind in population:
         if random.random() < mutation_prob:

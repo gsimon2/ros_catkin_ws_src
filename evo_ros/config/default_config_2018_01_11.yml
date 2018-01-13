@@ -18,7 +18,7 @@ ga_server:
 
 # Sonar Filter Script
 sonar_filter:
-   SENSOR_KNOCKOUT: !!bool 'false'
+   SENSOR_KNOCKOUT: !!bool 'true'
    KNOCKOUT_TYPE: 'aoe' # transient or complete or aoe
    MAIN_DAMAGE_ZONE_SIZE: 0.03
    DAMAGE_ZONE_STEP_SIZE: 0.03
@@ -48,7 +48,7 @@ software_manager:
          ARDUPILOT_EXE: 'APMrover2.elf'
          LAUNCH_FILE: 'sonar_mission_4.launch'
          LAUNCH_FILE_PACKAGE: 'rover_ga'
-         SIM_MANAGER_SCRIPT: 'bidirectional_sonar_placement_evol_sim_manager.py'
+         SIM_MANAGER_SCRIPT: 'sonar_placement_evol_sim_manager.py'
          SIM_MANAGER_PACKAGE: 'evo_ros'
          #CONTROLLER_SCRIPT: 'sonar_placement_evol_controller_GA.py'
          #CONTROLLER_SCRIPT_PACKAGE: 'rover_ga'
@@ -96,4 +96,4 @@ tranporter: # Note: Software Manager is scripted to overwrite these values at ru
    
  # Simulation Manager Script
 sim_manager:
-   MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending 
+   MAX_SIM_TIME: 270 # simulation seconds a simulation is allowed to run before ending 
