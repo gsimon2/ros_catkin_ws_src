@@ -484,7 +484,7 @@ def fixed_number_mutations(population, mutation_prob, constraints,max_sensors):
                 ind['genome']['position_encoding'][sensor_to_change]['region'] = random.randint(constraints['physical']['sonar']['regions'][0],constraints['physical']['sonar']['regions'][1])
                 region = ind['genome']['position_encoding'][sensor_to_change]['region']
                 ind['genome']['position_encoding'][sensor_to_change]['orient'][2] = random.randint(constraints['physical']['sonar']['region_orient'][region][0],constraints['physical']['sonar']['region_orient'][region][1])
-
+	return population
       
             
 def add_remove_random_mutation(population, mutation_prob, constraints,max_sensors):
