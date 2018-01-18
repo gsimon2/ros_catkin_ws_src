@@ -71,17 +71,17 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(co
 if args.ga_send_port is not None:
 	GA_SEND_PORT = args.ga_send_port
 else:
-	GA_SEND_PORT = cfg['tranporter']['GA_SEND_PORT']
+	GA_SEND_PORT = cfg['transporter']['GA_SEND_PORT']
 
 if args.ga_recv_port is not None:
 	GA_RECV_PORT = args.ga_recv_port
 else:
-	GA_RECV_PORT = cfg['tranporter']['GA_RECV_PORT']
+	GA_RECV_PORT = cfg['transporter']['GA_RECV_PORT']
 	
 if args.ga_ip_addr is not None:
 	GA_IP_ADDR = args.ga_ip_addr
 else:
-	GA_IP_ADDR = cfg['tranporter']['GA_IP_ADDR']
+	GA_IP_ADDR = cfg['transporter']['GA_IP_ADDR']
 	
 # If debugging print configuration settings to screen
 if args.debug:

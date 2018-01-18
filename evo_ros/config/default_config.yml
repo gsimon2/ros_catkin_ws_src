@@ -19,9 +19,9 @@ ga_server:
 # Sonar Filter Script
 sonar_filter:
    SENSOR_KNOCKOUT: !!bool 'false'
-   KNOCKOUT_TYPE: 'aoe' # transient or complete or aoe
-   MAIN_DAMAGE_ZONE_SIZE: 0.03
-   DAMAGE_ZONE_STEP_SIZE: 0.03
+   KNOCKOUT_TYPE: 'aoe' # Type of damage to the sonar sensors - transient or complete or aoe
+   MAIN_DAMAGE_ZONE_SIZE: 0.03 # AoE main impact zone size
+   DAMAGE_ZONE_STEP_SIZE: 0.03 # Size of the concentric circles of damage out from the main impact zone
    
 # Software Manager Script
 software_manager:
@@ -89,7 +89,7 @@ software_manager:
    
 
 # Transporter between GA server and Software Manager
-tranporter: # Note: Software Manager is scripted to overwrite these values at run-time
+transporter: # Note: Software Manager is scripted to overwrite these values at run-time
    GA_SEND_PORT: 5000
    GA_RECV_PORT: 5010
    GA_IP_ADDR: '127.0.0.1'
