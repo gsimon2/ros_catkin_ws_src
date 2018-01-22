@@ -18,7 +18,7 @@ ga_server:
 
 # Sonar Filter Script
 sonar_filter:
-   SENSOR_KNOCKOUT: !!bool 'false'
+   SENSOR_KNOCKOUT: !!bool 'true'
    KNOCKOUT_TYPE: 'aoe' # Type of damage to the sonar sensors - transient or complete or aoe
    MAIN_DAMAGE_ZONE_SIZE: 0.03 # AoE main impact zone size
    DAMAGE_ZONE_STEP_SIZE: 0.03 # Size of the concentric circles of damage out from the main impact zone
