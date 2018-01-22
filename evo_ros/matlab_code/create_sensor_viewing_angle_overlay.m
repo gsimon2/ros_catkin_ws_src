@@ -8,7 +8,7 @@
 clear all
 
 % Configuration options
-experiment_name = 'variable_sonar_placement_with_transient_failure';
+experiment_name = 'symmetric_variable_sonar_placement_with_aoe_failure';
 bool_save = 1;
 save_file_name = strcat(experiment_name, '_sensor_viewing_area_overlay.png');
 num_of_ind = 1; % Num of individuals to include from each log file
