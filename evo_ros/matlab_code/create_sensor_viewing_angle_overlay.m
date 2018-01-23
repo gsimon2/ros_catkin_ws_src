@@ -8,7 +8,7 @@
 clear all
 
 % Configuration options
-experiment_name = 'symmetric_variable_sonar_placement_with_aoe_failure';
+experiment_name = '6_sonar_symmetric_placement_without_failure';
 bool_save = 1;
 save_file_name = strcat(experiment_name, '_sensor_viewing_area_overlay.png');
 num_of_ind = 1; % Num of individuals to include from each log file
@@ -59,7 +59,7 @@ for i=1:height(winning_individuals)
     ind = winning_individuals(i,:);
     
     % Iterate through the sensors on this ind
-    for j=4:3:31
+    for j=4:3:width(ind)-2
         color = 'R';
         ind_angle = ind{1, j} * -1; % -1 because gazebo flips orienation
         ind_pos_x = ind{1,j+1} * 100; % times 100 to conver meters (gazebo) to cm (shown on plot)
