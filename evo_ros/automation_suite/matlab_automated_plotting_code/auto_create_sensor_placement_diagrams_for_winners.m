@@ -5,7 +5,7 @@
 %
 % GAS 2017-12-26
 
-%file_name = 'symmetric_variable_sonar_placement_with_failure_run1.dat';
+%file_name = '6_sonar_symmetric_placement_without_failure_run1.dat';
 %plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
 
 %% Automation set up
@@ -82,7 +82,7 @@ for i=1:height(winning_inds)
     plot_rover_diagram(ind{1,2} , ind{1,1});
     
     % Iterate through the sensors on this ind
-    for j=4:3:31
+    for j=4:3:width(ind)-2
         color = colors((j-1)/3,:);
         ind_angle = ind{1, j} * -1; % -1 because gazebo flips orienation
         ind_pos_x = ind{1,j+1} * 100; % times 100 to conver meters (gazebo) to cm (shown on plot)
