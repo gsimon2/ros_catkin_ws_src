@@ -44,9 +44,9 @@ for i=0:gen_count-1
 end
 
 %% Plot average line in red and best in blue
-plot(generation,avg,'r')
-plot(generation,best,'b')
-legend('Best Fitness', 'Average Fitness', 'location', 'best')
+h(1) = plot(generation,avg,'--r');
+h(2) = plot(generation,best,'b');
+legend(h, 'Average Fitness','Best Fitness', 'location', 'best')
 xlabel('Generation')
 ylabel('Fitness')
 hold off

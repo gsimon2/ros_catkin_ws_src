@@ -9,7 +9,7 @@ clear all
 % Configuration options
 experiment_name = '6_sonar_symmetric_placement_without_failure';
 bool_save = 1;
-save_file_name = strcat(experiment_name, '_winners_panel.png');
+save_file_name = strcat(experiment_name, '_winners_panel_2x5.png');
 
 
 
@@ -51,9 +51,13 @@ for j=1:length(run_directories)
     end
 end
 
-fig = montage(images);
-title(strcat(experiment_name,' Run Winners'), 'Interpreter', 'none');
+for i=2:9
+    images ([i i+1]) = images([i+1 i]);
+end
 
+fig = montage(images, 'size', [2 NaN]);
+%title(strcat(experiment_name,' Run Winners'), 'Interpreter', 'none');
+title('Baseline No Failure Replicate Winners')
 if bool_save == 1
     saveas(fig,save_file_name);
 end

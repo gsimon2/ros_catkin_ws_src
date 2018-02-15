@@ -5,8 +5,9 @@
 %
 % GAS 2017-12-26
 
-%file_name = '6_sonar_symmetric_placement_without_failure_run1.dat';
+%file_name = '6_sonar_symmetric_placement_with_aoe_failure_run10.dat';
 %plot_dir = '/analysis_plots/symmetric_variable_sonar_placement_with_failure/run1/';
+bool_save = 1;
 
 %% Automation set up
 save_dir = strcat('~/simulation/ros_catkin_ws/src/evo_ros', plot_dir);
@@ -93,8 +94,11 @@ for i=1:height(winning_inds)
     
     % Save the figure
     full_save_file_name = strcat(save_file_name, '_', string(i),'.png');
-    saveas(diagram,full_save_file_name);
-    close(diagram)
+    if bool_save
+        saveas(diagram,full_save_file_name);
+        close(diagram)
+    end
+    
 end
 
 
@@ -135,6 +139,12 @@ end
 function a = plot_rover_diagram(ind_name, ind_fitness)
     hold on;
     
+    font_size = 26;
+    pos = strfind(ind_name, 'run');
+    len = strlength(ind_name);
+    run = extractBetween(ind_name,pos+3,len-2);
+    ind_name = strcat('Run ',run);
+    
     pw = 5; % placement width - width of outside ledge to place sensor on 
     % Outside border
     rectangle('Position',[-15 -25 30 50]) % start x,y , width, height
@@ -144,23 +154,23 @@ function a = plot_rover_diagram(ind_name, ind_fitness)
     
     % Region 1
     rectangle('Position',[-10 20 20 5])
-    text(-5, 22.5, 'Region 1', 'color', 'black')
+    %text(-5, 22.5, 'Region 1', 'color', 'black','FontSize',font_size)
     
     % Region 2
     rectangle('Position',[-15 0 5 20])
-    text(-14, 12, 'R2', 'color', 'black')
+    %text(-14, 12, 'R2', 'color', 'black','FontSize',font_size)
     
     % Region 3
     rectangle('Position',[10 0 5 20])
-    text(11, 12, 'R3', 'color', 'black')
+    %text(11, 12, 'R3', 'color', 'black','FontSize',font_size)
     
     % Region 4
     %rectangle('Position',[-10 20 20 5])
-    text(-14, 22.5, 'R4', 'color', 'black')
+    %text(-14, 22.5, 'R4', 'color', 'black','FontSize',font_size)
     
     % Region 5
     %rectangle('Position',[-10 20 20 5])
-    text(11, 22.5, 'R5', 'color', 'black')
+    %text(11, 22.5, 'R5', 'color', 'black','FontSize',font_size)
     
     % Fill in resricted areas
     rectangle('Position',[-10 0 20 20],...
@@ -171,23 +181,28 @@ function a = plot_rover_diagram(ind_name, ind_fitness)
     % Overlay individuals name
     text(0,-10,ind_name, 'Interpreter', 'none',...
         'HorizontalAlignment', 'center',...
-        'BackgroundColor','white')
+        'BackgroundColor','white',...
+        'FontSize',font_size)
     
     % Label front of rover
     text(0,27,'Front', 'Interpreter', 'none',...
-        'HorizontalAlignment', 'center')
+        'HorizontalAlignment', 'center',...
+        'FontSize',font_size)
     
     % Label back of rover
     text(0,-27,'Back', 'Interpreter', 'none',...
-        'HorizontalAlignment', 'center')
+        'HorizontalAlignment', 'center',...
+        'FontSize',font_size)
     
     % Overlay Fitness value
     text(22.5, -15, 'Fitness:',...
         'Interpreter', 'none',...
-        'HorizontalAlignment', 'center')
-    text(22.5, -18, string(ind_fitness),...
+        'HorizontalAlignment', 'center',...
+        'FontSize',font_size)
+    text(22.5, -22, string(ind_fitness),...
         'Interpreter', 'none',...
-        'HorizontalAlignment', 'center')
+        'HorizontalAlignment', 'center',...
+        'FontSize',font_size)
     
     axis([-30 30 -30 40])
     

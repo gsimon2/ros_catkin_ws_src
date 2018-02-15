@@ -17,7 +17,7 @@ colors = [([115 120 72] ./ 255); ([11 104 127] ./ 255); ([124 3 58] ./ 255);
 
 % Iterate through the individuals in the log file
 %for i=1:height(winning_inds)
-for i=7:7
+for i=1:1
     
     ind = winning_inds(i,:);
     num_of_sensors = ind.NumberOfSonar;

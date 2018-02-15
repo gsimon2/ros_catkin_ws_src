@@ -315,7 +315,7 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/../config/{}'.format(co
 	cfg = yaml.load(ymlfile)
 
 # Seed rand num generator	
-rand_seed = random.randrange(1,19,1)
+rand_seed = random.randrange(1,25,1)
 random.seed(rand_seed)
 
 # Load in values from config file

@@ -5,10 +5,9 @@
 % GAS 10-30-17
 
 %% Read in table and set up plotting arrays
-cd('./GA/logs');
-file_name = 'single_sonar_evolution_40pop_60gen_run1.dat';
-file_name = 'double_sonar_with_knockout_run1.dat';
-title('Fitness vs Generation')
+cd('../GA/logs');
+file_name = '6_sonar_symmetric_placement_without_failure_run4.dat';
+%file_name = 'double_sonar_with_knockout_run1.dat';
 table = readtable(file_name);
 cd('../../')
 hold on
@@ -29,20 +28,21 @@ for i=0:gen_count-1
     
     % For each generation add to the arrays tracking the average and best
     % fitnesss as well as the one for generations
-    avg = [avg, mean(A.Fitness)];
-    best = [best, max(A.Fitness)];
+    avg = [avg, mean(A.Fitness/10)];
+    best = [best, max(A.Fitness/10)];
     generation = [generation, A.Generation(1)];
     
     % Create a scattor plot for this generatin
     %   for the two arrays need to be the same size since it does pairwise
     %   matching
-    scatter(A.Generation,A.Fitness);
+    scatter(A.Generation,A.Fitness/10);
 end
 
 %% Plot average line in red and best in blue
-plot(generation,avg,'r')
-plot(generation,best,'b')
-legend('Average Fitness','Best Fitness')
+title('Baseline Treatment Run 4 Fitness vs Generation')
+h(1) = plot(generation,avg,'--r');
+h(2) = plot(generation,best,'b');
+legend(h, 'Average Fitness','Best Fitness', 'location', 'best')
 xlabel('Generation')
 ylabel('Fitness')
 hold off

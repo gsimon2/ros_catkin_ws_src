@@ -228,7 +228,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 	nextwaypoint=vehicle.commands.next
 	msg.last_visited_waypoint = nextwaypoint - 1
 	dist_to_current_waypoint = distance_to_current_waypoint(vehicle)
-	msg.distance_to_next_waypoint = dist_to_current_waypoint
+	msg.distance_to_next_waypoint = dist_to_current_waypoint if dist_to_current_waypoint is not None else 0.001
 	waypoint_pub.publish(msg)
 	#print 'Distance to waypoint (%s): %s' % (nextwaypoint, dist_to_current_waypoint)
 	time.sleep(0.25)
@@ -244,7 +244,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 	msg = waypoint()
 	msg.last_visited_waypoint = 4
 	dist_to_home = get_distance_metres(vehicle.location.global_frame, vehicle.home_location)
-	msg.distance_to_next_waypoint = dist_to_home
+	msg.distance_to_next_waypoint = dist_to_home if dist_to_home is not None else 0.001
 	waypoint_pub.publish(msg)
 	#print 'Returning to launch'
 	time.sleep(0.25)
@@ -252,7 +252,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 # Made it to launch (home) location. Publish a message saying so
 msg = waypoint()
 msg.last_visited_waypoint = 5
-msg.distance_to_next_waypoint = 0
+msg.distance_to_next_waypoint = 10
 waypoint_pub.publish(msg)
 
 
@@ -286,7 +286,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 	nextwaypoint=vehicle.commands.next
 	msg.last_visited_waypoint = nextwaypoint - 1 + 5 # Because this is the second time through
 	dist_to_current_waypoint = distance_to_current_waypoint(vehicle)
-	msg.distance_to_next_waypoint = dist_to_current_waypoint
+	msg.distance_to_next_waypoint = dist_to_current_waypoint if dist_to_current_waypoint is not None else 0.001
 	waypoint_pub.publish(msg)
 	#print 'Distance to waypoint (%s): %s' % (nextwaypoint, dist_to_current_waypoint)
 	time.sleep(0.25)
@@ -302,7 +302,7 @@ while vehicle.mode != VehicleMode("HOLD"):
 	msg = waypoint()
 	msg.last_visited_waypoint = 4 + 5
 	dist_to_home = get_distance_metres(vehicle.location.global_frame, vehicle.home_location)
-	msg.distance_to_next_waypoint = dist_to_home
+	msg.distance_to_next_waypoint = dist_to_home if dist_to_home is not None else 0.001
 	waypoint_pub.publish(msg)
 	#print 'Returning to launch'
 	time.sleep(0.25)
@@ -316,3 +316,10 @@ waypoint_pub.publish(msg)
 
 print('mission complete!')
 rospy.spin()
+
+
+def send_location_msg(waypoint, dist_to_next_waypoint):
+	msg = waypoint()
+	msg.last_visited_waypoint = waypoint
+	msg.distance_to_next_waypoint = dist_to_next_waypoint if dist_to_next_waypoint is not None else 0.001
+	waypoint_pub.publish(msg)
